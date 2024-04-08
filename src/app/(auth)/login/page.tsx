@@ -6,16 +6,12 @@ import { Input } from '@/components/ui/input'
 import { login } from '@/server/login'
 
 const Login = () => {
-	const initialState: {
-		error: string
-		token: string
-	} = {
+	const initialState = {
 		error: '',
-		token: '',
 	}
 
 	const [state, formAction] = useFormState(login, initialState)
-	const status = useFormStatus()
+	const { pending } = useFormStatus()
 
 	return (
 		<main className='w-full h-full flex justify-end'>
@@ -29,11 +25,11 @@ const Login = () => {
 						<label htmlFor='password'>Password</label>
 						<Input type='password' name='password' />
 					</div>
-					<Button type='submit' disabled={status.pending}>
+					<Button type='submit' disabled={pending}>
 						Submit
 					</Button>
 				</form>
-				<p>{state.error}</p>
+				<p className='text-md text-red-500 whitespace-pre-line'>{state.error}</p>
 			</section>
 		</main>
 	)
