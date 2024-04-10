@@ -23,7 +23,7 @@ export const login = async (prevState: any, formData: FormData) => {
 		}
 	}
 
-	const res = await fetch('http://localhost:5159/customLogin', {
+	const res = await fetch(`${process.env.API_URL}/customLogin`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

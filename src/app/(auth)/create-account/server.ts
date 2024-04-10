@@ -50,7 +50,7 @@ export const createAccount = async (prevState: any, formData: FormData) => {
 		}
 	}
 
-	const res = await fetch('http://localhost:5159/customRegister', {
+	const res = await fetch(`${process.env.API_URL}/customRegister`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
