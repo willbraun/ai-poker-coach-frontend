@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import { isAuthData } from '@/lib/types'
 
 export const login = async (prevState: any, formData: FormData) => {
 	const email = formData.get('email') ?? ''
