@@ -13,7 +13,7 @@ export const login = async (prevState: any, formData: FormData) => {
 	}
 
 	if (!password) {
-		clientError += 'Please enter your password\n'
+		clientError += 'Please enter your password'
 	}
 
 	if (clientError) {
@@ -46,6 +46,13 @@ export const login = async (prevState: any, formData: FormData) => {
 	}
 
 	const data = await res.json()
+
+	if (!isAuthData(data)) {
+		return {
+			error: `Unknown error: ${JSON.stringify(data)}`,
+		}
+	}
+
 	cookies().set(
 		'auth',
 		JSON.stringify({
