@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import GetAuth from './_GetAuth'
+import GetAuth from '../components/GetAuth'
 
 export const metadata: Metadata = {
 	title: 'AI Poker Coach',
