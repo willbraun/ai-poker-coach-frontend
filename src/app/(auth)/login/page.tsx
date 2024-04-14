@@ -38,7 +38,7 @@ const Login = () => {
 	return (
 		<main className='w-full h-full flex justify-end'>
 			<section className='w-full lg:w-1/2 bg-slate-300 flex justify-center items-center'>
-				<div className='w-96'>
+				<div className='w-96 p-4'>
 					<h1 className='mb-4 font-bold text-3xl'>Log in</h1>
 					<form action={formAction}>
 						<LoginFormDetails />
