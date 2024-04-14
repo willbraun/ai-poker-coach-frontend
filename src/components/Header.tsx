@@ -14,10 +14,12 @@ const Header = () => {
 	}
 
 	return (
-		<header className='bg-slate-300 fixed top-0 z-20 flex w-full p-4 justify-between'>
+		<header className='fixed h-14 top-0 z-20 bg-slate-300 flex w-full justify-between items-center px-4'>
 			<h1>AI Poker Coach</h1>
 			{isAuth ? (
-				<Button onClick={handleClick}>Logout</Button>
+				<Button size='sm' onClick={handleClick}>
+					Logout
+				</Button>
 			) : (
 				<div className='flex gap-4'>
 					<Link href='/login'>Log in</Link>
