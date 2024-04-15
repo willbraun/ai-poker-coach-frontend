@@ -17,6 +17,7 @@ const config = {
 				'1': '1px',
 			},
 			colors: {
+				'pure-red': '#ff0000',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
