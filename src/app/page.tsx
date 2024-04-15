@@ -13,7 +13,7 @@ const Home = async () => {
 	return (
 		<>
 			<Header />
-			<main className='pt-14 w-full'>
+			<main className='pt-16 w-full'>
 				<div className='max-w-screen-md mx-auto py-2 md:py-4'>
 					{hands.map(hand => (
 						<HandPreview key={hand.handId} hand={hand} />

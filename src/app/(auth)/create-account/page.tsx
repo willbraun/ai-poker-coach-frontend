@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import FormError from '@/components/FormError'
 import PasswordField from '@/components/PasswordField'
+import { Home } from 'lucide-react'
 
 interface PasswordValidation {
 	sixChars: boolean
@@ -89,13 +90,16 @@ const CreateAccount = () => {
 						<CreateAccountFormDetails />
 					</form>
 					<FormError error={state.error} />
-					<p className='mt-8'>
+					<p className='mt-8 mb-2'>
 						Already have an account? Click{' '}
 						<Link href='/login' className='underline'>
 							here
 						</Link>{' '}
 						to log in
 					</p>
+					<Link href='/'>
+						<Home />
+					</Link>
 				</div>
 			</section>
 		</main>

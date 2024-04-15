@@ -8,6 +8,7 @@ import Link from 'next/link'
 import FormError from '@/components/FormError'
 import { useEffect, useState } from 'react'
 import PasswordField from '@/components/PasswordField'
+import { Home } from 'lucide-react'
 
 const LoginFormDetails = () => {
 	const [email, setEmail] = useState('')
@@ -44,13 +45,16 @@ const Login = () => {
 						<LoginFormDetails />
 					</form>
 					<FormError error={state.error} />
-					<p className='mt-8'>
+					<p className='mt-8 mb-2'>
 						No account? Click{' '}
 						<Link href='/create-account' className='underline'>
 							here
 						</Link>{' '}
 						to create one
 					</p>
+					<Link href='/'>
+						<Home />
+					</Link>
 				</div>
 			</section>
 		</main>
