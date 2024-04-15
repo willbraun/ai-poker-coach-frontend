@@ -1,19 +1,22 @@
 import Image from 'next/image'
+import { formatDistanceToNow } from 'date-fns'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Hand } from '@/lib/types'
 import ellipsis from '@/lib/images/icons/ellipsis.svg'
 import Link from 'next/link'
 import SmallCard from './SmallCard'
 
-export interface HandPreviewProps {
-	hand: Hand
-}
+const HandPreview = ({ hand }: { hand: Hand }) => {
+	const isWin = hand.handSteps.pots.some(pot => pot.winner.split(',').includes(hand.handSteps.position.toString()))
 
-const HandPreview = ({ hand }: HandPreviewProps) => {
 	return (
-		<Card className='mb-2 md:mb-4 rounded-none md:rounded-xl'>
+		<Card className='relative mb-2 md:mb-4 rounded-none md:rounded-xl'>
 			<CardHeader>
-				<CardTitle>{hand.handSteps.name}</CardTitle>
+				<div className='flex justify-between'>
+					<CardTitle className='flex justify-between'>{hand.handSteps.name}</CardTitle>
+					<div className={`px-2 rounded ${isWin ? 'bg-green-200' : 'bg-red-200'}`}>{isWin ? 'Win' : 'Loss'}</div>
+				</div>
+				<CardDescription>{formatDistanceToNow(hand.createdTime, { addSuffix: true })}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<div className='mb-4 flex flex-wrap items-center gap-y-2'>
@@ -30,7 +33,7 @@ const HandPreview = ({ hand }: HandPreviewProps) => {
 						</div>
 					</div>
 				</div>
-				<p>{hand.analysis}</p>
+				<p className='bg-stone-200 p-4 rounded font-serif text-xl'>{hand.analysis}</p>
 			</CardContent>
 			<CardFooter className='justify-end'>
 				<Link href={`/hand/${hand.handId}`} className='hover:bg-slate-200 rounded-full'>

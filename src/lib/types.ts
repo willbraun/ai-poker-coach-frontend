@@ -12,6 +12,7 @@ export interface Hand {
 	applicationUserId: string
 	handSteps: HandSteps
 	analysis: string
+	createdTime: Date
 }
 
 export interface HandSteps {
