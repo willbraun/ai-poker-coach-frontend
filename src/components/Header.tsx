@@ -6,9 +6,6 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
@@ -16,25 +13,24 @@ import { Book, LogOut } from 'lucide-react'
 import { CircleUser } from 'lucide-react'
 import logout from '@/app/(auth)/(logout)/server'
 import { useAuthStore } from '@/lib/store'
-import Image from 'next/image'
 
 const Header = () => {
-	const { isAuth, setAuth } = useAuthStore()
+	const { userId, setUserId } = useAuthStore()
 
 	const handleLogOut = async () => {
 		await logout()
-		setAuth(false)
+		setUserId('')
 	}
 
 	return (
 		<header className='fixed h-16 top-0 z-20 bg-slate-300 flex w-full justify-between items-center px-4'>
 			<h1 className='text-2xl font-semibold tracking-tight'>AI Poker Coach</h1>
-			{isAuth ? (
+			{userId ? (
 				<DropdownMenu>
-					<DropdownMenuTrigger>
+					<DropdownMenuTrigger className='outline-none hover:bg-slate-200 rounded-full p-1'>
 						<CircleUser size='36px' />
 					</DropdownMenuTrigger>
-					<DropdownMenuContent>
+					<DropdownMenuContent className='mr-4'>
 						<DropdownMenuItem className='text-lg'>
 							<Link href='/my-hands' className='flex items-center'>
 								<Book className='mr-2 h-4 w-4' />

@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 
 interface AuthStore {
-	isAuth: boolean
-	setAuth: (value: boolean) => void
+	userId: string
+	setUserId: (value: string) => void
 }
 
 export const useAuthStore = create<AuthStore>(set => ({
-	isAuth: false,
-	setAuth: (value: boolean) => set(() => ({ isAuth: value })),
+	userId: '',
+	setUserId: (value: string) => set(() => ({ userId: value })),
 }))

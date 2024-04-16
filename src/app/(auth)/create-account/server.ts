@@ -84,8 +84,8 @@ export const createAccount = async (prevState: any, formData: FormData) => {
 	cookies().set(
 		'auth',
 		JSON.stringify({
-			user: data.userId,
-			token: data.accessToken,
+			userId: data.userId,
+			accessToken: data.accessToken,
 		}),
 		{
 			maxAge: 60 * 60 * 24 * 7,
