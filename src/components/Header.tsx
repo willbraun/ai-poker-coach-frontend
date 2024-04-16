@@ -1,31 +1,21 @@
-'use client'
-
 import Link from 'next/link'
 import { Button } from './ui/button'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
-import { Book, LogOut } from 'lucide-react'
+import { Book } from 'lucide-react'
 import { CircleUser } from 'lucide-react'
-import logout from '@/app/(auth)/(logout)/server'
-import { useAuthStore } from '@/lib/store'
+import LogoutDropdownItem from './LogoutDropdownItem'
+import { useGetAuth } from '@/lib/hooks'
 
 const Header = () => {
-	const { userId, setUserId } = useAuthStore()
-
-	const handleLogOut = async () => {
-		await logout()
-		setUserId('')
-	}
+	const isAuth = useGetAuth()
 
 	return (
 		<header className='fixed h-16 top-0 z-20 bg-slate-300 flex w-full justify-between items-center px-4'>
-			<h1 className='text-2xl font-semibold tracking-tight'>AI Poker Coach</h1>
-			{userId ? (
+			<Link href='/'>
+				<h1 className='text-2xl font-semibold tracking-tight'>AI Poker Coach</h1>
+			</Link>
+			{isAuth ? (
 				<DropdownMenu>
 					<DropdownMenuTrigger className='outline-none hover:bg-slate-200 rounded-full p-1'>
 						<CircleUser size='36px' />
@@ -37,10 +27,7 @@ const Header = () => {
 								<span>My Hands</span>
 							</Link>
 						</DropdownMenuItem>
-						<DropdownMenuItem className='text-lg' onSelect={handleLogOut}>
-							<LogOut className='mr-2 h-4 w-4' />
-							<span>Log out</span>
-						</DropdownMenuItem>
+						<LogoutDropdownItem />
 					</DropdownMenuContent>
 				</DropdownMenu>
 			) : (

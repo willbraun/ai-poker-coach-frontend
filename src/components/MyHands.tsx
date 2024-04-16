@@ -8,8 +8,8 @@ const getHands = async (userId: string): Promise<Hand[]> => {
 }
 
 const MyHands = async () => {
-  const authCookie = cookies().get('auth')?.value ?? '{}'
-  const parsed: AuthData = JSON.parse(authCookie)
+	const authCookie = cookies().get('auth')?.value ?? '{}'
+	const parsed: AuthData = JSON.parse(authCookie)
 	const hands = await getHands(parsed.userId)
 
 	return (

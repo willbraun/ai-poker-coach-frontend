@@ -1,15 +1,12 @@
-import Header from '@/components/Header'
 import HandList from '@/components/HandList'
 import MyHands from '@/components/MyHands'
 
 const MyHandsPage = async () => {
 	return (
-		<>
-			<Header />
-			<HandList>
-				<MyHands />
-			</HandList>
-		</>
+		<HandList>
+			<h1 className='text-2xl mt-2 md:mt-0 mb-4 ml-6'>My Hands</h1>
+			<MyHands />
+		</HandList>
 	)
 }
 

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { login } from './server'
 import Link from 'next/link'
 import FormError from '@/components/FormError'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import PasswordField from '@/components/PasswordField'
 import { Home } from 'lucide-react'
 
