@@ -5,10 +5,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Book } from 'lucide-react'
 import { CircleUser } from 'lucide-react'
 import LogoutDropdownItem from './LogoutDropdownItem'
-import { useGetAuth } from '@/lib/hooks'
+import { getAuth } from '@/lib/server_utils'
 
 const Header = () => {
-	const isAuth = useGetAuth()
+	const isAuth = getAuth()
 
 	return (
 		<header className='fixed h-16 top-0 z-20 bg-slate-300 flex w-full justify-between items-center px-4'>
@@ -17,16 +17,16 @@ const Header = () => {
 			</Link>
 			{isAuth ? (
 				<DropdownMenu>
-					<DropdownMenuTrigger className='outline-none hover:bg-slate-200 rounded-full p-1'>
-						<CircleUser size='36px' />
+					<DropdownMenuTrigger className='outline-none hover:bg-slate-200 rounded-full p-1' asChild>
+						<CircleUser size='48px' />
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className='mr-4'>
-						<DropdownMenuItem className='text-lg'>
-							<Link href='/my-hands' className='flex items-center'>
+						<Link href='/my-hands' className='flex items-center'>
+							<DropdownMenuItem className='text-lg'>
 								<Book className='mr-2 h-4 w-4' />
 								<span>My Hands</span>
-							</Link>
-						</DropdownMenuItem>
+							</DropdownMenuItem>
+						</Link>
 						<LogoutDropdownItem />
 					</DropdownMenuContent>
 				</DropdownMenu>

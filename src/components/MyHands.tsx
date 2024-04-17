@@ -15,7 +15,7 @@ const MyHands = async () => {
 	return (
 		<>
 			{hands.map(hand => (
-				<HandPreview key={hand.handId} hand={hand} />
+				<HandPreview key={hand.id} hand={hand} />
 			))}
 		</>
 	)

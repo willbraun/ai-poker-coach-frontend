@@ -36,7 +36,7 @@ const HandPreview = ({ hand }: { hand: Hand }) => {
 				<p className='bg-stone-200 p-4 rounded font-serif text-xl'>{hand.analysis}</p>
 			</CardContent>
 			<CardFooter className='justify-end'>
-				<Link href={`/hand/${hand.handId}`} className='hover:bg-slate-200 rounded-full'>
+				<Link href={`/hand/${hand.id}`} className='hover:bg-slate-200 rounded-full'>
 					<Image src={ellipsis} alt='see hand details' className='w-8 h-8 m-1' />
 				</Link>
 			</CardFooter>

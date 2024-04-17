@@ -1,3 +1,5 @@
+import { UUID } from 'crypto'
+
 export interface AuthData {
 	userId: string
 	accessToken: string
@@ -8,7 +10,7 @@ export const isAuthData = (value: any): value is AuthData => {
 }
 
 export interface Hand {
-	handId: number
+	id: UUID
 	applicationUserId: string
 	handSteps: HandSteps
 	analysis: string
