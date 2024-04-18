@@ -27,7 +27,7 @@ export interface HandSteps {
 	ante: number
 	bigBlindAnte: number
 	myStack: number
-	playerNotes: string
+	notes: string
 	pots: Pot[]
 	rounds: Round[]
 	villains: Villain[]

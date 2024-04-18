@@ -33,7 +33,11 @@ const HandPreview = ({ hand }: { hand: Hand }) => {
 						</div>
 					</div>
 				</div>
-				<p className='bg-stone-200 p-4 rounded font-serif text-xl'>{hand.analysis}</p>
+				<div className='bg-stone-200 p-4 rounded font-serif sm:text-lg md:text-xl flex flex-col gap-4'>
+					{hand.analysis.split('\n').map((paragraph, i) => (
+						<p key={i}>{paragraph}</p>
+					))}
+				</div>
 			</CardContent>
 			<CardFooter className='justify-end'>
 				<Link href={`/hand/${hand.id}`} className='hover:bg-slate-200 rounded-full'>
