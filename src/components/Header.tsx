@@ -1,11 +1,10 @@
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import { Button } from './ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
-import { Book } from 'lucide-react'
-import { CircleUser } from 'lucide-react'
-import LogoutDropdownItem from './LogoutDropdownItem'
 import { getAuth } from '@/lib/server_utils'
+import { Book, CircleUser } from 'lucide-react'
+import LogoutDropdownItem from './LogoutDropdownItem'
 
 const Header = () => {
 	const isAuth = getAuth()
@@ -13,7 +12,7 @@ const Header = () => {
 	return (
 		<header className='fixed h-16 top-0 z-20 bg-slate-300 flex w-full justify-between items-center px-4'>
 			<Link href='/'>
-				<h1 className='text-2xl font-semibold tracking-tight'>AI Poker Coach</h1>
+				<p className='text-2xl font-semibold tracking-tight'>AI Poker Coach</p>
 			</Link>
 			{isAuth ? (
 				<DropdownMenu>

@@ -1,16 +1,16 @@
-import Image from 'next/image'
-import { formatDistanceToNow } from 'date-fns'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
-import { Hand } from '@/lib/types'
 import ellipsis from '@/lib/images/icons/ellipsis.svg'
+import { Hand } from '@/lib/types'
+import { formatDistanceToNow } from 'date-fns'
+import Image from 'next/image'
 import Link from 'next/link'
 import SmallCard from './SmallCard'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 
 const HandPreview = ({ hand }: { hand: Hand }) => {
 	const isWin = hand.handSteps.pots.some(pot => pot.winner.split(',').includes(hand.handSteps.position.toString()))
 
 	return (
-		<Card className='relative mb-2 md:mb-4 rounded-none md:rounded-xl'>
+		<Card className='relative mb-2 lg:mb-4 rounded-none lg:rounded-xl'>
 			<CardHeader>
 				<div className='flex justify-between'>
 					<CardTitle className='flex justify-between'>{hand.handSteps.name}</CardTitle>
@@ -33,7 +33,7 @@ const HandPreview = ({ hand }: { hand: Hand }) => {
 						</div>
 					</div>
 				</div>
-				<div className='bg-stone-200 p-4 rounded font-serif sm:text-lg md:text-xl flex flex-col gap-4'>
+				<div className='bg-stone-200 p-4 rounded font-serif sm:text-lg lg:text-xl flex flex-col gap-4'>
 					{hand.analysis.split('\n').map((paragraph, i) => (
 						<p key={i}>{paragraph}</p>
 					))}

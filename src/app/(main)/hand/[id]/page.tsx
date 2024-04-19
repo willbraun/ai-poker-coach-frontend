@@ -1,4 +1,5 @@
 import ScrollToTop from '@/components/ScrollToTop'
+import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import { Hand } from '@/lib/types'
 import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
@@ -45,7 +46,7 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 			<ScrollToTop />
 			<main className='mt-32 max-w-screen-md mx-auto flex flex-col gap-8'>
 				<section>
-					<h1 className='scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl'>{name}</h1>
+					<TypographyH1>{name}</TypographyH1>
 					<p className='text-md text-muted-foreground'>{formatDistanceToNow(createdTime, { addSuffix: true })}</p>
 				</section>
 				<section className='rounded-xl p-4 bg-white shadow'>

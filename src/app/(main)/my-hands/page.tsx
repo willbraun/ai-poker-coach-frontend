@@ -1,10 +1,11 @@
 import HandList from '@/components/HandList'
 import MyHands from '@/components/MyHands'
+import TypographyH1 from '@/components/ui/typography/TypographyH1'
 
 const MyHandsPage = async () => {
 	return (
 		<HandList>
-			<h1 className='text-2xl mt-2 md:mt-0 mb-4 ml-6'>My Hands</h1>
+			<TypographyH1 className='ml-4 my-4 lg:mt-4 lg:mb-8 lg:ml-0'>My Hands</TypographyH1>
 			<MyHands />
 		</HandList>
 	)
