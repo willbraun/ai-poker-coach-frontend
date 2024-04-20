@@ -1,5 +1,6 @@
 import ellipsis from '@/lib/images/icons/ellipsis.svg'
 import { Hand } from '@/lib/types'
+import { getIsWin } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -8,7 +9,7 @@ import SmallCard from './SmallCard'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 
 const HandPreview = ({ hand }: { hand: Hand }) => {
-	const isWin = hand.handSteps.pots.some(pot => pot.winner.split(',').includes(hand.handSteps.position.toString()))
+	const isWin = getIsWin(hand)
 
 	return (
 		<Card className='relative mb-2 lg:mb-4 rounded-none lg:rounded-xl'>

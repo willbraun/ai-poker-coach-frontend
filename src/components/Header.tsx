@@ -1,10 +1,9 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import Link from 'next/link'
-import { Button } from './ui/button'
-
 import { getAuth } from '@/lib/server_utils'
 import { Book, CircleUser } from 'lucide-react'
+import Link from 'next/link'
 import LogoutDropdownItem from './LogoutDropdownItem'
+import { Button } from './ui/button'
 
 const Header = () => {
 	const isAuth = getAuth()

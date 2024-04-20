@@ -4,6 +4,7 @@ import SmallCard from '@/components/SmallCard'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { Action, Hand, Pot, Round } from '@/lib/types'
+import { getIsWin } from '@/lib/utils'
 import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -14,15 +15,7 @@ const getHand = async (id: string): Promise<Hand> => {
 
 const decisions = ['folds', 'checks', 'calls', 'bets', 'bets all-in for', 'calls all-in for']
 
-const potColors = [
-	'bg-blue-200',
-	'bg-green-200',
-	'bg-yellow-200',
-	'bg-orange-200',
-	'bg-red-200',
-	'bg-purple-200',
-	'bg-pink-200',
-]
+const potColors = ['bg-blue-200', 'bg-green-200', 'bg-yellow-200', 'bg-orange-200', 'bg-pink-200', 'bg-purple-200']
 
 const getPositionMessage = (position: number, playerCount: number) => {
 	if (position === 1) {
@@ -54,6 +47,14 @@ const getCumulativePotActionSum = (pots: Pot[], rounds: Round[], roundIndex: num
 		}, Array(pots.length).fill(0))
 }
 
+const PotView = ({ value, index }: { value: number; index: number }) => {
+	return (
+		<div key={crypto.randomUUID()} className={`px-2 py-1 rounded text-xl ${potColors[index]}`}>
+			{value}
+		</div>
+	)
+}
+
 const ActionLine = ({ action, position }: { action: Action; position: number }) => {
 	const betSize = action.decision > 1 ? ` ${action.bet}` : ''
 	return (
@@ -66,7 +67,8 @@ const ActionLine = ({ action, position }: { action: Action; position: number }) 
 }
 
 const HandPage = async ({ params }: { params: { id: UUID } }) => {
-	const { handSteps, analysis, createdTime } = await getHand(params.id)
+	const hand = await getHand(params.id)
+	const { handSteps, analysis, createdTime } = hand
 	const {
 		name,
 		gameStyle,
@@ -85,16 +87,21 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 
 	const potStatusByRound = rounds.map((_, i) => getCumulativePotActionSum(pots, rounds, i))
 
+	const isWin = getIsWin(hand)
+	const loss = rounds
+		.flatMap(round => round.actions.filter(action => action.player === position).map(action => action.bet))
+		.reduce((acc, i) => acc + i, 0)
+
 	return (
 		<>
 			<ScrollToTop />
 			<main className='pt-24 pb-16 bg-white'>
-				<div className='max-w-screen-md mx-auto h-full flex flex-col gap-8'>
+				<div className='max-w-screen-md mx-auto h-full flex flex-col gap-8 p-4'>
 					<section>
 						<TypographyH1>{name}</TypographyH1>
 						<p className='text-md text-muted-foreground'>{formatDistanceToNow(createdTime, { addSuffix: true })}</p>
 					</section>
-					<section className='rounded-xl p-4 border-1 border-slate-500'>
+					<section className='rounded-xl p-4 border-1 border-slate-300'>
 						<TypographyH2>Details</TypographyH2>
 						<p>{['Tournament', 'Cash Game'][gameStyle]}</p>
 						<p>{playerCount} Players</p>
@@ -102,24 +109,30 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 						<p>
 							Blinds: {smallBlind}/{bigBlind}
 						</p>
-						{ante ? <p>Ante: {ante}</p> : <></>}
-						{bigBlindAnte ? <p>Big Blind Ante: {bigBlindAnte}</p> : <></>}
+						{ante ? <p>Ante: {ante}</p> : null}
+						{bigBlindAnte ? <p>Big Blind Ante: {bigBlindAnte}</p> : null}
 						<p>Stack: {myStack}</p>
 						<p className='mt-4'>
 							Notes: <span>{notes}</span>
 						</p>
 					</section>
 					<section className='[&>*]:p-4 [&>*]:border-b-1 [&>*]:border-slate-300 '>
-						<div className='flex items-center'>
-							<p className='text-xl pr-8'>You are dealt</p>
-							<div className='flex gap-2 pr-4'>
-								<SmallCard card={rounds[0].cards[0]} />
-								<SmallCard card={rounds[0].cards[1]} />
+						{ante || bigBlindAnte ? (
+							<div className='flex items-center'>
+								<p className='text-xl'>Pot after antes</p>
+								<PotView value={ante + bigBlindAnte * playerCount} index={0} />
 							</div>
+						) : null}
+						<div>
+							<div className='flex items-center'>
+								<p className='text-xl pr-8'>You are dealt</p>
+								<div className='flex gap-2 pr-4'>
+									<SmallCard card={rounds[0].cards[0]} />
+									<SmallCard card={rounds[0].cards[1]} />
+								</div>
+							</div>
+							<p className='text-muted-foreground'>{rounds[0].evaluation.value}</p>
 						</div>
-						<p className='text-xl'>
-							You now have <span className='font-bold'>{rounds[0].evaluation.value}</span>
-						</p>
 						{rounds[0].actions.map(action => {
 							return <ActionLine key={action.step} action={action} position={position} />
 						})}
@@ -128,26 +141,24 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 							{potStatusByRound[0]
 								.filter(potStatus => potStatus > 0)
 								.map((potStatus, i) => (
-									<div key={i} className={`px-2 py-1 rounded ${potColors[i]}`}>
-										{potStatus}
-									</div>
+									<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
 								))}
 						</div>
-						<div className='flex items-center'>
-							<p className='text-xl pr-8'>Flop</p>
-							<div className='flex gap-2 pr-4 border-r-2 border-black'>
-								<SmallCard card={rounds[0].cards[0]} />
-								<SmallCard card={rounds[0].cards[1]} />
+						<div>
+							<div className='flex items-center'>
+								<p className='text-xl pr-8'>Flop</p>
+								<div className='flex gap-2 pr-4 border-r-2 border-black'>
+									<SmallCard card={rounds[0].cards[0]} />
+									<SmallCard card={rounds[0].cards[1]} />
+								</div>
+								<div className='flex gap-2 pl-4'>
+									<SmallCard card={rounds[1].cards[0]} />
+									<SmallCard card={rounds[1].cards[1]} />
+									<SmallCard card={rounds[1].cards[2]} />
+								</div>
 							</div>
-							<div className='flex gap-2 pl-4'>
-								<SmallCard card={rounds[1].cards[0]} />
-								<SmallCard card={rounds[1].cards[1]} />
-								<SmallCard card={rounds[1].cards[2]} />
-							</div>
+							<p className='text-muted-foreground'>{rounds[1].evaluation.value}</p>
 						</div>
-						<p className='text-xl'>
-							You now have <span className='font-bold'>{rounds[1].evaluation.value}</span>
-						</p>
 						{rounds[1] &&
 							rounds[1].actions.map(action => {
 								return <ActionLine key={action.step} action={action} position={position} />
@@ -157,27 +168,25 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 							{potStatusByRound[1]
 								.filter(potStatus => potStatus > 0)
 								.map((potStatus, i) => (
-									<div key={i} className={`px-2 py-1 rounded ${potColors[i]}`}>
-										{potStatus}
-									</div>
+									<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
 								))}
 						</div>
-						<div className='flex items-center'>
-							<p className='text-xl pr-8'>Turn</p>
-							<div className='flex gap-2 pr-4 border-r-2 border-black'>
-								<SmallCard card={rounds[0].cards[0]} />
-								<SmallCard card={rounds[0].cards[1]} />
+						<div>
+							<div className='flex items-center'>
+								<p className='text-xl pr-8'>Turn</p>
+								<div className='flex gap-2 pr-4 border-r-2 border-black'>
+									<SmallCard card={rounds[0].cards[0]} />
+									<SmallCard card={rounds[0].cards[1]} />
+								</div>
+								<div className='flex gap-2 pl-4'>
+									<SmallCard card={rounds[1].cards[0]} />
+									<SmallCard card={rounds[1].cards[1]} />
+									<SmallCard card={rounds[1].cards[2]} />
+									<SmallCard card={rounds[2].cards[0]} />
+								</div>
 							</div>
-							<div className='flex gap-2 pl-4'>
-								<SmallCard card={rounds[1].cards[0]} />
-								<SmallCard card={rounds[1].cards[1]} />
-								<SmallCard card={rounds[1].cards[2]} />
-								<SmallCard card={rounds[2].cards[0]} />
-							</div>
+							<p className='text-muted-foreground'>{rounds[2].evaluation.value}</p>
 						</div>
-						<p className='text-xl'>
-							You now have <span className='font-bold'>{rounds[2].evaluation.value}</span>
-						</p>
 						{rounds[2] &&
 							rounds[2].actions.map(action => {
 								return <ActionLine key={action.step} action={action} position={position} />
@@ -187,28 +196,26 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 							{potStatusByRound[2]
 								.filter(potStatus => potStatus > 0)
 								.map((potStatus, i) => (
-									<div key={i} className={`px-2 py-1 rounded ${potColors[i]}`}>
-										{potStatus}
-									</div>
+									<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
 								))}
 						</div>
-						<div className='flex items-center'>
-							<p className='text-xl pr-8'>River</p>
-							<div className='flex gap-2 pr-4 border-r-2 border-black'>
-								<SmallCard card={rounds[0].cards[0]} />
-								<SmallCard card={rounds[0].cards[1]} />
+						<div>
+							<div className='flex items-center'>
+								<p className='text-xl pr-8'>River</p>
+								<div className='flex gap-2 pr-4 border-r-2 border-black'>
+									<SmallCard card={rounds[0].cards[0]} />
+									<SmallCard card={rounds[0].cards[1]} />
+								</div>
+								<div className='flex gap-2 pl-4'>
+									<SmallCard card={rounds[1].cards[0]} />
+									<SmallCard card={rounds[1].cards[1]} />
+									<SmallCard card={rounds[1].cards[2]} />
+									<SmallCard card={rounds[2].cards[0]} />
+									<SmallCard card={rounds[3].cards[0]} />
+								</div>
 							</div>
-							<div className='flex gap-2 pl-4'>
-								<SmallCard card={rounds[1].cards[0]} />
-								<SmallCard card={rounds[1].cards[1]} />
-								<SmallCard card={rounds[1].cards[2]} />
-								<SmallCard card={rounds[2].cards[0]} />
-								<SmallCard card={rounds[3].cards[0]} />
-							</div>
+							<p className='text-muted-foreground'>{rounds[3].evaluation.value}</p>
 						</div>
-						<p className='text-xl'>
-							You now have <span className='font-bold'>{rounds[3].evaluation.value}</span>
-						</p>
 						{rounds[3] &&
 							rounds[3].actions.map(action => {
 								return <ActionLine key={action.step} action={action} position={position} />
@@ -218,36 +225,35 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 							{potStatusByRound[3]
 								.filter(potStatus => potStatus > 0)
 								.map((potStatus, i) => (
-									<div key={i} className={`px-2 py-1 rounded ${potColors[i]}`}>
-										{potStatus}
-									</div>
+									<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
 								))}
 						</div>
-						{villains.length &&
-							villains.map(villain => {
-								return (
-									<>
-										<div key={villain.cards[0].step} className='flex items-center'>
-											<p className='text-xl pr-8'>Player {villain.cards[0].player} shows down</p>
-											<div className='flex gap-2 pr-4'>
-												<SmallCard card={villain.cards[0]} />
-												<SmallCard card={villain.cards[1]} />
+						{villains.length
+							? villains.map(villain => {
+									return (
+										<div key={crypto.randomUUID()}>
+											<div className='flex items-center'>
+												<p className='text-xl pr-8'>Player {villain.cards[0].player} shows down</p>
+												<div className='flex gap-2 pr-4'>
+													<SmallCard card={villain.cards[0]} />
+													<SmallCard card={villain.cards[1]} />
+												</div>
 											</div>
+											<p className='text-muted-foreground'>{villain.evaluation.value}</p>
 										</div>
-										<p className='text-xl'>
-											Player {villain.cards[0].player} has <span className='font-bold'>{villain.evaluation.value}</span>
-										</p>
-									</>
-								)
-							})}
+									)
+							  })
+							: null}
 						{pots.map(pot => {
 							if (pot.winner.length === 1) {
 								return (
-									<div key={pot.potIndex} className='flex'>
+									<div key={crypto.randomUUID()} className='flex items-center gap-4'>
 										<p className='text-xl'>Player {pot.winner} wins</p>
-										<div className={`ml-2 px-2 py-1 rounded ${potColors[pot.potIndex]}`}>
-											{potStatusByRound.at(-1)![pot.potIndex]}
-										</div>
+										<PotView
+											key={crypto.randomUUID()}
+											value={potStatusByRound.at(-1)![pot.potIndex]}
+											index={pot.potIndex}
+										/>
 									</div>
 								)
 							} else {
@@ -256,11 +262,13 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 									<>
 										{winners.map(winner => {
 											return (
-												<div key={pot.potIndex} className='flex'>
+												<div key={crypto.randomUUID()} className='flex items-center gap-4'>
 													<p className='text-xl'>Player {winner} wins</p>
-													<div className={`ml-2 px-2 py-1 rounded ${potColors[pot.potIndex]}`}>
-														{potStatusByRound.at(-1)![pot.potIndex] / winners.length}
-													</div>
+													<PotView
+														key={crypto.randomUUID()}
+														value={potStatusByRound.at(-1)![pot.potIndex] / winners.length}
+														index={pot.potIndex}
+													/>
 												</div>
 											)
 										})}
@@ -268,9 +276,17 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 								)
 							}
 						})}
+						{!isWin ? (
+							<div className='text-xl flex items-center gap-4'>
+								<p>You lost</p>
+								<p className='px-2 py-1 bg-red-300 rounded'>{loss}</p>
+							</div>
+						) : null}
 					</section>
-					<TypographyH2>Analysis</TypographyH2>
-					<Analysis analysis={analysis} />
+					<section>
+						<TypographyH2>Analysis</TypographyH2>
+						<Analysis analysis={analysis} />
+					</section>
 				</div>
 			</main>
 		</>
