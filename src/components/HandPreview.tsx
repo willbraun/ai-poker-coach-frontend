@@ -3,6 +3,7 @@ import { Hand } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import Image from 'next/image'
 import Link from 'next/link'
+import Analysis from './Analysis'
 import SmallCard from './SmallCard'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 
@@ -33,11 +34,7 @@ const HandPreview = ({ hand }: { hand: Hand }) => {
 						</div>
 					</div>
 				</div>
-				<div className='bg-stone-200 p-4 rounded font-serif sm:text-lg lg:text-xl flex flex-col gap-4'>
-					{hand.analysis.split('\n').map((paragraph, i) => (
-						<p key={i}>{paragraph}</p>
-					))}
-				</div>
+				<Analysis analysis={hand.analysis} />
 			</CardContent>
 			<CardFooter className='justify-end'>
 				<Link href={`/hand/${hand.id}`} className='hover:bg-slate-200 rounded-full'>
