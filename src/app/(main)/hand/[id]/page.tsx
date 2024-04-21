@@ -195,7 +195,9 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 				<div className='max-w-screen-md mx-auto h-full flex flex-col gap-8 p-4'>
 					<section>
 						<TypographyH1>{name}</TypographyH1>
-						<p className='text-md text-muted-foreground'>{formatDistanceToNow(createdTime, { addSuffix: true })}</p>
+						<p className='text-md text-muted-foreground mt-2'>
+							{formatDistanceToNow(createdTime, { addSuffix: true })}
+						</p>
 					</section>
 					<section className='rounded-xl p-4 border-1 border-slate-300'>
 						<TypographyH2>Details</TypographyH2>
@@ -280,7 +282,7 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 						) : null}
 					</section>
 					<section>
-						<TypographyH2>Analysis</TypographyH2>
+						<TypographyH2 className='mb-4'>Analysis</TypographyH2>
 						<Analysis analysis={analysis} />
 					</section>
 				</div>
