@@ -9,3 +9,10 @@ export function cn(...inputs: ClassValue[]) {
 export const getIsWin = (hand: Hand): boolean => {
 	return hand.handSteps.pots.some(pot => pot.winner.split(',').includes(hand.handSteps.position.toString()))
 }
+
+export const suitMap: Record<string, string> = {
+	C: 'club',
+	D: 'diamond',
+	H: 'heart',
+	S: 'spade',
+}

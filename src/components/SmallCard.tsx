@@ -1,16 +1,6 @@
 import { Card } from '@/lib/types'
+import { suitMap } from '@/lib/utils'
 import Image from 'next/image'
-import club from '@/lib/images/icons/club.svg'
-import diamond from '@/lib/images/icons/diamond.svg'
-import heart from '@/lib/images/icons/heart.svg'
-import spade from '@/lib/images/icons/spade.svg'
-
-const suitMap: Record<string, JSX.Element> = {
-	C: <Image src={club} alt={'club'} className='scale-75 md:scale-100' />,
-	D: <Image src={diamond} alt={'diamond'} className='scale-75 md:scale-100' />,
-	H: <Image src={heart} alt={'heart'} className='scale-75 md:scale-100' />,
-	S: <Image src={spade} alt={'spade'} className='scale-75 md:scale-100' />,
-}
 
 const SmallCard = ({ card }: { card: Card }) => {
 	return (
@@ -18,7 +8,11 @@ const SmallCard = ({ card }: { card: Card }) => {
 			<p className={`text-md md:text-2xl font-bold ${['D', 'H'].includes(card.suit) && 'text-pure-red'}`}>
 				{card.value}
 			</p>
-			{suitMap[card.suit]}
+			<Image
+				src={require(`@/lib/images/icons/${suitMap[card.suit]}.svg`).default}
+				alt={'spade'}
+				className='scale-75 md:scale-100'
+			/>
 		</div>
 	)
 }

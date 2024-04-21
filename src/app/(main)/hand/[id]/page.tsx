@@ -1,6 +1,6 @@
 import Analysis from '@/components/Analysis'
+import LargeCard from '@/components/LargeCard'
 import ScrollToTop from '@/components/ScrollToTop'
-import SmallCard from '@/components/SmallCard'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { Action, Card, Hand, Pot, Round } from '@/lib/types'
@@ -82,13 +82,13 @@ const CardLine = ({
 		<div className='flex items-center'>
 			<p className='text-xl pr-8'>{message}</p>
 			<div className='flex gap-2 pr-4'>
-				<SmallCard card={hole[0]} />
-				<SmallCard card={hole[1]} />
+				<LargeCard card={hole[0]} />
+				<LargeCard card={hole[1]} />
 			</div>
 			{table ? (
 				<div className='flex gap-2 pl-4 border-l-2 border-black'>
 					{table.map(card => (
-						<SmallCard key={card.step} card={card} />
+						<LargeCard key={card.step} card={card} />
 					))}
 				</div>
 			) : null}
@@ -192,7 +192,7 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 		<>
 			<ScrollToTop />
 			<main className='pt-24 pb-16 bg-white'>
-				<div className='max-w-screen-md mx-auto h-full flex flex-col gap-8 p-4'>
+				<div className='max-w-screen-lg mx-auto h-full flex flex-col gap-8 p-4'>
 					<section>
 						<TypographyH1>{name}</TypographyH1>
 						<p className='text-md text-muted-foreground'>{formatDistanceToNow(createdTime, { addSuffix: true })}</p>
