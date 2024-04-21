@@ -3,7 +3,7 @@ import ScrollToTop from '@/components/ScrollToTop'
 import SmallCard from '@/components/SmallCard'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
-import { Action, Hand, Pot, Round } from '@/lib/types'
+import { Action, Card, Hand, Pot, Round } from '@/lib/types'
 import { getIsWin } from '@/lib/utils'
 import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
@@ -16,6 +16,25 @@ const getHand = async (id: string): Promise<Hand> => {
 const decisions = ['folds', 'checks', 'calls', 'bets', 'bets all-in for', 'calls all-in for']
 
 const potColors = ['bg-blue-200', 'bg-green-200', 'bg-yellow-200', 'bg-orange-200', 'bg-pink-200', 'bg-purple-200']
+
+const roundText = [
+	{
+		cards: 'You are dealt',
+		pots: 'Pots after preflop betting',
+	},
+	{
+		cards: 'Flop',
+		pots: 'Pots after flop betting',
+	},
+	{
+		cards: 'Turn',
+		pots: 'Pots after turn betting',
+	},
+	{
+		cards: 'River',
+		pots: 'Pots after river betting',
+	},
+]
 
 const getPositionMessage = (position: number, playerCount: number) => {
 	if (position === 1) {
@@ -47,10 +66,32 @@ const getCumulativePotActionSum = (pots: Pot[], rounds: Round[], roundIndex: num
 		}, Array(pots.length).fill(0))
 }
 
-const PotView = ({ value, index }: { value: number; index: number }) => {
+const CardLine = ({
+	message,
+	hole,
+	table,
+	evaluation,
+}: {
+	message: string
+	hole: [Card, Card]
+	table?: Card[]
+	evaluation: string
+}) => {
 	return (
-		<div key={crypto.randomUUID()} className={`px-2 py-1 rounded text-xl ${potColors[index]}`}>
-			{value}
+		<div className='flex items-center'>
+			<p className='text-xl pr-8'>{message}</p>
+			<div className='flex gap-2 pr-4'>
+				<SmallCard card={hole[0]} />
+				<SmallCard card={hole[1]} />
+			</div>
+			{table ? (
+				<div className='flex gap-2 pl-4 border-l-2 border-black'>
+					{table?.map(card => (
+						<SmallCard key={card.step} card={card} />
+					))}
+				</div>
+			) : null}
+			<p className='text-muted-foreground ml-auto pl-4 text-right'>{evaluation}</p>
 		</div>
 	)
 }
@@ -63,6 +104,55 @@ const ActionLine = ({ action, position }: { action: Action; position: number }) 
 				decisions[action.decision]
 			}${betSize}.`}</p>
 		</div>
+	)
+}
+
+const PotView = ({ value, index }: { value: number; index: number }) => {
+	return <div className={`px-2 py-1 rounded text-xl ${potColors[index]}`}>{value}</div>
+}
+
+const PotLine = ({ message, potStatus }: { message: string; potStatus: number[] }) => {
+	return (
+		<div className='flex items-center gap-4'>
+			<p className='text-xl'>{message}</p>
+			{potStatus
+				.filter(potStatus => potStatus > 0)
+				.map((potStatus, i) => (
+					<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
+				))}
+		</div>
+	)
+}
+
+const RoundDetails = ({
+	rounds,
+	index,
+	position,
+	potStatus,
+}: {
+	rounds: Round[]
+	index: number
+	position: number
+	potStatus: number[]
+}) => {
+	const tableCards = rounds
+		.slice(1, index + 1)
+		.flatMap(round => round.cards)
+		.filter(card => card.player === 0)
+
+	return (
+		<>
+			<CardLine
+				message={roundText[index].cards}
+				hole={[rounds[0].cards[0], rounds[0].cards[1]]}
+				table={tableCards}
+				evaluation={rounds[index].evaluation.value}
+			/>
+			{rounds[index].actions.map(action => {
+				return <ActionLine key={action.step} action={action} position={position} />
+			})}
+			<PotLine message={roundText[index].pots} potStatus={potStatus} />
+		</>
 	)
 }
 
@@ -123,124 +213,24 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 								<PotView value={ante + bigBlindAnte * playerCount} index={0} />
 							</div>
 						) : null}
-						<div>
-							<div className='flex items-center'>
-								<p className='text-xl pr-8'>You are dealt</p>
-								<div className='flex gap-2 pr-4'>
-									<SmallCard card={rounds[0].cards[0]} />
-									<SmallCard card={rounds[0].cards[1]} />
-								</div>
-							</div>
-							<p className='text-muted-foreground'>{rounds[0].evaluation.value}</p>
-						</div>
-						{rounds[0].actions.map(action => {
-							return <ActionLine key={action.step} action={action} position={position} />
-						})}
-						<div className='flex items-center gap-4'>
-							<p className='text-xl'>Pots after preflop betting</p>
-							{potStatusByRound[0]
-								.filter(potStatus => potStatus > 0)
-								.map((potStatus, i) => (
-									<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
-								))}
-						</div>
-						<div>
-							<div className='flex items-center'>
-								<p className='text-xl pr-8'>Flop</p>
-								<div className='flex gap-2 pr-4 border-r-2 border-black'>
-									<SmallCard card={rounds[0].cards[0]} />
-									<SmallCard card={rounds[0].cards[1]} />
-								</div>
-								<div className='flex gap-2 pl-4'>
-									<SmallCard card={rounds[1].cards[0]} />
-									<SmallCard card={rounds[1].cards[1]} />
-									<SmallCard card={rounds[1].cards[2]} />
-								</div>
-							</div>
-							<p className='text-muted-foreground'>{rounds[1].evaluation.value}</p>
-						</div>
-						{rounds[1] &&
-							rounds[1].actions.map(action => {
-								return <ActionLine key={action.step} action={action} position={position} />
-							})}
-						<div className='flex items-center gap-4'>
-							<p className='text-xl'>Pots after flop betting</p>
-							{potStatusByRound[1]
-								.filter(potStatus => potStatus > 0)
-								.map((potStatus, i) => (
-									<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
-								))}
-						</div>
-						<div>
-							<div className='flex items-center'>
-								<p className='text-xl pr-8'>Turn</p>
-								<div className='flex gap-2 pr-4 border-r-2 border-black'>
-									<SmallCard card={rounds[0].cards[0]} />
-									<SmallCard card={rounds[0].cards[1]} />
-								</div>
-								<div className='flex gap-2 pl-4'>
-									<SmallCard card={rounds[1].cards[0]} />
-									<SmallCard card={rounds[1].cards[1]} />
-									<SmallCard card={rounds[1].cards[2]} />
-									<SmallCard card={rounds[2].cards[0]} />
-								</div>
-							</div>
-							<p className='text-muted-foreground'>{rounds[2].evaluation.value}</p>
-						</div>
-						{rounds[2] &&
-							rounds[2].actions.map(action => {
-								return <ActionLine key={action.step} action={action} position={position} />
-							})}
-						<div className='flex items-center gap-4'>
-							<p className='text-xl'>Pots after turn betting</p>
-							{potStatusByRound[2]
-								.filter(potStatus => potStatus > 0)
-								.map((potStatus, i) => (
-									<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
-								))}
-						</div>
-						<div>
-							<div className='flex items-center'>
-								<p className='text-xl pr-8'>River</p>
-								<div className='flex gap-2 pr-4 border-r-2 border-black'>
-									<SmallCard card={rounds[0].cards[0]} />
-									<SmallCard card={rounds[0].cards[1]} />
-								</div>
-								<div className='flex gap-2 pl-4'>
-									<SmallCard card={rounds[1].cards[0]} />
-									<SmallCard card={rounds[1].cards[1]} />
-									<SmallCard card={rounds[1].cards[2]} />
-									<SmallCard card={rounds[2].cards[0]} />
-									<SmallCard card={rounds[3].cards[0]} />
-								</div>
-							</div>
-							<p className='text-muted-foreground'>{rounds[3].evaluation.value}</p>
-						</div>
-						{rounds[3] &&
-							rounds[3].actions.map(action => {
-								return <ActionLine key={action.step} action={action} position={position} />
-							})}
-						<div className='flex items-center gap-4'>
-							<p className='text-xl'>Pots after river betting</p>
-							{potStatusByRound[3]
-								.filter(potStatus => potStatus > 0)
-								.map((potStatus, i) => (
-									<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
-								))}
-						</div>
+						{rounds.map((round, i) => (
+							<RoundDetails
+								key={round.cards[0].step}
+								rounds={rounds}
+								index={i}
+								position={position}
+								potStatus={potStatusByRound[i]}
+							/>
+						))}
 						{villains.length
 							? villains.map(villain => {
 									return (
-										<div key={crypto.randomUUID()}>
-											<div className='flex items-center'>
-												<p className='text-xl pr-8'>Player {villain.cards[0].player} shows down</p>
-												<div className='flex gap-2 pr-4'>
-													<SmallCard card={villain.cards[0]} />
-													<SmallCard card={villain.cards[1]} />
-												</div>
-											</div>
-											<p className='text-muted-foreground'>{villain.evaluation.value}</p>
-										</div>
+										<CardLine
+											key={villain.cards[0].step}
+											message={`Player ${villain.cards[0].player} shows down`}
+											hole={[villain.cards[0], villain.cards[1]]}
+											evaluation={villain.evaluation.value}
+										/>
 									)
 							  })
 							: null}
