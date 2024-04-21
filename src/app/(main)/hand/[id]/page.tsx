@@ -13,13 +13,14 @@ const getHand = async (id: string): Promise<Hand> => {
 	return res.json()
 }
 
-const decisions = ['folds', 'checks', 'calls', 'bets', 'bets all-in for', 'calls all-in for']
+const decisions = ['folds', 'checks', 'calls', 'bets', 'raises to', 'bets all-in for', 'calls all-in for']
+const myDecisions = ['fold', 'check', 'call', 'bet', 'raise to', 'bet all-in for', 'call all-in for']
 
 const potColors = ['bg-blue-200', 'bg-green-200', 'bg-yellow-200', 'bg-orange-200', 'bg-pink-200', 'bg-purple-200']
 
 const roundText = [
 	{
-		cards: 'You are dealt',
+		cards: 'I am dealt',
 		pots: 'Pots after preflop betting',
 	},
 	{
@@ -86,7 +87,7 @@ const CardLine = ({
 			</div>
 			{table ? (
 				<div className='flex gap-2 pl-4 border-l-2 border-black'>
-					{table?.map(card => (
+					{table.map(card => (
 						<SmallCard key={card.step} card={card} />
 					))}
 				</div>
@@ -97,12 +98,17 @@ const CardLine = ({
 }
 
 const ActionLine = ({ action, position }: { action: Action; position: number }) => {
+	let message = ''
+	if (action.player === position) {
+		message = `I ${myDecisions[action.decision]}`
+	} else {
+		message = `Player ${action.player} ${decisions[action.decision]}`
+	}
+
 	const betSize = action.decision > 1 ? ` ${action.bet}` : ''
 	return (
 		<div className='flex'>
-			<p key={action.step} className='text-xl'>{`Player ${action.player}${action.player == position ? ' ⭐️' : ''} ${
-				decisions[action.decision]
-			}${betSize}.`}</p>
+			<p key={action.step} className='text-xl'>{`${message}${betSize}.`}</p>
 		</div>
 	)
 }
@@ -268,7 +274,7 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 						})}
 						{!isWin ? (
 							<div className='text-xl flex items-center gap-4'>
-								<p>You lost</p>
+								<p>I lose</p>
 								<p className='px-2 py-1 bg-red-300 rounded'>{loss}</p>
 							</div>
 						) : null}
