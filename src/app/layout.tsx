@@ -1,4 +1,3 @@
-import SetBodyColor from '@/components/SetBodyColor'
 import type { Metadata } from 'next'
 import './globals.css'
 
@@ -17,7 +16,6 @@ export default function RootLayout({
 			<body className='bg-slate-100' id='body'>
 				{children}
 			</body>
-			<SetBodyColor />
 		</html>
 	)
 }

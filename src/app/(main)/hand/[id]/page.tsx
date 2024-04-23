@@ -1,9 +1,10 @@
 import Analysis from '@/components/Analysis'
 import ScrollToTop from '@/components/ScrollToTop'
 import SmallCard from '@/components/SmallCard'
+import { Card } from '@/components/ui/card'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
-import { Action, Card, Hand, Pot, Round } from '@/lib/types'
+import { Action, Card as CardType, Hand, Pot, Round } from '@/lib/types'
 import { getIsWin } from '@/lib/utils'
 import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
@@ -21,19 +22,19 @@ const potColors = ['bg-blue-200', 'bg-green-200', 'bg-yellow-200', 'bg-orange-20
 const roundText = [
 	{
 		cards: 'I am dealt',
-		pots: 'Pots after preflop betting',
+		pots: 'preflop betting',
 	},
 	{
 		cards: 'Flop',
-		pots: 'Pots after flop betting',
+		pots: 'flop betting',
 	},
 	{
 		cards: 'Turn',
-		pots: 'Pots after turn betting',
+		pots: 'turn betting',
 	},
 	{
 		cards: 'River',
-		pots: 'Pots after river betting',
+		pots: 'river betting',
 	},
 ]
 
@@ -74,8 +75,8 @@ const CardLine = ({
 	evaluation,
 }: {
 	message: string
-	hole: [Card, Card]
-	table?: Card[]
+	hole: [CardType, CardType]
+	table?: CardType[]
 	evaluation: string
 }) => {
 	return (
@@ -118,14 +119,14 @@ const PotView = ({ value, index }: { value: number; index: number }) => {
 }
 
 const PotLine = ({ message, potStatus }: { message: string; potStatus: number[] }) => {
+	const pots = potStatus.filter(potStatus => potStatus > 0)
+
 	return (
 		<div className='flex items-center gap-4'>
-			<p className='text-xl'>{message}</p>
-			{potStatus
-				.filter(potStatus => potStatus > 0)
-				.map((potStatus, i) => (
-					<PotView key={crypto.randomUUID()} value={potStatus} index={i} />
-				))}
+			<p className='text-xl'>{`Pot${pots.length > 1 ? 's' : ''} after ${message}`}</p>
+			{pots.map((value, i) => (
+				<PotView key={crypto.randomUUID()} value={value} index={i} />
+			))}
 		</div>
 	)
 }
@@ -191,8 +192,8 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 	return (
 		<>
 			<ScrollToTop />
-			<main className='pt-24 pb-16 bg-white'>
-				<div className='max-w-screen-md mx-auto h-full flex flex-col gap-8 p-4'>
+			<main className='pt-24 pb-16'>
+				<Card className='max-w-screen-lg mx-auto h-full flex flex-col gap-8 p-16'>
 					<section>
 						<TypographyH1>{name}</TypographyH1>
 						<p className='text-md text-muted-foreground mt-2'>
@@ -285,7 +286,7 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 						<TypographyH2 className='mb-4'>Analysis</TypographyH2>
 						<Analysis analysis={analysis} />
 					</section>
-				</div>
+				</Card>
 			</main>
 		</>
 	)

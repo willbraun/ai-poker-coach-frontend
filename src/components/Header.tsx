@@ -9,7 +9,7 @@ const Header = () => {
 	const isAuth = getAuth()
 
 	return (
-		<header className='fixed h-16 top-0 z-20 bg-slate-300 flex w-full items-center px-4 gap-4'>
+		<header className='fixed h-16 top-0 z-20 bg-white flex w-full items-center px-4 gap-4 shadow'>
 			<Link href='/'>
 				<p className='text-2xl font-semibold tracking-tight'>AI Poker Coach</p>
 			</Link>
@@ -40,8 +40,8 @@ const Header = () => {
 					</DropdownMenu>
 				</>
 			) : (
-				<div className='flex items-center gap-4'>
-					<Button size='sm'>
+				<div className='flex items-center gap-4 ml-auto'>
+					<Button size='sm' variant='link'>
 						<Link href='/login'>Log in</Link>
 					</Button>
 					<Button size='sm'>
