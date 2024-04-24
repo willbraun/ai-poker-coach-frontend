@@ -80,20 +80,22 @@ const CardLine = ({
 	evaluation: string
 }) => {
 	return (
-		<div className='flex items-center'>
-			<p className='text-xl pr-8'>{message}</p>
-			<div className='flex gap-2 pr-4'>
-				<SmallCard card={hole[0]} />
-				<SmallCard card={hole[1]} />
-			</div>
-			{table ? (
-				<div className='flex gap-2 pl-4 border-l-2 border-black'>
-					{table.map(card => (
-						<SmallCard key={card.step} card={card} />
-					))}
+		<div className='flex items-center flex-wrap gap-y-2'>
+			<div className='flex items-center flex-wrap gap-y-2 mr-auto'>
+				<p className='text-xl pr-4 md:pr-8'>{message}</p>
+				<div className='flex gap-2 pr-4'>
+					<SmallCard card={hole[0]} />
+					<SmallCard card={hole[1]} />
 				</div>
-			) : null}
-			<p className='text-muted-foreground ml-auto pl-4 text-right'>{evaluation}</p>
+				{table ? (
+					<div className='flex gap-2 pl-4 border-l-2 border-black '>
+						{table.map(card => (
+							<SmallCard key={card.step} card={card} />
+						))}
+					</div>
+				) : null}
+			</div>
+			<p className='text-muted-foreground'>{evaluation}</p>
 		</div>
 	)
 }
@@ -124,8 +126,8 @@ const PotLine = ({ message, potStatus }: { message: string; potStatus: number[] 
 	return (
 		<div className='flex items-center gap-4'>
 			<p className='text-xl'>{`Pot${pots.length > 1 ? 's' : ''} after ${message}`}</p>
-			{pots.map((value, i) => (
-				<PotView key={crypto.randomUUID()} value={value} index={i} />
+			{pots.map((pot, i) => (
+				<PotView key={i} value={pot} index={i} />
 			))}
 		</div>
 	)
@@ -192,8 +194,8 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 	return (
 		<>
 			<ScrollToTop />
-			<main className='pt-24 pb-16'>
-				<Card className='max-w-screen-lg mx-auto h-full flex flex-col gap-8 p-16'>
+			<main className='pt-16 lg:pt-24 lg:pb-16'>
+				<Card className='max-w-screen-lg mx-auto h-full flex flex-col gap-8 p-4 lg:p-16 rounded-none lg:rounded-xl'>
 					<section>
 						<TypographyH1>{name}</TypographyH1>
 						<p className='text-md text-muted-foreground mt-2'>
@@ -243,38 +245,16 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 									)
 							  })
 							: null}
-						{pots.map(pot => {
-							if (pot.winner.length === 1) {
+						{pots.map(pot =>
+							pot.winner.split(',').map((winner, winnerIndex, winners) => {
 								return (
-									<div key={crypto.randomUUID()} className='flex items-center gap-4'>
-										<p className='text-xl'>Player {pot.winner} wins</p>
-										<PotView
-											key={crypto.randomUUID()}
-											value={potStatusByRound.at(-1)![pot.potIndex]}
-											index={pot.potIndex}
-										/>
+									<div key={`${pot.potIndex}_${winnerIndex}`} className='flex items-center gap-4'>
+										<p className='text-xl'>Player {winner} wins</p>
+										<PotView value={potStatusByRound.at(-1)![pot.potIndex] / winners.length} index={pot.potIndex} />
 									</div>
 								)
-							} else {
-								const winners = pot.winner.split(',')
-								return (
-									<>
-										{winners.map(winner => {
-											return (
-												<div key={crypto.randomUUID()} className='flex items-center gap-4'>
-													<p className='text-xl'>Player {winner} wins</p>
-													<PotView
-														key={crypto.randomUUID()}
-														value={potStatusByRound.at(-1)![pot.potIndex] / winners.length}
-														index={pot.potIndex}
-													/>
-												</div>
-											)
-										})}
-									</>
-								)
-							}
-						})}
+							})
+						)}
 						{!isWin ? (
 							<div className='text-xl flex items-center gap-4'>
 								<p>I lose</p>
