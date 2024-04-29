@@ -107,3 +107,39 @@ type Prompt =
 	| BigBlindAntePrompt
 	| MyStackPrompt
 	| NotesPrompt
+
+// NEW METHOD
+
+interface FormCardGroup {
+	player: number
+	cards: FormCard[]
+	evaluation: string
+}
+
+interface FormAction {
+	player: number
+	decision: number
+	bet: number
+}
+
+interface NewHandState {
+	name: string
+	gameStyle: number
+	playerCount: number
+	position: number
+	smallBlind: number
+	bigBlind: number
+	ante: number
+	bigBlindAnte: number
+	myStack: number
+	notes: string
+	round0Cards: FormCardGroup
+	round0Actions: FormAction[]
+	round1Cards: FormCardGroup
+	round1Actions: FormAction[]
+	round2Cards: FormCardGroup
+	round2Actions: FormAction[]
+	round3Cards: FormCardGroup
+	round3Actions: FormAction[]
+	villains: FormCardGroup[]
+}

@@ -1,33 +1,58 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import TypographyH1 from '@/components/ui/typography/TypographyH1'
-import { useNewHandStore } from './store'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 const NewHand = () => {
-	const { prompts, activePrompt, increment, decrement } = useNewHandStore()
-	const [name, gameStyle, playerCount, position, smallBlind, bigBlind, ante, bigBlindAnte, myStack, notes] =
-		prompts.map(p => p.value)
-	const isLast = false
-	const inputType = prompts[activePrompt]?.type ?? 'unknown'
+	const form = useForm()
+
+	const [formValue, setFormValue] = useState<NewHandState>({
+		name: '',
+		gameStyle: 0,
+		playerCount: 0,
+		position: 0,
+		smallBlind: 0,
+		bigBlind: 0,
+		ante: 0,
+		bigBlindAnte: 0,
+		myStack: 0,
+		notes: '',
+		round0Cards: {} as FormCardGroup,
+		round0Actions: [],
+		round1Cards: {} as FormCardGroup,
+		round1Actions: [],
+		round2Cards: {} as FormCardGroup,
+		round2Actions: [],
+		round3Cards: {} as FormCardGroup,
+		round3Actions: [],
+		villains: [],
+	})
 
 	return (
 		<main className='mt-24'>
-			<Card className='max-w-screen-lg mx-auto'>
-				<section>
-					<TypographyH1>{name}</TypographyH1>
-				</section>
-			</Card>
-			<div className='absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-screen-md border-slate-500 border-1 p-4 rounded'>
-				<p>{inputType}</p>
-				<div className='flex justify-between gap-4'>
-					<Button className='mr-auto' onClick={decrement}>
-						Back
-					</Button>
-					{isLast ? <Button>Analyze</Button> : <Button onClick={increment}>Next</Button>}
-				</div>
-			</div>
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+					<FormField
+						control={form.control}
+						name='username'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Username</FormLabel>
+								<FormControl>
+									<Input placeholder='shadcn' {...field} />
+								</FormControl>
+								<FormDescription>This is your public display name.</FormDescription>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<Button type='submit'>Submit</Button>
+				</form>
+			</Form>
 		</main>
 	)
 }
