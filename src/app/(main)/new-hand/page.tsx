@@ -1,6 +1,5 @@
 'use client'
 
-import { Card } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -8,13 +7,30 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Bold, Italic, Underline } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+
+const atMostTwoDigitsAfterDecimal = (value: number) => {
+	const stringValue = value.toString()
+	const decimalIndex = stringValue.indexOf('.')
+
+	if (decimalIndex === -1) {
+		return true
+	}
+
+	const digitsAfterDecimal = stringValue.substring(decimalIndex + 1)
+
+	return digitsAfterDecimal.length <= 2
+}
+
+const zodNumber = z.coerce
+	.number()
+	.gte(0)
+	.refine(atMostTwoDigitsAfterDecimal, { message: 'Cannot have more than 2 digits after the decimal' })
 
 const zodCardGroup = z.object({
-	player: z.number(),
+	player: z.number().gte(0).lte(12),
 	cards: z.array(
 		z.object({
 			value: z.string(),
@@ -25,21 +41,21 @@ const zodCardGroup = z.object({
 })
 
 const zodAction = z.object({
-	player: z.number(),
-	decision: z.number(),
-	bet: z.number(),
+	player: z.number().gte(0).lte(12),
+	decision: z.number().gte(0).lte(6),
+	bet: zodNumber,
 })
 
 const FormSchema = z.object({
 	name: z.string(),
-	gameStyle: z.string(),
-	playerCount: z.string(),
-	position: z.string(),
-	smallBlind: z.string(),
-	bigBlind: z.string(),
-	ante: z.string(),
-	bigBlindAnte: z.string(),
-	myStack: z.string(),
+	gameStyle: z.coerce.number().gte(0).lte(1),
+	playerCount: z.coerce.number().gte(2).lte(12),
+	position: z.coerce.number().gte(1).lte(12),
+	smallBlind: zodNumber,
+	bigBlind: zodNumber,
+	ante: zodNumber,
+	bigBlindAnte: zodNumber,
+	myStack: zodNumber,
 	notes: z.string().optional(),
 	round0Cards: zodCardGroup,
 	round0Actions: z.array(zodAction),
@@ -57,14 +73,14 @@ const NewHand = () => {
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
 			name: '',
-			gameStyle: '',
-			playerCount: '',
-			position: '',
-			smallBlind: '',
-			bigBlind: '',
-			ante: '',
-			bigBlindAnte: '',
-			myStack: '',
+			gameStyle: 0,
+			playerCount: 0,
+			position: 0,
+			smallBlind: 0,
+			bigBlind: 0,
+			ante: 0,
+			bigBlindAnte: 0,
+			myStack: 0,
 			notes: '',
 			round0Cards: {
 				player: 0,
@@ -101,24 +117,23 @@ const NewHand = () => {
 		watch,
 	} = form
 
-	const watchPlayerCount = watch('playerCount')
+	const watchPlayerCount = Number(watch('playerCount'))
 
-	const positionLabels = new Map<string, string>([
-		['1', 'small blind'],
-		['2', 'big blind'],
+	const positionLabels = new Map<number, string>([
+		[1, 'small blind'],
+		[2, 'big blind'],
 	])
 
-	const playerCountInt = parseInt(watchPlayerCount)
-	if (playerCountInt > 2) {
+	if (watchPlayerCount > 2) {
 		positionLabels.set(watchPlayerCount, 'button')
 	}
-	if (playerCountInt > 3) {
-		positionLabels.set((playerCountInt - 1).toString(), 'cutoff')
+	if (watchPlayerCount > 3) {
+		positionLabels.set(watchPlayerCount - 1, 'cutoff')
 	}
 
 	return (
 		<main className='mt-24'>
-			<div className='max-w-screen-sm mx-auto'>
+			<div className='max-w-screen-sm mx-auto pb-16'>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<Form {...form}>
 					<form onSubmit={handleSubmit(data => console.log(data))} className='space-y-8'>
@@ -144,7 +159,7 @@ const NewHand = () => {
 									<FormControl>
 										<RadioGroup
 											onValueChange={field.onChange}
-											defaultValue={field.value}
+											defaultValue={field.value.toString()}
 											className='flex flex-col space-y-1'
 										>
 											<FormItem className='flex items-center space-x-3 space-y-0'>
@@ -170,7 +185,7 @@ const NewHand = () => {
 							name='playerCount'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>How many players were dealt in this hand?</FormLabel>
+									<FormLabel>Players dealt in this hand</FormLabel>
 									<Select onValueChange={field.onChange}>
 										<FormControl>
 											<SelectTrigger className='w-48'>
@@ -200,7 +215,7 @@ const NewHand = () => {
 							name='position'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>What position were you relative to the small blind (1) ?</FormLabel>
+									<FormLabel>Your position relative to the small blind (1)</FormLabel>
 									<Select onValueChange={field.onChange}>
 										<FormControl>
 											<SelectTrigger className='w-48'>
@@ -208,11 +223,11 @@ const NewHand = () => {
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											{Array.from({ length: parseInt(watchPlayerCount) }).map((_, i) => {
-												const position = (i + 1).toString()
+											{Array.from({ length: watchPlayerCount }).map((_, i) => {
+												const position = i + 1
 												const label = positionLabels.get(position)
 												return (
-													<SelectItem key={`position_choice_${position}`} value={`${position}`}>
+													<SelectItem key={`position_choice_${position}`} value={position.toString()}>
 														{position}
 														{label && ` (${label})`}
 													</SelectItem>
@@ -231,16 +246,87 @@ const NewHand = () => {
 								<FormItem>
 									<FormLabel>Small Blind</FormLabel>
 									<FormControl className='w-48'>
-										<Input {...field} />
+										<Input {...field} type='number' />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
-						<Button type='submit'>Submit</Button>
+						<FormField
+							control={control}
+							name='bigBlind'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Big Blind</FormLabel>
+									<FormControl className='w-48'>
+										<Input {...field} type='number' />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={control}
+							name='ante'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Ante</FormLabel>
+									<FormControl className='w-48'>
+										<Input {...field} type='number' />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={control}
+							name='bigBlindAnte'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Big Blind Ante</FormLabel>
+									<FormControl className='w-48'>
+										<Input {...field} type='number' />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={control}
+							name='myStack'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Your stack size at the beginning of the hand</FormLabel>
+									<FormControl className='w-48'>
+										<Input {...field} type='number' />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={control}
+							name='notes'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Notes</FormLabel>
+									<FormControl>
+										<Textarea {...field} />
+									</FormControl>
+									<FormDescription>
+										Additional information outside of the hard facts to provide the AI model. Include player styles,
+										history, or simply set the stage for the hand.{' '}
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<Button type='submit' className='w-full text-xl'>
+							Submit
+						</Button>
 					</form>
+					{Object.keys(errors).length ? <p className='text-red-500 mt-2'>Please resolve errors and try again</p> : null}
 				</Form>
-				<p>Errors - {JSON.stringify(errors)}</p>
 			</div>
 		</main>
 	)
