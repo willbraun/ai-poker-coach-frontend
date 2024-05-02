@@ -314,7 +314,7 @@ const NewHand = () => {
 										<Textarea {...field} />
 									</FormControl>
 									<FormDescription>
-										Additional information outside of the hard facts to provide the AI model. Include player styles,
+										Additional information outside of the hard facts to provide to the AI model. Include player styles,
 										history, or simply set the stage for the hand.{' '}
 									</FormDescription>
 									<FormMessage />
