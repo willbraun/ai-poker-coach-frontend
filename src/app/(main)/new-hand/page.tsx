@@ -3,13 +3,14 @@
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import CardGroupInput from '@/components/CardGroupInput'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -117,6 +118,8 @@ const NewHand = () => {
 		watch,
 	} = form
 
+	const methods = useForm()
+
 	const watchPlayerCount = Number(watch('playerCount'))
 
 	const positionLabels = new Map<number, string>([
@@ -135,198 +138,205 @@ const NewHand = () => {
 		<main className='mt-24'>
 			<div className='max-w-screen-sm mx-auto pb-16'>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
-				<Form {...form}>
-					<form onSubmit={handleSubmit(data => console.log(data))} className='space-y-8'>
-						<FormField
-							control={control}
-							name='name'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Title</FormLabel>
-									<FormControl>
-										<Input {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='gameStyle'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Game Style</FormLabel>
-									<FormControl>
-										<RadioGroup
-											onValueChange={field.onChange}
-											defaultValue={field.value.toString()}
-											className='flex flex-col space-y-1'
-										>
-											<FormItem className='flex items-center space-x-3 space-y-0'>
-												<FormControl>
-													<RadioGroupItem value='0' />
-												</FormControl>
-												<FormLabel className='font-normal'>Tournament</FormLabel>
-											</FormItem>
-											<FormItem className='flex items-center space-x-3 space-y-0'>
-												<FormControl>
-													<RadioGroupItem value='1' />
-												</FormControl>
-												<FormLabel className='font-normal'>Cash Game</FormLabel>
-											</FormItem>
-										</RadioGroup>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='playerCount'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Players dealt in this hand</FormLabel>
-									<Select onValueChange={field.onChange}>
+				<FormProvider {...methods}>
+					<Form {...form}>
+						<form onSubmit={handleSubmit(data => console.log(data))} className='space-y-8'>
+							<FormField
+								control={control}
+								name='name'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Title</FormLabel>
 										<FormControl>
-											<SelectTrigger className='w-48'>
-												<SelectValue placeholder='Select a number' />
-											</SelectTrigger>
+											<Input {...field} />
 										</FormControl>
-										<SelectContent>
-											<SelectItem value='2'>2</SelectItem>
-											<SelectItem value='3'>3</SelectItem>
-											<SelectItem value='4'>4</SelectItem>
-											<SelectItem value='5'>5</SelectItem>
-											<SelectItem value='6'>6</SelectItem>
-											<SelectItem value='7'>7</SelectItem>
-											<SelectItem value='8'>8</SelectItem>
-											<SelectItem value='9'>9</SelectItem>
-											<SelectItem value='10'>10</SelectItem>
-											<SelectItem value='11'>11</SelectItem>
-											<SelectItem value='12'>12</SelectItem>
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='position'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Your position relative to the small blind (1)</FormLabel>
-									<Select onValueChange={field.onChange}>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='gameStyle'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Game Style</FormLabel>
 										<FormControl>
-											<SelectTrigger className='w-48'>
-												<SelectValue placeholder='Select a number' />
-											</SelectTrigger>
+											<RadioGroup
+												onValueChange={field.onChange}
+												defaultValue={field.value.toString()}
+												className='flex flex-col space-y-1'
+											>
+												<FormItem className='flex items-center space-x-3 space-y-0'>
+													<FormControl>
+														<RadioGroupItem value='0' />
+													</FormControl>
+													<FormLabel className='font-normal'>Tournament</FormLabel>
+												</FormItem>
+												<FormItem className='flex items-center space-x-3 space-y-0'>
+													<FormControl>
+														<RadioGroupItem value='1' />
+													</FormControl>
+													<FormLabel className='font-normal'>Cash Game</FormLabel>
+												</FormItem>
+											</RadioGroup>
 										</FormControl>
-										<SelectContent>
-											{Array.from({ length: watchPlayerCount }).map((_, i) => {
-												const position = i + 1
-												const label = positionLabels.get(position)
-												return (
-													<SelectItem key={`position_choice_${position}`} value={position.toString()}>
-														{position}
-														{label && ` (${label})`}
-													</SelectItem>
-												)
-											})}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='smallBlind'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Small Blind</FormLabel>
-									<FormControl className='w-48'>
-										<Input {...field} type='number' />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='bigBlind'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Big Blind</FormLabel>
-									<FormControl className='w-48'>
-										<Input {...field} type='number' />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='ante'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Ante</FormLabel>
-									<FormControl className='w-48'>
-										<Input {...field} type='number' />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='bigBlindAnte'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Big Blind Ante</FormLabel>
-									<FormControl className='w-48'>
-										<Input {...field} type='number' />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='myStack'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Your stack size at the beginning of the hand</FormLabel>
-									<FormControl className='w-48'>
-										<Input {...field} type='number' />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={control}
-							name='notes'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Notes</FormLabel>
-									<FormControl>
-										<Textarea {...field} />
-									</FormControl>
-									<FormDescription>
-										Additional information outside of the hard facts to provide to the AI model. Include player styles,
-										history, or simply set the stage for the hand.{' '}
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<Button type='submit' className='w-full text-xl'>
-							Submit
-						</Button>
-					</form>
-					{Object.keys(errors).length ? <p className='text-red-500 mt-2'>Please resolve errors and try again</p> : null}
-				</Form>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='playerCount'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Players dealt in this hand</FormLabel>
+										<Select onValueChange={field.onChange}>
+											<FormControl>
+												<SelectTrigger className='w-48'>
+													<SelectValue placeholder='Select a number' />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value='2'>2</SelectItem>
+												<SelectItem value='3'>3</SelectItem>
+												<SelectItem value='4'>4</SelectItem>
+												<SelectItem value='5'>5</SelectItem>
+												<SelectItem value='6'>6</SelectItem>
+												<SelectItem value='7'>7</SelectItem>
+												<SelectItem value='8'>8</SelectItem>
+												<SelectItem value='9'>9</SelectItem>
+												<SelectItem value='10'>10</SelectItem>
+												<SelectItem value='11'>11</SelectItem>
+												<SelectItem value='12'>12</SelectItem>
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='position'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Your position relative to the small blind (1)</FormLabel>
+										<Select onValueChange={field.onChange}>
+											<FormControl>
+												<SelectTrigger className='w-48'>
+													<SelectValue placeholder='Select a number' />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{Array.from({ length: watchPlayerCount }).map((_, i) => {
+													const position = i + 1
+													const label = positionLabels.get(position)
+													return (
+														<SelectItem key={`position_choice_${position}`} value={position.toString()}>
+															{position}
+															{label && ` (${label})`}
+														</SelectItem>
+													)
+												})}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='smallBlind'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Small Blind</FormLabel>
+										<FormControl className='w-48'>
+											<Input {...field} type='number' />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='bigBlind'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Big Blind</FormLabel>
+										<FormControl className='w-48'>
+											<Input {...field} type='number' />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='ante'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Ante</FormLabel>
+										<FormControl className='w-48'>
+											<Input {...field} type='number' />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='bigBlindAnte'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Big Blind Ante</FormLabel>
+										<FormControl className='w-48'>
+											<Input {...field} type='number' />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='myStack'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Your stack size at the beginning of the hand</FormLabel>
+										<FormControl className='w-48'>
+											<Input {...field} type='number' />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='notes'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Notes</FormLabel>
+										<FormControl>
+											<Textarea {...field} />
+										</FormControl>
+										<FormDescription>
+											Additional information outside of the hard facts to provide to the AI model. Include player
+											styles, history, or simply set the stage for the hand.{' '}
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<CardGroupInput round={0} />
+
+							<Button type='submit' className='w-full text-xl'>
+								Submit
+							</Button>
+						</form>
+						{Object.keys(errors).length ? (
+							<p className='text-red-500 mt-2'>Please resolve errors and try again</p>
+						) : null}
+					</Form>
+				</FormProvider>
 			</div>
 		</main>
 	)

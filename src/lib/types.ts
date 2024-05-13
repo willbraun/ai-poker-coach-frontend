@@ -76,3 +76,5 @@ export interface PotAction {
 	potIndex: number
 	bet: number
 }
+
+export type validRounds = 0 | 1 | 2 | 3 | 4
