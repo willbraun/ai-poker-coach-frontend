@@ -61,9 +61,11 @@ const CardGroup = ({ round, player }: CardGroupProps) => {
 	return (
 		<div>
 			<FormLabel>{title}</FormLabel>
-			{Array.from({ length: cardCount }).map((_, i) => (
-				<CardInput key={`card_${i}`} cardIndex={i} name={name} />
-			))}
+			<div className='mt-4 flex justify-center gap-4'>
+				{Array.from({ length: cardCount }).map((_, i) => (
+					<CardInput key={`card_${i}`} cardIndex={i} name={name} />
+				))}
+			</div>
 		</div>
 	)
 }
