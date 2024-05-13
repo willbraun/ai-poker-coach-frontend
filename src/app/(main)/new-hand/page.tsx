@@ -34,8 +34,8 @@ const zodCardGroup = z.object({
 	player: z.number().gte(0).lte(12),
 	cards: z.array(
 		z.object({
-			value: z.string(),
-			suit: z.string(),
+			value: z.enum(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']),
+			suit: z.enum(['C', 'D', 'H', 'S']),
 		})
 	),
 	evaluation: z.string(),
@@ -326,7 +326,7 @@ const NewHand = () => {
 								)}
 							/>
 
-							<CardGroupInput round={0} />
+							<CardGroupInput groupSelector={'round0Cards'} />
 
 							<Button type='submit' className='w-full text-xl'>
 								Submit

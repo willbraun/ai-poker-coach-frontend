@@ -8,11 +8,15 @@ import club from '@/lib/images/icons/club.svg'
 import diamond from '@/lib/images/icons/diamond.svg'
 import heart from '@/lib/images/icons/heart.svg'
 import spade from '@/lib/images/icons/spade.svg'
+import { FormLabel } from './ui/form'
 
-const CardInput = ({ cardIndex, name }: { cardIndex: number; name: string }) => {
-	const { setValue } = useFormContext()
+const CardInput = ({ cardIndex, groupSelector }: { cardIndex: number; groupSelector: string }) => {
+	const { setValue, watch } = useFormContext()
 
-	// setValue(`${name}.cards.${cardIndex}`, { value: newValue, suit: newSuit })
+	const cardSelector = `${groupSelector}.cards.${cardIndex}`
+	const card = watch(cardSelector)
+
+	const setSuit = (suit: string) => setValue(cardSelector, { ...card, suit })
 
 	return (
 		<Popover>
@@ -22,10 +26,10 @@ const CardInput = ({ cardIndex, name }: { cardIndex: number; name: string }) => 
 				</div>
 			</PopoverTrigger>
 			<PopoverContent className='flex gap-4'>
-				<div className='w-1/2 text-center flex flex-col'>
-					<p className='mb-6'>Value</p>
+				<div className='w-1/2 text-center flex flex-col gap-4'>
+					<FormLabel>Value</FormLabel>
 					<div className=''>
-						<Select>
+						<Select value={card?.value ?? ''} onValueChange={value => setValue(cardSelector, { ...card, value })}>
 							<SelectTrigger>
 								<SelectValue />
 							</SelectTrigger>
@@ -47,20 +51,38 @@ const CardInput = ({ cardIndex, name }: { cardIndex: number; name: string }) => 
 						</Select>
 					</div>
 				</div>
-				<div className='w-1/2 text-center'>
-					<p className='mb-2'>Suit</p>
-					<Button variant='ghost'>
-						<Image src={club} alt='club' />
-					</Button>
-					<Button variant='ghost'>
-						<Image src={diamond} alt='diamond' />
-					</Button>
-					<Button variant='ghost'>
-						<Image src={heart} alt='heart' />
-					</Button>
-					<Button variant='ghost'>
-						<Image src={spade} alt='spade' />
-					</Button>
+				<div className='w-1/2 text-center flex flex-col gap-4'>
+					<FormLabel>Suit</FormLabel>
+					<div className='grid grid-rows-2 grid-cols-2 gap-1'>
+						<Button
+							variant='ghost'
+							className={`p-0 ${card?.suit === 'C' ? 'border-2 border-black' : ''}`}
+							onClick={() => setSuit('C')}
+						>
+							<Image src={club} alt='club' />
+						</Button>
+						<Button
+							variant='ghost'
+							className={`p-0 ${card?.suit === 'D' ? 'border-2 border-black' : ''}`}
+							onClick={() => setSuit('D')}
+						>
+							<Image src={diamond} alt='diamond' />
+						</Button>
+						<Button
+							variant='ghost'
+							className={`p-0 ${card?.suit === 'H' ? 'border-2 border-black' : ''}`}
+							onClick={() => setSuit('H')}
+						>
+							<Image src={heart} alt='heart' />
+						</Button>
+						<Button
+							variant='ghost'
+							className={`p-0 ${card?.suit === 'S' ? 'border-2 border-black' : ''}`}
+							onClick={() => setSuit('S')}
+						>
+							<Image src={spade} alt='spade' />
+						</Button>
+					</div>
 				</div>
 			</PopoverContent>
 		</Popover>
