@@ -49,7 +49,7 @@ const getDetails = (groupSelector: string, player?: number): roundDetails => {
 }
 
 const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
-	const { getValues, setValue } = useFormContext()
+	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues()
 
 	const { title, cardCount } = getDetails(groupSelector)
@@ -57,16 +57,25 @@ const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 		setValue(`${groupSelector}.player`, player ?? values.position)
 	}, [groupSelector, player, setValue, values.position])
 
+	const group = watch(groupSelector)
+	if (
+		group?.cards.length === cardCount &&
+		group?.cards.every((card: { value: string; suit: string }) => card?.value && card?.suit)
+	) {
+		console.log('all cards entered')
+	}
+
 	// watch round, load this once all cards are entered
 	// setValue(`${name}.evaluation`, 'test evaluation')
 
 	return (
 		<div>
 			<FormLabel>{title}</FormLabel>
-			<div className='mt-4 flex justify-center gap-4'>
+			<div className='mt-4 flex items-center gap-4'>
 				{Array.from({ length: cardCount }).map((_, i) => (
 					<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} />
 				))}
+				<p className='ml-auto'>evaluation</p>
 			</div>
 		</div>
 	)

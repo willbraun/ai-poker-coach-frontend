@@ -64,28 +64,28 @@ const CardInput = ({ cardIndex, groupSelector }: { cardIndex: number; groupSelec
 							className={`p-0 ${card?.suit === 'C' ? 'border-2 border-black' : ''}`}
 							onClick={() => setSuit('C')}
 						>
-							<Image src={club} alt='club' />
+							<Image src={club} alt='club' width={24} />
 						</Button>
 						<Button
 							variant='ghost'
 							className={`p-0 ${card?.suit === 'D' ? 'border-2 border-black' : ''}`}
 							onClick={() => setSuit('D')}
 						>
-							<Image src={diamond} alt='diamond' />
+							<Image src={diamond} alt='diamond' width={24} />
 						</Button>
 						<Button
 							variant='ghost'
 							className={`p-0 ${card?.suit === 'H' ? 'border-2 border-black' : ''}`}
 							onClick={() => setSuit('H')}
 						>
-							<Image src={heart} alt='heart' />
+							<Image src={heart} alt='heart' width={24} />
 						</Button>
 						<Button
 							variant='ghost'
 							className={`p-0 ${card?.suit === 'S' ? 'border-2 border-black' : ''}`}
 							onClick={() => setSuit('S')}
 						>
-							<Image src={spade} alt='spade' />
+							<Image src={spade} alt='spade' width={24} />
 						</Button>
 					</div>
 				</div>
