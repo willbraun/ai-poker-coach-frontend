@@ -9,6 +9,7 @@ import diamond from '@/lib/images/icons/diamond.svg'
 import heart from '@/lib/images/icons/heart.svg'
 import spade from '@/lib/images/icons/spade.svg'
 import { FormLabel } from './ui/form'
+import LargeCard from './LargeCard'
 
 const CardInput = ({ cardIndex, groupSelector }: { cardIndex: number; groupSelector: string }) => {
 	const { setValue, watch } = useFormContext()
@@ -21,9 +22,13 @@ const CardInput = ({ cardIndex, groupSelector }: { cardIndex: number; groupSelec
 	return (
 		<Popover>
 			<PopoverTrigger>
-				<div className='w-20 h-32 border-dashed border-1 border-black rounded-lg flex justify-center items-center bg-slate-200 hover:brightness-105 hover:cursor-pointer'>
-					<Plus size='40px' />
-				</div>
+				{card?.value && card?.suit ? (
+					<LargeCard value={card.value} suit={card.suit} />
+				) : (
+					<div className='w-24 h-36 border-dashed border-1 border-black rounded-lg flex justify-center items-center bg-slate-200 hover:brightness-105 hover:cursor-pointer'>
+						<Plus size='40px' />
+					</div>
+				)}
 			</PopoverTrigger>
 			<PopoverContent className='flex gap-4'>
 				<div className='w-1/2 text-center flex flex-col gap-4'>

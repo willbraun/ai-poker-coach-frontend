@@ -52,7 +52,6 @@ const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 	const { getValues, setValue } = useFormContext()
 	const values = getValues()
 
-	// const name = `round${round}Cards`
 	const { title, cardCount } = getDetails(groupSelector)
 	useEffect(() => {
 		setValue(`${groupSelector}.player`, player ?? values.position)

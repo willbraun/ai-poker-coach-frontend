@@ -136,7 +136,7 @@ const NewHand = () => {
 
 	return (
 		<main className='mt-24'>
-			<div className='max-w-screen-sm mx-auto pb-16'>
+			<div className='max-w-screen-sm mx-auto pb-16 px-4'>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
