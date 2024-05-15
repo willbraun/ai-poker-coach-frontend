@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
 import { useEffect } from 'react'
+import ActionInput from '@/components/ActionInput'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -144,6 +145,24 @@ const NewHand = () => {
 		setValue('round3Cards.player', watchPosition)
 	}, [watchPosition, setValue])
 
+	const addAction = (selector: 'round0Actions' | 'round1Actions' | 'round2Actions' | 'round3Actions') => {
+		const actions = form.getValues(selector)
+		// next available player
+		actions.push({
+			player: 2,
+			decision: 0,
+			bet: 0,
+		})
+		form.setValue(selector, actions)
+	}
+
+	// first action in a round
+	useEffect(() => {
+		setValue('round0Actions.0.player', 2)
+		setValue('round0Actions.0.decision', 0)
+		setValue('round0Actions.0.bet', 0)
+	}, [])
+
 	return (
 		<main className='mt-24'>
 			<div className='max-w-screen-sm mx-auto pb-16 px-4'>
@@ -180,13 +199,13 @@ const NewHand = () => {
 													<FormControl>
 														<RadioGroupItem value='0' />
 													</FormControl>
-													<FormLabel className='font-normal'>Tournament</FormLabel>
+													<p className='font-normal'>Tournament</p>
 												</FormItem>
 												<FormItem className='flex items-center space-x-3 space-y-0'>
 													<FormControl>
 														<RadioGroupItem value='1' />
 													</FormControl>
-													<FormLabel className='font-normal'>Cash Game</FormLabel>
+													<p className='font-normal'>Cash Game</p>
 												</FormItem>
 											</RadioGroup>
 										</FormControl>
@@ -202,7 +221,7 @@ const NewHand = () => {
 										<FormLabel>Players dealt in this hand</FormLabel>
 										<Select onValueChange={field.onChange}>
 											<FormControl>
-												<SelectTrigger className='w-48'>
+												<SelectTrigger className='w-1/2'>
 													<SelectValue placeholder='Select a number' />
 												</SelectTrigger>
 											</FormControl>
@@ -232,7 +251,7 @@ const NewHand = () => {
 										<FormLabel>Your position relative to the small blind (1)</FormLabel>
 										<Select onValueChange={field.onChange}>
 											<FormControl>
-												<SelectTrigger className='w-48'>
+												<SelectTrigger className='w-1/2'>
 													<SelectValue placeholder='Select a number' />
 												</SelectTrigger>
 											</FormControl>
@@ -259,7 +278,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Small Blind</FormLabel>
-										<FormControl className='w-48'>
+										<FormControl className='w-1/2'>
 											<Input {...field} type='number' />
 										</FormControl>
 										<FormMessage />
@@ -272,7 +291,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Big Blind</FormLabel>
-										<FormControl className='w-48'>
+										<FormControl className='w-1/2'>
 											<Input {...field} type='number' />
 										</FormControl>
 										<FormMessage />
@@ -285,7 +304,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Ante</FormLabel>
-										<FormControl className='w-48'>
+										<FormControl className='w-1/2'>
 											<Input {...field} type='number' />
 										</FormControl>
 										<FormMessage />
@@ -298,7 +317,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Big Blind Ante</FormLabel>
-										<FormControl className='w-48'>
+										<FormControl className='w-1/2'>
 											<Input {...field} type='number' />
 										</FormControl>
 										<FormMessage />
@@ -311,7 +330,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Your stack size at the beginning of the hand</FormLabel>
-										<FormControl className='w-48'>
+										<FormControl className='w-1/2'>
 											<Input {...field} type='number' />
 										</FormControl>
 										<FormMessage />
@@ -336,7 +355,11 @@ const NewHand = () => {
 								)}
 							/>
 
-							<CardGroupInput groupSelector={'round0Cards'} player={form.getValues().position} />
+							<CardGroupInput groupSelector={'round0Cards'} />
+
+							<ActionInput selector={'round0Actions.0'} player={2} />
+
+							{/* <Button onClick={() => addAction('round0Actions')}>Next Action</Button> */}
 
 							<Button type='submit' className='w-full text-xl'>
 								Submit

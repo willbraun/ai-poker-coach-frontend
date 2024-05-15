@@ -5,7 +5,6 @@ import { useEffect } from 'react'
 
 interface CardGroupProps {
 	groupSelector: string
-	player?: number
 }
 
 interface roundDetails {
@@ -69,7 +68,7 @@ const evaluateHand = async (cards: string[]) => {
 	}
 }
 
-const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
+const CardGroup = ({ groupSelector }: CardGroupProps) => {
 	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues()
 	const { title, cardCount } = getDetails(groupSelector)
@@ -100,7 +99,7 @@ const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 	return (
 		<div>
 			<FormLabel>{title}</FormLabel>
-			<div className='mt-4 flex items-center gap-4'>
+			<div className='mt-4 mb-8 flex items-center gap-4'>
 				{Array.from({ length: cardCount }).map((_, i) => (
 					<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} />
 				))}
