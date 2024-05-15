@@ -1,6 +1,5 @@
 import { useFormContext } from 'react-hook-form'
 import { FormLabel } from '@/components/ui/form'
-import { validRounds } from '@/lib/types'
 import CardInput from './CardInput'
 import { useEffect } from 'react'
 
@@ -48,25 +47,55 @@ const getDetails = (groupSelector: string, player?: number): roundDetails => {
 	}
 }
 
+const evaluateHand = async (cards: string[]) => {
+	try {
+		const response = await fetch('/api/evaluateHand', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ cards }),
+		})
+
+		if (!response.ok) {
+			throw new Error('Error evaluating hand')
+		}
+
+		const data = await response.json()
+		return data.result
+	} catch (error) {
+		console.error(error)
+		return 'error'
+	}
+}
+
 const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues()
-
 	const { title, cardCount } = getDetails(groupSelector)
-	useEffect(() => {
-		setValue(`${groupSelector}.player`, player ?? values.position)
-	}, [groupSelector, player, setValue, values.position])
 
 	const group = watch(groupSelector)
-	if (
-		group?.cards.length === cardCount &&
-		group?.cards.every((card: { value: string; suit: string }) => card?.value && card?.suit)
-	) {
-		console.log('all cards entered')
-	}
 
-	// watch round, load this once all cards are entered
-	// setValue(`${name}.evaluation`, 'test evaluation')
+	useEffect(() => {
+		;(async () => {
+			if (
+				group?.cards.length === cardCount &&
+				group?.cards.every((card: { value: string; suit: string }) => card?.value && card?.suit)
+			) {
+				const evalInput: string[] = Object.entries(values)
+					.filter(([key, _]) => key.startsWith('round') && key.endsWith('Cards'))
+					.flatMap(([_, group]) =>
+						group.cards.map((card: { value: string; suit: string }) => {
+							return `${card.value}${card.suit}`
+						})
+					)
+				const evaluation = await evaluateHand(evalInput)
+
+				setValue(`${groupSelector}.evaluation`, evaluation.handName)
+			}
+		})()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [JSON.stringify(group?.cards)])
 
 	return (
 		<div>
@@ -75,7 +104,7 @@ const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 				{Array.from({ length: cardCount }).map((_, i) => (
 					<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} />
 				))}
-				<p className='ml-auto'>evaluation</p>
+				<p className='ml-auto'>{group.evaluation}</p>
 			</div>
 		</div>
 	)

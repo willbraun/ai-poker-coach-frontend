@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
+import { useEffect } from 'react'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -114,6 +115,7 @@ const NewHand = () => {
 	const {
 		control,
 		handleSubmit,
+		setValue,
 		formState: { errors },
 		watch,
 	} = form
@@ -133,6 +135,14 @@ const NewHand = () => {
 	if (watchPlayerCount > 3) {
 		positionLabels.set(watchPlayerCount - 1, 'cutoff')
 	}
+
+	const watchPosition = Number(watch('position'))
+	useEffect(() => {
+		setValue('round0Cards.player', watchPosition)
+		setValue('round1Cards.player', watchPosition)
+		setValue('round2Cards.player', watchPosition)
+		setValue('round3Cards.player', watchPosition)
+	}, [watchPosition, setValue])
 
 	return (
 		<main className='mt-24'>
@@ -326,7 +336,7 @@ const NewHand = () => {
 								)}
 							/>
 
-							<CardGroupInput groupSelector={'round0Cards'} />
+							<CardGroupInput groupSelector={'round0Cards'} player={form.getValues().position} />
 
 							<Button type='submit' className='w-full text-xl'>
 								Submit
