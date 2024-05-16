@@ -11,8 +11,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
+import { ActionSelector, PlayerStatus } from '@/lib/types'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -113,9 +114,12 @@ const NewHand = () => {
 		},
 	})
 
+	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
+
 	const {
 		control,
 		handleSubmit,
+		getValues,
 		setValue,
 		formState: { errors },
 		watch,
@@ -123,7 +127,11 @@ const NewHand = () => {
 
 	const methods = useForm()
 
+	const watchSmallBlind = watch('smallBlind')
+	const watchBigBlind = watch('bigBlind')
 	const watchPlayerCount = Number(watch('playerCount'))
+	const watchPosition = Number(watch('position'))
+	const watchRound0Actions = watch('round0Actions')
 
 	const positionLabels = new Map<number, string>([
 		[1, 'small blind'],
@@ -137,7 +145,6 @@ const NewHand = () => {
 		positionLabels.set(watchPlayerCount - 1, 'cutoff')
 	}
 
-	const watchPosition = Number(watch('position'))
 	useEffect(() => {
 		setValue('round0Cards.player', watchPosition)
 		setValue('round1Cards.player', watchPosition)
@@ -145,23 +152,53 @@ const NewHand = () => {
 		setValue('round3Cards.player', watchPosition)
 	}, [watchPosition, setValue])
 
+	useEffect(() => {
+		setValue('round0Actions.0.player', 1)
+		setValue('round0Actions.0.decision', 3)
+		setValue('round0Actions.0.bet', watchSmallBlind)
+	}, [watchSmallBlind, setValue])
+
+	useEffect(() => {
+		setValue('round0Actions.1.player', 2)
+		setValue('round0Actions.1.decision', 3)
+		setValue('round0Actions.1.bet', watchBigBlind)
+
+		const underTheGun = watchPlayerCount === 2 ? 1 : 3
+		setValue('round0Actions.2.player', underTheGun)
+		setValue('round0Actions.2.decision', 0)
+		setValue('round0Actions.2.bet', 0)
+	}, [watchBigBlind, watchPlayerCount, setValue])
+
 	const addAction = (selector: 'round0Actions' | 'round1Actions' | 'round2Actions' | 'round3Actions') => {
+		console.log('before', playerStatus)
 		const actions = form.getValues(selector)
-		// next available player
+		const lastAction = actions.at(-1)
+		if (!lastAction) return
+
+		let nextPlayer = lastAction.player
+		do {
+			nextPlayer++
+			if (nextPlayer > watchPlayerCount) {
+				nextPlayer = 1
+			}
+		} while (playerStatus[nextPlayer] === 'folded')
+
+		console.log(getValues())
+
+		setPlayerStatus({
+			...playerStatus,
+			[lastAction.player]: lastAction.decision === 0 ? 'folded' : 'active',
+			[nextPlayer]: 'current',
+		})
+
 		actions.push({
-			player: 2,
+			player: nextPlayer,
 			decision: 0,
 			bet: 0,
 		})
 		form.setValue(selector, actions)
+		console.log('after', playerStatus)
 	}
-
-	// first action in a round
-	useEffect(() => {
-		setValue('round0Actions.0.player', 2)
-		setValue('round0Actions.0.decision', 0)
-		setValue('round0Actions.0.bet', 0)
-	}, [])
 
 	return (
 		<main className='mt-24'>
@@ -357,9 +394,14 @@ const NewHand = () => {
 
 							<CardGroupInput groupSelector={'round0Cards'} />
 
-							<ActionInput selector={'round0Actions.0'} player={2} />
+							<p>{`Player 1 bet ${watchSmallBlind} as the small blind`}</p>
+							<p>{`Player 2 bet ${watchBigBlind} as the big blind`}</p>
 
-							{/* <Button onClick={() => addAction('round0Actions')}>Next Action</Button> */}
+							{watchRound0Actions.slice(2).map((action, index) => (
+								<ActionInput key={index} selector={`round0Actions.${index + 2}`} player={action.player} />
+							))}
+
+							<Button onClick={() => addAction('round0Actions')}>Next Action</Button>
 
 							<Button type='submit' className='w-full text-xl'>
 								Submit

@@ -9,13 +9,13 @@ interface ActionInputProps {
 }
 
 const ActionInput = ({ selector, player }: ActionInputProps) => {
-	const { getValues, setValue, watch, control } = useFormContext()
+	const { setValue, watch, control } = useFormContext()
 	const decision = watch(`${selector}.decision`)
-	const values = getValues()
-	console.log(values)
+
+	console.log(watch(`${selector}.bet`))
 
 	const onChange = (value: string) => {
-		setValue(`${selector}.decision`, value)
+		setValue(`${selector}.decision`, value ?? 0)
 		if (['0', '1'].includes(value)) {
 			setValue(`${selector}.bet`, 0)
 		}
@@ -26,7 +26,6 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 			<FormLabel>{`What did player ${player} do?`}</FormLabel>
 			<div className='mt-4 grid grid-rows-1 grid-cols-2'>
 				<div>
-					<p className='mb-4'>Action</p>
 					<FormControl>
 						<RadioGroup onValueChange={onChange} defaultValue={'0'} className='flex flex-col space-y-1'>
 							<FormItem className='flex items-center space-x-3 space-y-0'>
@@ -75,7 +74,7 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 					</FormControl>
 				</div>
 				<div>
-					<p className='mb-4'>Bet Size</p>
+					<p className='mb-2'>Bet Size</p>
 					<FormField
 						control={control}
 						name={`${selector}.bet`}
