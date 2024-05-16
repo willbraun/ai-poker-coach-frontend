@@ -1,6 +1,7 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 interface ActionInputProps {
@@ -11,8 +12,6 @@ interface ActionInputProps {
 const ActionInput = ({ selector, player }: ActionInputProps) => {
 	const { setValue, watch, control } = useFormContext()
 	const decision = watch(`${selector}.decision`)
-
-	console.log(watch(`${selector}.bet`))
 
 	const onChange = (value: string) => {
 		setValue(`${selector}.decision`, value ?? 0)

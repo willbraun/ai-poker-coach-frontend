@@ -3,7 +3,7 @@
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { FormProvider, useForm } from 'react-hook-form'
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
@@ -91,7 +91,23 @@ const NewHand = () => {
 				cards: [],
 				evaluation: '',
 			},
-			round0Actions: [],
+			round0Actions: [
+				{
+					player: 1,
+					decision: 3,
+					bet: 0,
+				},
+				{
+					player: 2,
+					decision: 3,
+					bet: 0,
+				},
+				{
+					player: 3,
+					decision: 0,
+					bet: 0,
+				},
+			],
 			round1Cards: {
 				player: 0,
 				cards: [],
@@ -125,65 +141,82 @@ const NewHand = () => {
 		watch,
 	} = form
 
+	const round0ActionsFA = useFieldArray({
+		control,
+		name: 'round0Actions',
+	})
+
+	const round1ActionsFA = useFieldArray({
+		control,
+		name: 'round1Actions',
+	})
+
+	const round2ActionsFA = useFieldArray({
+		control,
+		name: 'round2Actions',
+	})
+
+	const round3ActionsFA = useFieldArray({
+		control,
+		name: 'round3Actions',
+	})
+
+	const fieldArrayMap = {
+		round0Actions: round0ActionsFA,
+		round1Actions: round1ActionsFA,
+		round2Actions: round2ActionsFA,
+		round3Actions: round3ActionsFA,
+	}
+
 	const methods = useForm()
 
-	const watchSmallBlind = watch('smallBlind')
-	const watchBigBlind = watch('bigBlind')
-	const watchPlayerCount = Number(watch('playerCount'))
-	const watchPosition = Number(watch('position'))
-	const watchRound0Actions = watch('round0Actions')
+	const smallBlind = watch('smallBlind')
+	const bigBlind = watch('bigBlind')
+	const playerCount = Number(watch('playerCount'))
+	const position = Number(watch('position'))
 
 	const positionLabels = new Map<number, string>([
 		[1, 'small blind'],
 		[2, 'big blind'],
 	])
 
-	if (watchPlayerCount > 2) {
-		positionLabels.set(watchPlayerCount, 'button')
+	if (playerCount > 2) {
+		positionLabels.set(playerCount, 'button')
 	}
-	if (watchPlayerCount > 3) {
-		positionLabels.set(watchPlayerCount - 1, 'cutoff')
+	if (playerCount > 3) {
+		positionLabels.set(playerCount - 1, 'cutoff')
 	}
 
-	useEffect(() => {
-		setValue('round0Cards.player', watchPosition)
-		setValue('round1Cards.player', watchPosition)
-		setValue('round2Cards.player', watchPosition)
-		setValue('round3Cards.player', watchPosition)
-	}, [watchPosition, setValue])
+	// useEffect(() => {
+	// 	setValue('round0Cards.player', position)
+	// 	setValue('round1Cards.player', position)
+	// 	setValue('round2Cards.player', position)
+	// 	setValue('round3Cards.player', position)
+	// }, [position, setValue])
 
-	useEffect(() => {
-		setValue('round0Actions.0.player', 1)
-		setValue('round0Actions.0.decision', 3)
-		setValue('round0Actions.0.bet', watchSmallBlind)
-	}, [watchSmallBlind, setValue])
+	// useEffect(() => {
+	// 	setValue('round0Actions.0.bet', smallBlind ?? 0)
+	// }, [smallBlind, setValue])
 
-	useEffect(() => {
-		setValue('round0Actions.1.player', 2)
-		setValue('round0Actions.1.decision', 3)
-		setValue('round0Actions.1.bet', watchBigBlind)
+	// useEffect(() => {
+	// 	setValue('round0Actions.1.bet', bigBlind ?? 0)
 
-		const underTheGun = watchPlayerCount === 2 ? 1 : 3
-		setValue('round0Actions.2.player', underTheGun)
-		setValue('round0Actions.2.decision', 0)
-		setValue('round0Actions.2.bet', 0)
-	}, [watchBigBlind, watchPlayerCount, setValue])
+	// 	const underTheGun = playerCount === 2 ? 1 : 3
+	// 	setValue('round0Actions.2.player', underTheGun)
+	// }, [bigBlind, playerCount, setValue])
 
-	const addAction = (selector: 'round0Actions' | 'round1Actions' | 'round2Actions' | 'round3Actions') => {
-		console.log('before', playerStatus)
-		const actions = form.getValues(selector)
+	const addAction = (selector: ActionSelector) => {
+		const actions = fieldArrayMap[selector].fields
 		const lastAction = actions.at(-1)
 		if (!lastAction) return
 
 		let nextPlayer = lastAction.player
 		do {
 			nextPlayer++
-			if (nextPlayer > watchPlayerCount) {
+			if (nextPlayer > playerCount) {
 				nextPlayer = 1
 			}
 		} while (playerStatus[nextPlayer] === 'folded')
-
-		console.log(getValues())
 
 		setPlayerStatus({
 			...playerStatus,
@@ -191,14 +224,18 @@ const NewHand = () => {
 			[nextPlayer]: 'current',
 		})
 
-		actions.push({
+		fieldArrayMap[selector].append({
 			player: nextPlayer,
 			decision: 0,
 			bet: 0,
 		})
-		form.setValue(selector, actions)
-		console.log('after', playerStatus)
 	}
+	const test = watch('round0Actions.2.bet')
+	useEffect(() => {
+		console.log('round0Actions.2.bet is now:', test)
+		const values = getValues()
+		console.log(values.round0Actions[2])
+	}, [test])
 
 	return (
 		<main className='mt-24'>
@@ -293,7 +330,7 @@ const NewHand = () => {
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{Array.from({ length: watchPlayerCount }).map((_, i) => {
+												{Array.from({ length: playerCount }).map((_, i) => {
 													const position = i + 1
 													const label = positionLabels.get(position)
 													return (
@@ -394,10 +431,10 @@ const NewHand = () => {
 
 							<CardGroupInput groupSelector={'round0Cards'} />
 
-							<p>{`Player 1 bet ${watchSmallBlind} as the small blind`}</p>
-							<p>{`Player 2 bet ${watchBigBlind} as the big blind`}</p>
+							<p>{`Player 1 bet ${smallBlind} as the small blind`}</p>
+							<p>{`Player 2 bet ${bigBlind} as the big blind`}</p>
 
-							{watchRound0Actions.slice(2).map((action, index) => (
+							{fieldArrayMap['round0Actions'].fields.slice(2).map((action, index) => (
 								<ActionInput key={index} selector={`round0Actions.${index + 2}`} player={action.player} />
 							))}
 
