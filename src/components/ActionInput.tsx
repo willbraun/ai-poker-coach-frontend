@@ -1,7 +1,6 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 interface ActionInputProps {
@@ -16,7 +15,7 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 	const onChange = (value: string) => {
 		setValue(`${selector}.decision`, value ?? 0)
 		if (['0', '1'].includes(value)) {
-			setValue(`${selector}.bet`, 0)
+			setValue(`${selector}.bet`, '0')
 		}
 	}
 
@@ -77,12 +76,10 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 					<FormField
 						control={control}
 						name={`${selector}.bet`}
-						defaultValue={0}
-						disabled={[0, 1].includes(parseInt(decision))}
 						render={({ field }) => (
 							<FormItem>
 								<FormControl>
-									<Input {...field} type='number' />
+									<Input {...field} type='number' disabled={[0, 1].includes(parseInt(decision))} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>

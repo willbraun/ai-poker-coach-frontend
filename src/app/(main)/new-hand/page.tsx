@@ -137,6 +137,7 @@ const NewHand = () => {
 		handleSubmit,
 		getValues,
 		setValue,
+		getFieldState,
 		formState: { errors },
 		watch,
 	} = form
@@ -187,23 +188,23 @@ const NewHand = () => {
 		positionLabels.set(playerCount - 1, 'cutoff')
 	}
 
-	// useEffect(() => {
-	// 	setValue('round0Cards.player', position)
-	// 	setValue('round1Cards.player', position)
-	// 	setValue('round2Cards.player', position)
-	// 	setValue('round3Cards.player', position)
-	// }, [position, setValue])
+	useEffect(() => {
+		setValue('round0Cards.player', position)
+		setValue('round1Cards.player', position)
+		setValue('round2Cards.player', position)
+		setValue('round3Cards.player', position)
+	}, [position, setValue])
 
-	// useEffect(() => {
-	// 	setValue('round0Actions.0.bet', smallBlind ?? 0)
-	// }, [smallBlind, setValue])
+	useEffect(() => {
+		setValue('round0Actions.0.bet', smallBlind ?? 0)
+	}, [smallBlind, setValue])
 
-	// useEffect(() => {
-	// 	setValue('round0Actions.1.bet', bigBlind ?? 0)
+	useEffect(() => {
+		setValue('round0Actions.1.bet', bigBlind ?? 0)
 
-	// 	const underTheGun = playerCount === 2 ? 1 : 3
-	// 	setValue('round0Actions.2.player', underTheGun)
-	// }, [bigBlind, playerCount, setValue])
+		const underTheGun = playerCount === 2 ? 1 : 3
+		setValue('round0Actions.2.player', underTheGun)
+	}, [bigBlind, playerCount, setValue])
 
 	const addAction = (selector: ActionSelector) => {
 		const actions = fieldArrayMap[selector].fields
@@ -218,24 +219,18 @@ const NewHand = () => {
 			}
 		} while (playerStatus[nextPlayer] === 'folded')
 
-		setPlayerStatus({
-			...playerStatus,
-			[lastAction.player]: lastAction.decision === 0 ? 'folded' : 'active',
-			[nextPlayer]: 'current',
-		})
-
 		fieldArrayMap[selector].append({
 			player: nextPlayer,
 			decision: 0,
 			bet: 0,
 		})
+
+		setPlayerStatus({
+			...playerStatus,
+			[lastAction.player]: lastAction.decision === 0 ? 'folded' : 'active',
+			[nextPlayer]: 'current',
+		})
 	}
-	const test = watch('round0Actions.2.bet')
-	useEffect(() => {
-		console.log('round0Actions.2.bet is now:', test)
-		const values = getValues()
-		console.log(values.round0Actions[2])
-	}, [test])
 
 	return (
 		<main className='mt-24'>
@@ -435,10 +430,15 @@ const NewHand = () => {
 							<p>{`Player 2 bet ${bigBlind} as the big blind`}</p>
 
 							{fieldArrayMap['round0Actions'].fields.slice(2).map((action, index) => (
-								<ActionInput key={index} selector={`round0Actions.${index + 2}`} player={action.player} />
+								<ActionInput key={action.id} selector={`round0Actions.${index + 2}`} player={action.player} />
 							))}
 
-							<Button onClick={() => addAction('round0Actions')}>Next Action</Button>
+							<Button type='button' onClick={() => addAction('round0Actions')}>
+								Next Action
+							</Button>
+							<Button type='button' onClick={() => console.log(getValues())}>
+								console.log()
+							</Button>
 
 							<Button type='submit' className='w-full text-xl'>
 								Submit
