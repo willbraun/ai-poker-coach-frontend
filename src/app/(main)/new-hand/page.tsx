@@ -14,6 +14,8 @@ import CardGroupInput from '@/components/CardGroupInput'
 import { useEffect, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus } from '@/lib/types'
+import { add } from 'date-fns'
+import { isZeroBet } from '@/lib/utils'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -46,7 +48,7 @@ const zodCardGroup = z.object({
 
 const zodAction = z.object({
 	player: z.number().gte(0).lte(12),
-	decision: z.number().gte(0).lte(6),
+	decision: z.enum(['', 'fold', 'check', 'call', 'bet', 'raise', 'callAllIn', 'betAllIn']),
 	bet: zodNumber,
 })
 
@@ -94,17 +96,17 @@ const NewHand = () => {
 			round0Actions: [
 				{
 					player: 1,
-					decision: 3,
+					decision: 'bet',
 					bet: 0,
 				},
 				{
 					player: 2,
-					decision: 3,
+					decision: 'bet',
 					bet: 0,
 				},
 				{
 					player: 3,
-					decision: 0,
+					decision: '',
 					bet: 0,
 				},
 			],
@@ -137,9 +139,9 @@ const NewHand = () => {
 		handleSubmit,
 		getValues,
 		setValue,
-		getFieldState,
 		formState: { errors },
 		watch,
+		trigger,
 	} = form
 
 	const round0ActionsFA = useFieldArray({
@@ -206,10 +208,13 @@ const NewHand = () => {
 		setValue('round0Actions.2.player', underTheGun)
 	}, [bigBlind, playerCount, setValue])
 
-	const addAction = (selector: ActionSelector) => {
-		const actions = fieldArrayMap[selector].fields
+	const addAction = async (selector: ActionSelector) => {
+		const actions = getValues(selector)
 		const lastAction = actions.at(-1)
 		if (!lastAction) return
+
+		const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
+		if (!valid) return
 
 		let nextPlayer = lastAction.player
 		do {
@@ -221,15 +226,29 @@ const NewHand = () => {
 
 		fieldArrayMap[selector].append({
 			player: nextPlayer,
-			decision: 0,
+			decision: '',
 			bet: 0,
 		})
 
 		setPlayerStatus({
 			...playerStatus,
-			[lastAction.player]: lastAction.decision === 0 ? 'folded' : 'active',
+			[lastAction.player]: lastAction.decision === 'fold' ? 'folded' : 'active',
 			[nextPlayer]: 'current',
 		})
+	}
+
+	const isNextDisabled = (selector: ActionSelector) => {
+		const actions = getValues(selector)
+		const lastAction = actions.at(-1)
+		if (!lastAction?.decision) {
+			return true
+		}
+
+		if (isZeroBet(lastAction.decision)) {
+			return false
+		} else {
+			return Number(lastAction.bet) === 0
+		}
 	}
 
 	return (
@@ -433,7 +452,11 @@ const NewHand = () => {
 								<ActionInput key={action.id} selector={`round0Actions.${index + 2}`} player={action.player} />
 							))}
 
-							<Button type='button' onClick={() => addAction('round0Actions')}>
+							<Button
+								type='button'
+								onClick={() => addAction('round0Actions')}
+								disabled={isNextDisabled('round0Actions')}
+							>
 								Next Action
 							</Button>
 							<Button type='button' onClick={() => console.log(getValues())}>

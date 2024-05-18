@@ -25,3 +25,5 @@ export const valueToDisplay: Record<string, string> = {
 	K: 'King',
 	A: 'Ace',
 }
+
+export const isZeroBet = (decision: string) => ['fold', 'check'].includes(decision)
