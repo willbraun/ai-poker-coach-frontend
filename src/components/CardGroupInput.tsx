@@ -2,6 +2,7 @@ import { useFormContext } from 'react-hook-form'
 import { FormLabel } from '@/components/ui/form'
 import CardInput from './CardInput'
 import { useEffect } from 'react'
+import { FormRound } from '@/app/(main)/new-hand/page'
 
 interface CardGroupProps {
 	groupSelector: string
@@ -13,22 +14,22 @@ interface roundDetails {
 }
 
 const getDetails = (groupSelector: string, player?: number): roundDetails => {
-	if (groupSelector === 'round0Cards') {
+	if (groupSelector === 'rounds.0.cards') {
 		return {
 			title: 'Your cards',
 			cardCount: 2,
 		}
-	} else if (groupSelector === 'round1Cards') {
+	} else if (groupSelector === 'rounds.1.cards') {
 		return {
 			title: 'Flop',
 			cardCount: 3,
 		}
-	} else if (groupSelector === 'round2Cards') {
+	} else if (groupSelector === 'rounds.2.cards') {
 		return {
 			title: 'Turn',
 			cardCount: 1,
 		}
-	} else if (groupSelector === 'round3Cards') {
+	} else if (groupSelector === 'rounds.3.cards') {
 		return {
 			title: 'River',
 			cardCount: 1,
@@ -81,13 +82,11 @@ const CardGroup = ({ groupSelector }: CardGroupProps) => {
 				group?.cards.length === cardCount &&
 				group?.cards.every((card: { value: string; suit: string }) => card?.value && card?.suit)
 			) {
-				const evalInput: string[] = Object.entries(values)
-					.filter(([key, _]) => key.startsWith('round') && key.endsWith('Cards'))
-					.flatMap(([_, group]) =>
-						group.cards.map((card: { value: string; suit: string }) => {
-							return `${card.value}${card.suit}`
-						})
-					)
+				const evalInput: string[] = values.rounds.flatMap((round: FormRound) =>
+					round.cards.cards.map(card => {
+						return `${card.value}${card.suit}`
+					})
+				)
 				const evaluation = await evaluateHand(evalInput)
 
 				setValue(`${groupSelector}.evaluation`, evaluation.handName)

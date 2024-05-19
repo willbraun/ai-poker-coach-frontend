@@ -23,7 +23,7 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 
 	const onBetBlur = (event: ChangeEvent<HTMLInputElement>) => {
 		// Regular expression to remove leading zeros only if not followed by a decimal point
-		const trimmedValue = event.target.value.replace(/^0+(?!\.)/, '')
+		const trimmedValue = event.target.value.replace(/^0+(?!\.)/, '') || '0'
 		setValue(`${selector}.bet`, trimmedValue)
 	}
 

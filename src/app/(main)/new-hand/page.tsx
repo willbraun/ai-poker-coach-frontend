@@ -11,10 +11,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
-import { ActionSelector, PlayerStatus } from '@/lib/types'
-import { add } from 'date-fns'
+import { ActionSelector, PlayerStatus, validRound } from '@/lib/types'
 import { isZeroBet } from '@/lib/utils'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
@@ -52,6 +51,13 @@ const zodAction = z.object({
 	bet: zodNumber,
 })
 
+const zodRound = z.object({
+	cards: zodCardGroup,
+	actions: z.array(zodAction),
+})
+
+export type FormRound = z.infer<typeof zodRound>
+
 const FormSchema = z.object({
 	name: z.string(),
 	gameStyle: z.coerce.number().gte(0).lte(1),
@@ -63,14 +69,7 @@ const FormSchema = z.object({
 	bigBlindAnte: zodNumber,
 	myStack: zodNumber,
 	notes: z.string().optional(),
-	round0Cards: zodCardGroup,
-	round0Actions: z.array(zodAction),
-	round1Cards: zodCardGroup,
-	round1Actions: z.array(zodAction),
-	round2Cards: zodCardGroup,
-	round2Actions: z.array(zodAction),
-	round3Cards: zodCardGroup,
-	round3Actions: z.array(zodAction),
+	rounds: z.array(zodRound),
 	villains: z.array(zodCardGroup),
 })
 
@@ -88,51 +87,59 @@ const NewHand = () => {
 			bigBlindAnte: 0,
 			myStack: 0,
 			notes: '',
-			round0Cards: {
-				player: 0,
-				cards: [],
-				evaluation: '',
-			},
-			round0Actions: [
+			rounds: [
 				{
-					player: 1,
-					decision: 'bet',
-					bet: 0,
+					cards: {
+						player: 0,
+						cards: [],
+						evaluation: '',
+					},
+					actions: [
+						{
+							player: 1,
+							decision: 'bet',
+							bet: 0,
+						},
+						{
+							player: 2,
+							decision: 'bet',
+							bet: 0,
+						},
+						{
+							player: 3,
+							decision: '',
+							bet: 0,
+						},
+					],
 				},
 				{
-					player: 2,
-					decision: 'bet',
-					bet: 0,
+					cards: {
+						player: 0,
+						cards: [],
+						evaluation: '',
+					},
+					actions: [],
 				},
 				{
-					player: 3,
-					decision: '',
-					bet: 0,
+					cards: {
+						player: 0,
+						cards: [],
+						evaluation: '',
+					},
+					actions: [],
+				},
+				{
+					cards: {
+						player: 0,
+						cards: [],
+						evaluation: '',
+					},
+					actions: [],
 				},
 			],
-			round1Cards: {
-				player: 0,
-				cards: [],
-				evaluation: '',
-			},
-			round1Actions: [],
-			round2Cards: {
-				player: 0,
-				cards: [],
-				evaluation: '',
-			},
-			round2Actions: [],
-			round3Cards: {
-				player: 0,
-				cards: [],
-				evaluation: '',
-			},
-			round3Actions: [],
 			villains: [],
 		},
 	})
-
-	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
 
 	const {
 		control,
@@ -144,32 +151,32 @@ const NewHand = () => {
 		trigger,
 	} = form
 
+	const [currentRound, setCurrentRound] = useState(0)
+	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
+	const [nextDisabled, setNextDisabled] = useState(true)
+	const [showSubmit, setShowSubmit] = useState(false)
+
 	const round0ActionsFA = useFieldArray({
 		control,
-		name: 'round0Actions',
+		name: 'rounds.0.actions',
 	})
 
 	const round1ActionsFA = useFieldArray({
 		control,
-		name: 'round1Actions',
+		name: 'rounds.1.actions',
 	})
 
 	const round2ActionsFA = useFieldArray({
 		control,
-		name: 'round2Actions',
+		name: 'rounds.2.actions',
 	})
 
 	const round3ActionsFA = useFieldArray({
 		control,
-		name: 'round3Actions',
+		name: 'rounds.3.actions',
 	})
 
-	const fieldArrayMap = {
-		round0Actions: round0ActionsFA,
-		round1Actions: round1ActionsFA,
-		round2Actions: round2ActionsFA,
-		round3Actions: round3ActionsFA,
-	}
+	const fieldArrays = [round0ActionsFA, round1ActionsFA, round2ActionsFA, round3ActionsFA]
 
 	const methods = useForm()
 
@@ -191,50 +198,84 @@ const NewHand = () => {
 	}
 
 	useEffect(() => {
-		setValue('round0Cards.player', position)
-		setValue('round1Cards.player', position)
-		setValue('round2Cards.player', position)
-		setValue('round3Cards.player', position)
+		setValue('rounds.0.cards.player', position)
+		setValue('rounds.1.cards.player', position)
+		setValue('rounds.2.cards.player', position)
+		setValue('rounds.3.cards.player', position)
 	}, [position, setValue])
 
 	useEffect(() => {
-		setValue('round0Actions.0.bet', smallBlind ?? 0)
+		setValue('rounds.0.actions.0.bet', smallBlind ?? 0)
 	}, [smallBlind, setValue])
 
 	useEffect(() => {
-		setValue('round0Actions.1.bet', bigBlind ?? 0)
+		setValue('rounds.0.actions.1.bet', bigBlind ?? 0)
 
 		const underTheGun = playerCount === 2 ? 1 : 3
-		setValue('round0Actions.2.player', underTheGun)
+		setValue('rounds.0.actions.2.player', underTheGun)
+		setPlayerStatus({ [underTheGun]: 'current' })
 	}, [bigBlind, playerCount, setValue])
 
-	const addAction = async (selector: ActionSelector) => {
+	const scrollToBottom = () => {
+		setTimeout(() => {
+			window.scrollTo({
+				top: document.documentElement.scrollHeight,
+				behavior: 'smooth',
+			})
+		}, 0)
+	}
+
+	const addAction = async (round: validRound) => {
+		const selector = `rounds.${round}.actions` as ActionSelector
 		const actions = getValues(selector)
-		const lastAction = actions.at(-1)
-		if (!lastAction) return
+		const currentPlayer = Number(Object.entries(playerStatus).find(([_, status]) => status === 'current')?.[0])
+		if (!currentPlayer) return
 
-		const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
-		if (!valid) return
+		let nextPlayer = currentPlayer
 
-		let nextPlayer = lastAction.player
-		do {
-			nextPlayer++
-			if (nextPlayer > playerCount) {
-				nextPlayer = 1
-			}
-		} while (playerStatus[nextPlayer] === 'folded')
+		if (actions.length === 0) {
+			const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status === 'active')
+			nextPlayer = Math.min(...activePlayers.map(([player]) => Number(player)))
 
-		fieldArrayMap[selector].append({
+			setPlayerStatus({
+				...playerStatus,
+				[currentPlayer]: 'active',
+				[nextPlayer]: 'current',
+			})
+		} else {
+			const lastAction = actions.at(-1)
+			const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
+			if (!valid) return
+
+			do {
+				nextPlayer++
+				if (nextPlayer > playerCount) {
+					nextPlayer = 1
+				}
+			} while (playerStatus[nextPlayer] === 'folded')
+
+			setPlayerStatus({
+				...playerStatus,
+				[currentPlayer]: lastAction?.decision === 'fold' ? 'folded' : 'active',
+				[nextPlayer]: 'current',
+			})
+		}
+
+		fieldArrays[round].append({
 			player: nextPlayer,
 			decision: '',
 			bet: 0,
 		})
 
-		setPlayerStatus({
-			...playerStatus,
-			[lastAction.player]: lastAction.decision === 'fold' ? 'folded' : 'active',
-			[nextPlayer]: 'current',
-		})
+		scrollToBottom()
+	}
+
+	const nextRound = () => {
+		if (currentRound === 3) {
+			return
+		}
+		setCurrentRound(currentRound + 1)
+		scrollToBottom()
 	}
 
 	const isNextDisabled = (selector: ActionSelector) => {
@@ -247,7 +288,7 @@ const NewHand = () => {
 		if (isZeroBet(lastAction.decision)) {
 			return false
 		} else {
-			return Number(lastAction.bet) === 0
+			return Number(lastAction?.bet) === 0
 		}
 	}
 
@@ -443,36 +484,56 @@ const NewHand = () => {
 								)}
 							/>
 
-							<CardGroupInput groupSelector={'round0Cards'} />
+							{Array.from({ length: currentRound + 1 }, (_, i) => i).map((round, i) => {
+								const startingAction = round === 0 ? 2 : 0
+								return (
+									<div key={i} className='flex flex-col gap-4'>
+										<CardGroupInput groupSelector={`rounds.${round}.cards`} />
 
-							<p>{`Player 1 bet ${smallBlind} as the small blind`}</p>
-							<p>{`Player 2 bet ${bigBlind} as the big blind`}</p>
+										{round === 0 && (
+											<>
+												<p>{`Player 1 bet ${smallBlind} as the small blind`}</p>
+												<p>{`Player 2 bet ${bigBlind} as the big blind`}</p>
+											</>
+										)}
 
-							{fieldArrayMap['round0Actions'].fields.slice(2).map((action, index) => (
-								<ActionInput key={action.id} selector={`round0Actions.${index + 2}`} player={action.player} />
-							))}
-
+										{fieldArrays[round].fields.slice(startingAction).map((action, index) => (
+											<ActionInput
+												key={action.id}
+												selector={`rounds.${round}.actions.${index + startingAction}`}
+												player={action.player}
+											/>
+										))}
+									</div>
+								)
+							})}
 							<Button
 								type='button'
-								onClick={() => addAction('round0Actions')}
-								disabled={isNextDisabled('round0Actions')}
+								className='mt-8 w-full'
+								onClick={() => addAction(currentRound as validRound)}
+								// disabled={}
 							>
 								Next Action
 							</Button>
-							<Button type='button' onClick={() => console.log(getValues())}>
-								console.log()
+							<Button type='button' className='mt-8 w-full' onClick={nextRound}>
+								Next Round
 							</Button>
 
-							<Button type='submit' className='w-full text-xl'>
-								Submit
-							</Button>
+							{showSubmit && (
+								<Button type='submit' className='w-full text-xl mt-32'>
+									Submit
+								</Button>
+							)}
+							{Object.keys(errors).length ? (
+								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>
+							) : null}
 						</form>
-						{Object.keys(errors).length ? (
-							<p className='text-red-500 mt-2'>Please resolve errors and try again</p>
-						) : null}
 					</Form>
 				</FormProvider>
-			</div>
+			</div>{' '}
+			<Button type='button' onClick={() => console.log(getValues())}>
+				console.log()
+			</Button>
 		</main>
 	)
 }

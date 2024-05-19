@@ -26,4 +26,4 @@ export const valueToDisplay: Record<string, string> = {
 	A: 'Ace',
 }
 
-export const isZeroBet = (decision: string) => ['fold', 'check'].includes(decision)
+export const isZeroBet = (decision: string) => ['', 'fold', 'check'].includes(decision)
