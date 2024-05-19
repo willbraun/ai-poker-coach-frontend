@@ -81,4 +81,4 @@ export type validRound = 0 | 1 | 2 | 3
 
 export type ActionSelector = `rounds.${validRound}.actions`
 
-export type PlayerStatus = 'current' | 'active' | 'folded'
+export type PlayerStatus = 'current' | 'active' | 'all-in' | 'folded'

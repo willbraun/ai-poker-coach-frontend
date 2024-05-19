@@ -153,7 +153,7 @@ const NewHand = () => {
 
 	const [currentRound, setCurrentRound] = useState(0)
 	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
-	const [nextDisabled, setNextDisabled] = useState(true)
+	const [nextDisabled, setNextDisabled] = useState(false)
 	const [showSubmit, setShowSubmit] = useState(false)
 
 	const round0ActionsFA = useFieldArray({
@@ -213,7 +213,10 @@ const NewHand = () => {
 
 		const underTheGun = playerCount === 2 ? 1 : 3
 		setValue('rounds.0.actions.2.player', underTheGun)
-		setPlayerStatus({ [underTheGun]: 'current' })
+
+		const properties = Array.from({ length: playerCount }, _ => 'active')
+		const initialStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })))
+		setPlayerStatus({ ...initialStatus, [underTheGun]: 'current' })
 	}, [bigBlind, playerCount, setValue])
 
 	const scrollToBottom = () => {
@@ -243,7 +246,7 @@ const NewHand = () => {
 				[nextPlayer]: 'current',
 			})
 		} else {
-			const lastAction = actions.at(-1)
+			const lastAction = actions[actions.length - 1]
 			const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
 			if (!valid) return
 
@@ -254,9 +257,22 @@ const NewHand = () => {
 				}
 			} while (playerStatus[nextPlayer] === 'folded')
 
+			let newStatus = ''
+			switch (lastAction.decision) {
+				case 'fold':
+					newStatus = 'folded'
+					break
+				case 'betAllIn':
+				case 'callAllIn':
+					newStatus = 'all-in'
+					break
+				default:
+					newStatus = 'active'
+			}
+
 			setPlayerStatus({
 				...playerStatus,
-				[currentPlayer]: lastAction?.decision === 'fold' ? 'folded' : 'active',
+				[currentPlayer]: newStatus as PlayerStatus,
 				[nextPlayer]: 'current',
 			})
 		}
@@ -276,6 +292,32 @@ const NewHand = () => {
 		}
 		setCurrentRound(currentRound + 1)
 		scrollToBottom()
+	}
+
+	const handleNext = () => {
+		const selector = `rounds.${currentRound}.actions` as ActionSelector
+		const actions = getValues(selector)
+		if (actions.length === 0) {
+			addAction(currentRound as validRound)
+			return
+		}
+
+		const bettingPlayers = Object.entries(playerStatus)
+			.filter(([_, status]) => ['active', 'current'].includes(status))
+			.map(([player]) => Number(player))
+
+		const playerBetSums = bettingPlayers.map(player => {
+			return actions
+				.filter(action => action.player === player)
+				.map(action => Number(action.bet))
+				.reduce((a, b) => a + b, 0)
+		})
+
+		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && actions.length >= bettingPlayers.length) {
+			nextRound()
+		} else {
+			addAction(currentRound as validRound)
+		}
 	}
 
 	const isNextDisabled = (selector: ActionSelector) => {
@@ -507,16 +549,8 @@ const NewHand = () => {
 									</div>
 								)
 							})}
-							<Button
-								type='button'
-								className='mt-8 w-full'
-								onClick={() => addAction(currentRound as validRound)}
-								// disabled={}
-							>
-								Next Action
-							</Button>
-							<Button type='button' className='mt-8 w-full' onClick={nextRound}>
-								Next Round
+							<Button type='button' className='mt-8 w-full' onClick={handleNext} disabled={nextDisabled}>
+								Next
 							</Button>
 
 							{showSubmit && (
@@ -530,10 +564,7 @@ const NewHand = () => {
 						</form>
 					</Form>
 				</FormProvider>
-			</div>{' '}
-			<Button type='button' onClick={() => console.log(getValues())}>
-				console.log()
-			</Button>
+			</div>
 		</main>
 	)
 }
