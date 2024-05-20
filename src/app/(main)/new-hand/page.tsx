@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus, validRound } from '@/lib/types'
 import { isZeroBet } from '@/lib/utils'
@@ -153,6 +153,7 @@ const NewHand = () => {
 
 	const [currentRound, setCurrentRound] = useState(0)
 	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
+	const [startingPlayers, setStartingPlayers] = useState<number[]>([])
 	const [nextDisabled, setNextDisabled] = useState(false)
 	const [showSubmit, setShowSubmit] = useState(false)
 
@@ -217,6 +218,7 @@ const NewHand = () => {
 		const properties = Array.from({ length: playerCount }, _ => 'active')
 		const initialStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })))
 		setPlayerStatus({ ...initialStatus, [underTheGun]: 'current' })
+		setStartingPlayers([playerCount])
 	}, [bigBlind, playerCount, setValue])
 
 	const scrollToBottom = () => {
@@ -228,6 +230,8 @@ const NewHand = () => {
 		}, 0)
 	}
 
+	const getActivePlayers = () => Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
+
 	const addAction = async (round: validRound) => {
 		const selector = `rounds.${round}.actions` as ActionSelector
 		const actions = getValues(selector)
@@ -237,7 +241,7 @@ const NewHand = () => {
 		let nextPlayer = currentPlayer
 
 		if (actions.length === 0) {
-			const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status === 'active')
+			const activePlayers = getActivePlayers()
 			nextPlayer = Math.min(...activePlayers.map(([player]) => Number(player)))
 
 			setPlayerStatus({
@@ -290,7 +294,11 @@ const NewHand = () => {
 		if (currentRound === 3) {
 			return
 		}
-		setCurrentRound(currentRound + 1)
+		const nextRound = currentRound + 1
+		const activePlayerCount = getActivePlayers().length
+
+		setStartingPlayers([...startingPlayers, activePlayerCount])
+		setCurrentRound(nextRound)
 		scrollToBottom()
 	}
 
@@ -313,7 +321,9 @@ const NewHand = () => {
 				.reduce((a, b) => a + b, 0)
 		})
 
-		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && actions.length >= bettingPlayers.length) {
+		const decisionCount = actions.slice(currentRound === 0 ? 2 : 0)
+
+		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && decisionCount.length >= startingPlayers[currentRound]) {
 			nextRound()
 		} else {
 			addAction(currentRound as validRound)
