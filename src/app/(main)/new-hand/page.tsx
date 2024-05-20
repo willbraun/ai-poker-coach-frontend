@@ -153,7 +153,7 @@ const NewHand = () => {
 
 	const [currentRound, setCurrentRound] = useState(0)
 	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
-	const [startingPlayers, setStartingPlayers] = useState<number[]>([])
+	const [startingBetters, setStartingBetters] = useState<number[]>([])
 	const [nextDisabled, setNextDisabled] = useState(false)
 	const [showSubmit, setShowSubmit] = useState(false)
 
@@ -218,7 +218,7 @@ const NewHand = () => {
 		const properties = Array.from({ length: playerCount }, _ => 'active')
 		const initialStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })))
 		setPlayerStatus({ ...initialStatus, [underTheGun]: 'current' })
-		setStartingPlayers([playerCount])
+		setStartingBetters([playerCount])
 	}, [bigBlind, playerCount, setValue])
 
 	const scrollToBottom = () => {
@@ -230,8 +230,6 @@ const NewHand = () => {
 		}, 0)
 	}
 
-	const getActivePlayers = () => Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
-
 	const addAction = async (round: validRound) => {
 		const selector = `rounds.${round}.actions` as ActionSelector
 		const actions = getValues(selector)
@@ -241,7 +239,7 @@ const NewHand = () => {
 		let nextPlayer = currentPlayer
 
 		if (actions.length === 0) {
-			const activePlayers = getActivePlayers()
+			const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
 			nextPlayer = Math.min(...activePlayers.map(([player]) => Number(player)))
 
 			setPlayerStatus({
@@ -295,9 +293,11 @@ const NewHand = () => {
 			return
 		}
 		const nextRound = currentRound + 1
-		const activePlayerCount = getActivePlayers().length
+		const betterCount = Object.entries(playerStatus).filter(([_, status]) =>
+			['active', 'current'].includes(status)
+		).length
 
-		setStartingPlayers([...startingPlayers, activePlayerCount])
+		setStartingBetters([...startingBetters, betterCount])
 		setCurrentRound(nextRound)
 		scrollToBottom()
 	}
@@ -323,7 +323,7 @@ const NewHand = () => {
 
 		const decisionCount = actions.slice(currentRound === 0 ? 2 : 0)
 
-		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && decisionCount.length >= startingPlayers[currentRound]) {
+		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && decisionCount.length >= startingBetters[currentRound]) {
 			nextRound()
 		} else {
 			addAction(currentRound as validRound)
