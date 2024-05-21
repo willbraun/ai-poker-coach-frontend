@@ -10,7 +10,7 @@ import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import CardGroupInput from '@/components/CardGroupInput'
+import CardGroupInput, { isCardGroupComplete } from '@/components/CardGroupInput'
 import { useEffect, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus, validRound } from '@/lib/types'
@@ -180,6 +180,11 @@ const NewHand = () => {
 
 	const fieldArrays = [round0ActionsFA, round1ActionsFA, round2ActionsFA, round3ActionsFA]
 
+	const { fields: villainFields, append: appendVillains } = useFieldArray({
+		control,
+		name: 'villains',
+	})
+
 	const methods = useForm()
 
 	const smallBlind = watch('smallBlind')
@@ -212,6 +217,10 @@ const NewHand = () => {
 
 	useEffect(() => {
 		setValue('rounds.0.actions.1.bet', bigBlind ?? 0)
+	}, [bigBlind, setValue])
+
+	useEffect(() => {
+		if (!playerCount) return
 
 		const underTheGun = playerCount === 2 ? 1 : 3
 		fieldArrays[0].update(2, { player: underTheGun, decision: '', bet: 0 })
@@ -221,7 +230,15 @@ const NewHand = () => {
 		setPlayerStatus({ ...initialStatus, [underTheGun]: 'current' })
 		setStartingBetters([playerCount])
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [bigBlind, playerCount, setValue])
+	}, [playerCount])
+
+	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
+
+	useEffect(() => {
+		if (activePlayers.length === 1) {
+			setShowSubmit(true)
+		}
+	}, [activePlayers.length])
 
 	const scrollToBottom = () => {
 		setTimeout(() => {
@@ -241,7 +258,6 @@ const NewHand = () => {
 		let nextPlayer = currentPlayer
 
 		if (actions.length === 0) {
-			const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
 			nextPlayer = Math.min(...activePlayers.map(([player]) => Number(player)))
 
 			setPlayerStatus({
@@ -261,24 +277,28 @@ const NewHand = () => {
 				}
 			} while (playerStatus[nextPlayer] === 'folded')
 
-			let newStatus = ''
+			let updatedStatus = ''
 			switch (lastAction.decision) {
 				case 'fold':
-					newStatus = 'folded'
+					updatedStatus = 'folded'
 					break
 				case 'betAllIn':
 				case 'callAllIn':
-					newStatus = 'all-in'
+					updatedStatus = 'all-in'
 					break
 				default:
-					newStatus = 'active'
+					updatedStatus = 'active'
 			}
 
 			setPlayerStatus({
 				...playerStatus,
-				[currentPlayer]: newStatus as PlayerStatus,
+				[currentPlayer]: updatedStatus as PlayerStatus,
 				[nextPlayer]: 'current',
 			})
+
+			if (activePlayers.length === 2 && lastAction.decision === 'fold') {
+				return
+			}
 		}
 
 		fieldArrays[round].append({
@@ -292,7 +312,17 @@ const NewHand = () => {
 
 	const nextRound = () => {
 		if (currentRound === 3) {
+			const villainFormData = Object.entries(playerStatus)
+				.filter(([player, status]) => status !== 'folded' && player !== position.toString())
+				.map(([player]) => ({
+					player: Number(player),
+					cards: [],
+					evaluation: '',
+				}))
+
+			appendVillains(villainFormData)
 			setShowVillains(true)
+			setShowSubmit(true)
 			return
 		}
 		const nextRound = currentRound + 1
@@ -346,6 +376,8 @@ const NewHand = () => {
 			return Number(lastAction?.bet) === 0
 		}
 	}
+
+	const isSubmitDisabled = showVillains && watch('villains').some(villain => !isCardGroupComplete(villain.cards, 2))
 
 	return (
 		<main className='mt-24'>
@@ -594,18 +626,21 @@ const NewHand = () => {
 							})}
 
 							{showVillains &&
-								Object.entries(playerStatus)
-									.filter(([player, status]) => status !== 'folded' && player !== position.toString())
-									.map((villain, i) => (
-										<CardGroupInput key={villain[0]} groupSelector={`villains.${i}`} player={Number(villain[0])} />
-									))}
+								villainFields.map((villain, i) => (
+									<CardGroupInput key={villain.id} groupSelector={`villains.${i}`} player={villain.player} />
+								))}
 
 							{showSubmit ? (
-								<Button type='submit' className='w-full text-xl mt-32'>
+								<Button
+									type='submit'
+									className='w-full text-xl'
+									onClick={() => console.log('submit')}
+									disabled={isSubmitDisabled}
+								>
 									Submit
 								</Button>
 							) : (
-								<Button type='button' className='mt-8 w-full' onClick={handleNext} disabled={nextDisabled}>
+								<Button type='button' className='w-full text-xl' onClick={handleNext} disabled={nextDisabled}>
 									Next
 								</Button>
 							)}

@@ -70,6 +70,10 @@ const evaluateHand = async (cards: string[]) => {
 	}
 }
 
+export const isCardGroupComplete = (cards: { value: string; suit: string }[], cardCount: number) => {
+	return cards.length === cardCount && cards.every(card => card?.value && card?.suit)
+}
+
 const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues()
