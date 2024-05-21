@@ -17,7 +17,7 @@ interface roundDetails {
 const getDetails = (groupSelector: string, player?: number): roundDetails => {
 	if (groupSelector === 'rounds.0.cards') {
 		return {
-			title: 'Your cards',
+			title: 'Your Cards',
 			cardCount: 2,
 		}
 	} else if (groupSelector === 'rounds.1.cards') {
@@ -103,7 +103,7 @@ const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 				{Array.from({ length: cardCount }).map((_, i) => (
 					<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} />
 				))}
-				<p className='ml-auto'>{group.evaluation}</p>
+				<p className='ml-auto'>{group?.evaluation ?? ''}</p>
 			</div>
 		</div>
 	)

@@ -155,6 +155,7 @@ const NewHand = () => {
 	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
 	const [startingBetters, setStartingBetters] = useState<number[]>([])
 	const [nextDisabled, setNextDisabled] = useState(false)
+	const [showVillains, setShowVillains] = useState(false)
 	const [showSubmit, setShowSubmit] = useState(false)
 
 	const round0ActionsFA = useFieldArray({
@@ -213,12 +214,13 @@ const NewHand = () => {
 		setValue('rounds.0.actions.1.bet', bigBlind ?? 0)
 
 		const underTheGun = playerCount === 2 ? 1 : 3
-		setValue('rounds.0.actions.2.player', underTheGun)
+		fieldArrays[0].update(2, { player: underTheGun, decision: '', bet: 0 })
 
 		const properties = Array.from({ length: playerCount }, _ => 'active')
 		const initialStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })))
 		setPlayerStatus({ ...initialStatus, [underTheGun]: 'current' })
 		setStartingBetters([playerCount])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [bigBlind, playerCount, setValue])
 
 	const scrollToBottom = () => {
@@ -289,7 +291,8 @@ const NewHand = () => {
 	}
 
 	const nextRound = () => {
-		if (currentRound === 4) {
+		if (currentRound === 3) {
+			setShowVillains(true)
 			return
 		}
 		const nextRound = currentRound + 1
@@ -590,9 +593,9 @@ const NewHand = () => {
 								)
 							})}
 
-							{currentRound === 4 &&
+							{showVillains &&
 								Object.entries(playerStatus)
-									.filter(([_, status]) => status !== 'folded')
+									.filter(([player, status]) => status !== 'folded' && player !== position.toString())
 									.map((villain, i) => (
 										<CardGroupInput key={villain[0]} groupSelector={`villains.${i}`} player={Number(villain[0])} />
 									))}
