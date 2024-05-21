@@ -6,6 +6,7 @@ import { FormRound } from '@/app/(main)/new-hand/page'
 
 interface CardGroupProps {
 	groupSelector: string
+	player?: number
 }
 
 interface roundDetails {
@@ -69,10 +70,10 @@ const evaluateHand = async (cards: string[]) => {
 	}
 }
 
-const CardGroup = ({ groupSelector }: CardGroupProps) => {
+const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues()
-	const { title, cardCount } = getDetails(groupSelector)
+	const { title, cardCount } = getDetails(groupSelector, player)
 
 	const group = watch(groupSelector)
 

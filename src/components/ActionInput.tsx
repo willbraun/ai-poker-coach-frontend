@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { useFormContext } from 'react-hook-form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChangeEvent } from 'react'
-import { isZeroBet } from '@/lib/utils'
+import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 
 interface ActionInputProps {
 	selector: string
@@ -12,7 +12,10 @@ interface ActionInputProps {
 
 const ActionInput = ({ selector, player }: ActionInputProps) => {
 	const { setValue, watch, control } = useFormContext()
-	const decision = watch(`${selector}.decision`)
+	const decision: string = watch(`${selector}.decision`)
+	const position: string = watch('position')
+
+	const identifier = player === Number(position) ? `you (player ${player})` : `player ${player}`
 
 	const onDecisionChange = (value: string) => {
 		setValue(`${selector}.decision`, value)
@@ -21,15 +24,9 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 		}
 	}
 
-	const onBetBlur = (event: ChangeEvent<HTMLInputElement>) => {
-		// Regular expression to remove leading zeros only if not followed by a decimal point
-		const trimmedValue = event.target.value.replace(/^0+(?!\.)/, '') || '0'
-		setValue(`${selector}.bet`, trimmedValue)
-	}
-
 	return (
 		<div>
-			<FormLabel>{`What did player ${player} do?`}</FormLabel>
+			<FormLabel>{`What did ${identifier} do?`}</FormLabel>
 			<div className='mt-4 grid grid-rows-1 grid-cols-2 gap-4'>
 				<div>
 					<p className='mb-2'>Action</p>
@@ -67,7 +64,14 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 						render={({ field }) => (
 							<FormItem>
 								<FormControl>
-									<Input {...field} type='number' onBlur={onBetBlur} disabled={isZeroBet(decision)} />
+									<Input
+										{...field}
+										type='text'
+										inputMode='numeric'
+										onChange={e => handleNumberChange(e, field.onChange)}
+										onBlur={e => handleNumberBlur(e, field.onChange)}
+										disabled={isZeroBet(decision)}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>

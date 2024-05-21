@@ -14,7 +14,7 @@ import CardGroupInput from '@/components/CardGroupInput'
 import { useEffect, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus, validRound } from '@/lib/types'
-import { isZeroBet } from '@/lib/utils'
+import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -289,7 +289,7 @@ const NewHand = () => {
 	}
 
 	const nextRound = () => {
-		if (currentRound === 3) {
+		if (currentRound === 4) {
 			return
 		}
 		const nextRound = currentRound + 1
@@ -460,7 +460,13 @@ const NewHand = () => {
 									<FormItem>
 										<FormLabel>Small Blind</FormLabel>
 										<FormControl className='w-1/2'>
-											<Input {...field} type='number' />
+											<Input
+												{...field}
+												type='text'
+												inputMode='numeric'
+												onChange={e => handleNumberChange(e, field.onChange)}
+												onBlur={e => handleNumberBlur(e, field.onChange)}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -473,7 +479,13 @@ const NewHand = () => {
 									<FormItem>
 										<FormLabel>Big Blind</FormLabel>
 										<FormControl className='w-1/2'>
-											<Input {...field} type='number' />
+											<Input
+												{...field}
+												type='text'
+												inputMode='numeric'
+												onChange={e => handleNumberChange(e, field.onChange)}
+												onBlur={e => handleNumberBlur(e, field.onChange)}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -486,7 +498,13 @@ const NewHand = () => {
 									<FormItem>
 										<FormLabel>Ante</FormLabel>
 										<FormControl className='w-1/2'>
-											<Input {...field} type='number' />
+											<Input
+												{...field}
+												type='text'
+												inputMode='numeric'
+												onChange={e => handleNumberChange(e, field.onChange)}
+												onBlur={e => handleNumberBlur(e, field.onChange)}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -499,7 +517,13 @@ const NewHand = () => {
 									<FormItem>
 										<FormLabel>Big Blind Ante</FormLabel>
 										<FormControl className='w-1/2'>
-											<Input {...field} type='number' />
+											<Input
+												{...field}
+												type='text'
+												inputMode='numeric'
+												onChange={e => handleNumberChange(e, field.onChange)}
+												onBlur={e => handleNumberBlur(e, field.onChange)}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -512,7 +536,13 @@ const NewHand = () => {
 									<FormItem>
 										<FormLabel>Your stack size at the beginning of the hand</FormLabel>
 										<FormControl className='w-1/2'>
-											<Input {...field} type='number' />
+											<Input
+												{...field}
+												type='text'
+												inputMode='numeric'
+												onChange={e => handleNumberChange(e, field.onChange)}
+												onBlur={e => handleNumberBlur(e, field.onChange)}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -559,13 +589,21 @@ const NewHand = () => {
 									</div>
 								)
 							})}
-							<Button type='button' className='mt-8 w-full' onClick={handleNext} disabled={nextDisabled}>
-								Next
-							</Button>
 
-							{showSubmit && (
+							{currentRound === 4 &&
+								Object.entries(playerStatus)
+									.filter(([_, status]) => status !== 'folded')
+									.map((villain, i) => (
+										<CardGroupInput key={villain[0]} groupSelector={`villains.${i}`} player={Number(villain[0])} />
+									))}
+
+							{showSubmit ? (
 								<Button type='submit' className='w-full text-xl mt-32'>
 									Submit
+								</Button>
+							) : (
+								<Button type='button' className='mt-8 w-full' onClick={handleNext} disabled={nextDisabled}>
+									Next
 								</Button>
 							)}
 							{Object.keys(errors).length ? (
