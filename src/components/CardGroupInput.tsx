@@ -103,11 +103,13 @@ const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 	return (
 		<div>
 			<FormLabel>{title}</FormLabel>
-			<div className='mt-4 mb-8 flex items-center gap-4'>
-				{Array.from({ length: cardCount }).map((_, i) => (
-					<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} />
-				))}
-				<p className='ml-auto'>{group?.evaluation ?? ''}</p>
+			<div className='mt-4 mb-8 flex flex-wrap items-center gap-4'>
+				<div className='flex gap-4 mr-auto'>
+					{Array.from({ length: cardCount }).map((_, i) => (
+						<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} />
+					))}
+				</div>
+				<p className=''>{group?.evaluation ?? ''}</p>
 			</div>
 		</div>
 	)

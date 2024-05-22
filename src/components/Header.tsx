@@ -42,7 +42,9 @@ const Header = () => {
 			) : (
 				<div className='flex items-center gap-4 ml-auto'>
 					<Button size='sm' variant='link'>
-						<Link href='/login'>Log in</Link>
+						<Link href='/login' className='underline'>
+							Log in
+						</Link>
 					</Button>
 					<Button size='sm'>
 						<Link href='/create-account'>Sign up</Link>

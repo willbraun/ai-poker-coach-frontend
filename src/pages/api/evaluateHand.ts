@@ -52,6 +52,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 		}
 	})
 
+	const getDisplay = (value: string | undefined) => {
+		return valueToDisplay[value ?? ''] ?? 'unknown'
+	}
+
 	try {
 		const result = PokerEvaluator.evalHand(cards)
 		const handName = result.handName
@@ -63,8 +67,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				break
 			case 'one pair':
 				const pairValue = cards.find(card => valueMap.get(card.charAt(0)) === 2)?.charAt(0)
-				const displayValue = valueToDisplay[pairValue ?? ''] ?? 'unknown'
-				newHandName = `Pair of ${displayValue}s`
+				newHandName = `Pair of ${getDisplay(pairValue)}s`
 				break
 			case 'two pairs':
 				const pairValues = cards.map(value => value.charAt(0)).filter(value => valueMap.get(value) === 2)
@@ -72,23 +75,25 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				const lowPair = pairValues.find(value => value !== highPair) ?? 'unknown'
 				newHandName = `Two Pair: ${valueToDisplay[highPair]}s and ${valueToDisplay[lowPair]}s`
 				break
-			// case 'Three of a Kind':
-			// 	newHandName = `Three of a Kind: ${valueToDisplay[result.cards[0].charAt(0)]}s`
-			// 	break
+			case 'three of a kind':
+				const tripValue = cards.find(card => valueMap.get(card.charAt(0)) === 3)?.charAt(0)
+				newHandName = `Three of a Kind: ${getDisplay(tripValue)}s`
+				break
 			// case 'Straight':
 			// 	newHandName = `Straight to the ${valueToDisplay[result.cards[0].charAt(0)]}`
 			// 	break
 			// case 'Flush':
 			// 	newHandName = `Flush: ${valueToDisplay[result.cards[0].charAt(1)]}`
 			// 	break
-			// case 'Full House':
-			// 	newHandName = `Full House: ${valueToDisplay[result.cards[0].charAt(0)]}s full of ${
-			// 		valueToDisplay[result.cards[3].charAt(0)]
-			// 	}s`
-			// 	break
-			// case 'Four of a Kind':
-			// 	newHandName = `Four of a Kind: ${valueToDisplay[result.cards[0].charAt(0)]}s`
-			// 	break
+			case 'full house':
+				const fhTripValue = cards.find(card => valueMap.get(card.charAt(0)) === 3)?.charAt(0)
+				const fhPairValue = cards.find(card => valueMap.get(card.charAt(0)) === 2)?.charAt(0)
+				newHandName = `Full House: ${getDisplay(fhTripValue)}s full of ${getDisplay(fhPairValue)}s`
+				break
+			case 'four of a kind':
+				const quadValue = cards.find(card => valueMap.get(card.charAt(0)) === 4)?.charAt(0)
+				newHandName = `Four of a Kind: ${getDisplay(quadValue)}s`
+				break
 			// case 'Straight Flush':
 			// 	newHandName = `Straight Flush to the ${valueToDisplay[result.cards[0].charAt(0)]}`
 			// 	break
