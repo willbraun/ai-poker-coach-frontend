@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput, { isCardGroupComplete } from '@/components/CardGroupInput'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus, validRound } from '@/lib/types'
 import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
@@ -151,12 +151,11 @@ const NewHand = () => {
 		trigger,
 	} = form
 
+	const methods = useForm()
+
 	const [currentRound, setCurrentRound] = useState(0)
 	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
-	const [startingBetters, setStartingBetters] = useState<number[]>([])
-	const [nextDisabled, setNextDisabled] = useState(false)
-	const [showVillains, setShowVillains] = useState(false)
-	const [showSubmit, setShowSubmit] = useState(false)
+	// const [currentRoundBetterCount, setcurrentRoundBetterCount] = useState<number[]>([])
 
 	const round0ActionsFA = useFieldArray({
 		control,
@@ -185,7 +184,11 @@ const NewHand = () => {
 		name: 'villains',
 	})
 
-	const methods = useForm()
+	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
+
+	const disableNext = false // todo
+	const showSubmit = activePlayers.length === 1 || villainFields.length > 0
+	const disableSubmit = watch('villains').some(villain => !isCardGroupComplete(villain.cards, 2))
 
 	const smallBlind = watch('smallBlind')
 	const bigBlind = watch('bigBlind')
@@ -228,17 +231,19 @@ const NewHand = () => {
 		const properties = Array.from({ length: playerCount }, _ => 'active')
 		const initialStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })))
 		setPlayerStatus({ ...initialStatus, [underTheGun]: 'current' })
-		setStartingBetters([playerCount])
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [playerCount])
 
-	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
-
-	useEffect(() => {
-		if (activePlayers.length === 1) {
-			setShowSubmit(true)
-		}
-	}, [activePlayers.length])
+	const currentRoundBetterCount = useMemo(() => {
+		return (
+			playerCount -
+			fieldArrays
+				.slice(0, currentRound)
+				.flatMap(fa => fa.fields)
+				.filter(action => ['fold', 'betAllIn', 'callAllIn'].includes(action.decision)).length
+		)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [playerCount, currentRound])
 
 	const scrollToBottom = () => {
 		setTimeout(() => {
@@ -321,17 +326,11 @@ const NewHand = () => {
 				}))
 
 			appendVillains(villainFormData)
-			setShowVillains(true)
-			setShowSubmit(true)
+			scrollToBottom()
 			return
 		}
-		const nextRound = currentRound + 1
-		const betterCount = Object.entries(playerStatus).filter(([_, status]) =>
-			['active', 'current'].includes(status)
-		).length
 
-		setStartingBetters([...startingBetters, betterCount])
-		setCurrentRound(nextRound)
+		setCurrentRound(currentRound + 1)
 		scrollToBottom()
 	}
 
@@ -356,7 +355,7 @@ const NewHand = () => {
 
 		const decisionCount = actions.slice(currentRound === 0 ? 2 : 0)
 
-		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && decisionCount.length >= startingBetters[currentRound]) {
+		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && decisionCount.length >= currentRoundBetterCount) {
 			nextRound()
 		} else {
 			addAction(currentRound as validRound)
@@ -376,8 +375,6 @@ const NewHand = () => {
 			return Number(lastAction?.bet) === 0
 		}
 	}
-
-	const isSubmitDisabled = showVillains && watch('villains').some(villain => !isCardGroupComplete(villain.cards, 2))
 
 	return (
 		<main className='mt-24'>
@@ -625,22 +622,21 @@ const NewHand = () => {
 								)
 							})}
 
-							{showVillains &&
-								villainFields.map((villain, i) => (
-									<CardGroupInput key={villain.id} groupSelector={`villains.${i}`} player={villain.player} />
-								))}
+							{villainFields.map((villain, i) => (
+								<CardGroupInput key={villain.id} groupSelector={`villains.${i}`} player={villain.player} />
+							))}
 
 							{showSubmit ? (
 								<Button
 									type='submit'
 									className='w-full text-xl'
 									onClick={() => console.log('submit')}
-									disabled={isSubmitDisabled}
+									disabled={disableSubmit}
 								>
 									Submit
 								</Button>
 							) : (
-								<Button type='button' className='w-full text-xl' onClick={handleNext} disabled={nextDisabled}>
+								<Button type='button' className='w-full text-xl' onClick={handleNext} disabled={disableNext}>
 									Next
 								</Button>
 							)}
