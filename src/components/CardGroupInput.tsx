@@ -83,15 +83,17 @@ const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 
 	useEffect(() => {
 		;(async () => {
-			if (
-				group?.cards.length === cardCount &&
-				group?.cards.every((card: { value: string; suit: string }) => card?.value && card?.suit)
-			) {
-				const evalInput: string[] = values.rounds.flatMap((round: FormRound) =>
-					round.cards.cards.map(card => {
-						return `${card.value}${card.suit}`
-					})
-				)
+			if (isCardGroupComplete(group?.cards, cardCount)) {
+				let evalInput: string[] = []
+				if (groupSelector.startsWith('rounds')) {
+					const round = parseInt(groupSelector.split('.')[1])
+					evalInput = values.rounds.slice(0, round + 1).flatMap((round: FormRound) =>
+						round.cards.cards.map(card => {
+							return `${card.value}${card.suit}`
+						})
+					)
+				}
+
 				const evaluation = await evaluateHand(evalInput)
 
 				setValue(`${groupSelector}.evaluation`, evaluation.handName)

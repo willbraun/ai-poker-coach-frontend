@@ -26,27 +26,39 @@ const getStraight = (cards: string[]): [string, string] => {
 	return ['unknown', 'unknown']
 }
 
+const formatPlural = (value: string | undefined) => {
+	return value === '6' ? 'es' : 's'
+}
+
+const getDisplay = (value: string | undefined, plural: boolean) => {
+	const singular = valueToDisplay[value ?? ''] ?? 'unknown'
+	const suffix = plural ? formatPlural(value) : ''
+	return singular + suffix
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
 	// cards is an array of strings, e.g. ['As', 'Ks']
 	const cards: string[] = req.body.cards
 
+	let newHandName = ''
+
 	if (cards.length === 2) {
-		const char = cards[0].charAt(0)
-		if (cards[0].charAt(0) === cards[1].charAt(0)) {
-			res.status(200).json({
-				result: {
-					handName: `Pocket ${valueToDisplay[char]}s`,
-				},
-			})
+		if (cards[0] === cards[1]) {
+			newHandName = 'Invalid Hand'
+		} else if (cards[0].charAt(0) === cards[1].charAt(0)) {
+			const value = cards[0].charAt(0)
+			newHandName = `Pocket ${getDisplay(value, true)}`
 		} else {
 			const highCard = getHighCard(cards)
-
-			res.status(200).json({
-				result: {
-					handName: `High Card ${valueToDisplay[highCard]}`,
-				},
-			})
+			newHandName = `High Card: ${getDisplay(highCard, false)}`
 		}
+
+		res.status(200).json({
+			result: {
+				handName: newHandName,
+			},
+		})
+
 		return
 	}
 
@@ -70,14 +82,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 		}
 	})
 
-	const getDisplay = (value: string | undefined) => {
-		return valueToDisplay[value ?? ''] ?? 'unknown'
-	}
-
 	try {
 		const result = PokerEvaluator.evalHand(cards)
 		const handName = result.handName
-		let newHandName = ''
 		switch (handName) {
 			case 'high card':
 				const highCard = getHighCard(cards)
@@ -85,34 +92,34 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				break
 			case 'one pair':
 				const pairValue = cards.find(card => valueMap.get(card.charAt(0)) === 2)?.charAt(0)
-				newHandName = `Pair of ${getDisplay(pairValue)}s`
+				newHandName = `Pair of ${getDisplay(pairValue, true)}`
 				break
 			case 'two pairs':
 				const pairValues = cards.map(value => value.charAt(0)).filter(value => valueMap.get(value) === 2)
 				const highPair = getHighCard(pairValues)
 				const lowPair = pairValues.find(value => value !== highPair) ?? 'unknown'
-				newHandName = `Two Pair: ${valueToDisplay[highPair]}s and ${valueToDisplay[lowPair]}s`
+				newHandName = `Two Pair: ${getDisplay(highPair, true)} and ${getDisplay(lowPair, true)}`
 				break
 			case 'three of a kind':
 				const tripValue = cards.find(card => valueMap.get(card.charAt(0)) === 3)?.charAt(0)
-				newHandName = `Three of a Kind: ${getDisplay(tripValue)}s`
+				newHandName = `Three of a Kind: ${getDisplay(tripValue, true)}`
 				break
 			case 'straight':
 				const [straightLowCard, straightHighCard] = getStraight(cards)
-				newHandName = `Straight: ${getDisplay(straightLowCard)} to ${getDisplay(straightHighCard)}`
+				newHandName = `Straight: ${getDisplay(straightLowCard, false)} to ${getDisplay(straightHighCard, false)}`
 				break
 			case 'flush':
 				const flushHighCard = getHighCard(cards)
-				newHandName = `Flush: ${getDisplay(flushHighCard)} high`
+				newHandName = `Flush: ${getDisplay(flushHighCard, false)} high`
 				break
 			case 'full house':
 				const fhTripValue = cards.find(card => valueMap.get(card.charAt(0)) === 3)?.charAt(0)
 				const fhPairValue = cards.find(card => valueMap.get(card.charAt(0)) === 2)?.charAt(0)
-				newHandName = `Full House: ${getDisplay(fhTripValue)}s full of ${getDisplay(fhPairValue)}s`
+				newHandName = `Full House: ${getDisplay(fhTripValue, true)} full of ${getDisplay(fhPairValue, true)}`
 				break
 			case 'four of a kind':
 				const quadValue = cards.find(card => valueMap.get(card.charAt(0)) === 4)?.charAt(0)
-				newHandName = `Four of a Kind: ${getDisplay(quadValue)}s`
+				newHandName = `Four of a Kind: ${getDisplay(quadValue, true)}`
 				break
 			case 'straight flush':
 				const [sfLowCard, sfHighCard] = getStraight(cards)
@@ -120,7 +127,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 					newHandName = 'Royal Flush'
 					break
 				}
-				newHandName = `Straight Flush: ${getDisplay(sfLowCard)} to ${getDisplay(sfHighCard)}`
+				newHandName = `Straight Flush: ${getDisplay(sfLowCard, false)} to ${getDisplay(sfHighCard, false)}`
 				break
 			case 'invalid hand':
 			default:
@@ -128,7 +135,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				break
 		}
 
-		res.status(200).json({ result: { handName: newHandName } })
+		res.status(200).json({
+			result: {
+				handName: newHandName,
+			},
+		})
 	} catch (error) {
 		console.log(error)
 		res.status(500).json({ error: 'Error evaluating hand' })
