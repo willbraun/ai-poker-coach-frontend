@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form'
 import { FormLabel } from '@/components/ui/form'
 import CardInput from './CardInput'
 import { useEffect } from 'react'
-import { FormRound } from '@/app/(main)/new-hand/page'
+import { FormCardGroup, FormRound, PokerEvaluatorCard, Schema } from '@/app/(main)/new-hand/page'
 
 interface CardGroupProps {
 	groupSelector: string
@@ -48,7 +48,7 @@ const getDetails = (groupSelector: string, player?: number): roundDetails => {
 	}
 }
 
-const evaluateHand = async (cards: string[]) => {
+const evaluateHand = async (cards: PokerEvaluatorCard[]): Promise<string> => {
 	try {
 		const response = await fetch('/api/evaluateHand', {
 			method: 'POST',
@@ -63,10 +63,10 @@ const evaluateHand = async (cards: string[]) => {
 		}
 
 		const data = await response.json()
-		return data.result
+		return data.result.handName
 	} catch (error) {
 		console.error(error)
-		return 'error'
+		return `Error: ${error}`
 	}
 }
 
@@ -76,27 +76,35 @@ export const isCardGroupComplete = (cards: { value: string; suit: string }[], ca
 
 const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 	const { getValues, setValue, watch } = useFormContext()
-	const values = getValues()
+	const values = getValues() as Schema
 	const { title, cardCount } = getDetails(groupSelector, player)
 
-	const group = watch(groupSelector)
+	const group: FormCardGroup = watch(groupSelector)
 
 	useEffect(() => {
 		;(async () => {
 			if (isCardGroupComplete(group?.cards, cardCount)) {
-				let evalInput: string[] = []
+				let evalInput: PokerEvaluatorCard[] = []
 				if (groupSelector.startsWith('rounds')) {
 					const round = parseInt(groupSelector.split('.')[1])
 					evalInput = values.rounds.slice(0, round + 1).flatMap((round: FormRound) =>
 						round.cards.cards.map(card => {
-							return `${card.value}${card.suit}`
+							return `${card.value}${card.suit}` as PokerEvaluatorCard
 						})
 					)
 				}
 
+				if (groupSelector.startsWith('villains')) {
+					const playerCards = group.cards
+					const communityCards = values.rounds.slice(1, 4).flatMap((round: FormRound) => round.cards.cards)
+					evalInput = [...playerCards, ...communityCards].map(card => {
+						return `${card.value}${card.suit}` as PokerEvaluatorCard
+					})
+				}
+
 				const evaluation = await evaluateHand(evalInput)
 
-				setValue(`${groupSelector}.evaluation`, evaluation.handName)
+				setValue(`${groupSelector}.evaluation`, evaluation)
 			}
 		})()
 		// eslint-disable-next-line react-hooks/exhaustive-deps

@@ -34,12 +34,15 @@ const zodNumber = z.coerce
 	.gte(0)
 	.refine(atMostTwoDigitsAfterDecimal, { message: 'Cannot have more than 2 digits after the decimal' })
 
+const zodCardValue = z.enum(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'])
+const zodCardSuit = z.enum(['C', 'D', 'H', 'S'])
+
 const zodCardGroup = z.object({
 	player: z.number().gte(0).lte(12),
 	cards: z.array(
 		z.object({
-			value: z.enum(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']),
-			suit: z.enum(['C', 'D', 'H', 'S']),
+			value: zodCardValue,
+			suit: zodCardSuit,
 		})
 	),
 	evaluation: z.string(),
@@ -56,8 +59,6 @@ const zodRound = z.object({
 	actions: z.array(zodAction),
 })
 
-export type FormRound = z.infer<typeof zodRound>
-
 const FormSchema = z.object({
 	name: z.string(),
 	gameStyle: z.coerce.number().gte(0).lte(1),
@@ -73,8 +74,15 @@ const FormSchema = z.object({
 	villains: z.array(zodCardGroup),
 })
 
+export type FormCardValue = z.infer<typeof zodCardValue>
+export type FormCardSuit = z.infer<typeof zodCardSuit>
+export type FormCardGroup = z.infer<typeof zodCardGroup>
+export type FormRound = z.infer<typeof zodRound>
+export type Schema = z.infer<typeof FormSchema>
+export type PokerEvaluatorCard = `${FormCardValue}${FormCardSuit}`
+
 const NewHand = () => {
-	const form = useForm<z.infer<typeof FormSchema>>({
+	const form = useForm<Schema>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
 			name: '',

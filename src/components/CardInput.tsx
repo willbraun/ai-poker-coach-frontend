@@ -39,19 +39,19 @@ const CardInput = ({ cardIndex, groupSelector }: { cardIndex: number; groupSelec
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value='2'>2</SelectItem>
-								<SelectItem value='3'>3</SelectItem>
-								<SelectItem value='4'>4</SelectItem>
-								<SelectItem value='5'>5</SelectItem>
-								<SelectItem value='6'>6</SelectItem>
-								<SelectItem value='7'>7</SelectItem>
-								<SelectItem value='8'>8</SelectItem>
-								<SelectItem value='9'>9</SelectItem>
-								<SelectItem value='T'>10</SelectItem>
-								<SelectItem value='J'>Jack</SelectItem>
-								<SelectItem value='Q'>Queen</SelectItem>
-								<SelectItem value='K'>King</SelectItem>
 								<SelectItem value='A'>Ace</SelectItem>
+								<SelectItem value='K'>King</SelectItem>
+								<SelectItem value='Q'>Queen</SelectItem>
+								<SelectItem value='J'>Jack</SelectItem>
+								<SelectItem value='T'>10</SelectItem>
+								<SelectItem value='9'>9</SelectItem>
+								<SelectItem value='8'>8</SelectItem>
+								<SelectItem value='7'>7</SelectItem>
+								<SelectItem value='6'>6</SelectItem>
+								<SelectItem value='5'>5</SelectItem>
+								<SelectItem value='4'>4</SelectItem>
+								<SelectItem value='3'>3</SelectItem>
+								<SelectItem value='2'>2</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
