@@ -8,9 +8,10 @@ import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 interface ActionInputProps {
 	selector: string
 	player: number
+	disabled: boolean
 }
 
-const ActionInput = ({ selector, player }: ActionInputProps) => {
+const ActionInput = ({ selector, player, disabled }: ActionInputProps) => {
 	const { setValue, watch, control } = useFormContext()
 	const decision: string = watch(`${selector}.decision`)
 	const position: string = watch('position')
@@ -25,7 +26,7 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 	}
 
 	return (
-		<div>
+		<div className={`duration-100 ${!disabled && 'bg-blue-200 scale-105 rounded-xl p-4 border-1 border-black'}`}>
 			<FormLabel>{`What did ${identifier} do?`}</FormLabel>
 			<div className='mt-4 grid grid-rows-1 grid-cols-2 gap-4'>
 				<div>
@@ -35,7 +36,7 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 						name={`${selector}.decision`}
 						render={() => (
 							<FormItem>
-								<Select onValueChange={onDecisionChange}>
+								<Select onValueChange={onDecisionChange} disabled={disabled}>
 									<FormControl>
 										<SelectTrigger className='w-full'>
 											<SelectValue placeholder='Select' />
@@ -70,7 +71,7 @@ const ActionInput = ({ selector, player }: ActionInputProps) => {
 										inputMode='numeric'
 										onChange={e => handleNumberChange(e, field.onChange)}
 										onBlur={e => handleNumberBlur(e, field.onChange)}
-										disabled={isZeroBet(decision)}
+										disabled={disabled || isZeroBet(decision)}
 									/>
 								</FormControl>
 								<FormMessage />

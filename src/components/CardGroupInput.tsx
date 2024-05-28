@@ -7,6 +7,7 @@ import { FormCardGroup, FormRound, PokerEvaluatorCard, Schema } from '@/app/(mai
 interface CardGroupProps {
 	groupSelector: string
 	player?: number
+	selected?: boolean
 }
 
 interface roundDetails {
@@ -74,7 +75,7 @@ export const isCardGroupComplete = (cards: { value: string; suit: string }[], ca
 	return cards.length === cardCount && cards.every(card => card?.value && card?.suit)
 }
 
-const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
+const CardGroup = ({ groupSelector, player, selected }: CardGroupProps) => {
 	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues() as Schema
 	const { title, cardCount } = getDetails(groupSelector, player)
@@ -111,7 +112,7 @@ const CardGroup = ({ groupSelector, player }: CardGroupProps) => {
 	}, [JSON.stringify(group?.cards)])
 
 	return (
-		<div>
+		<div className={`duration-100 ${selected && 'bg-blue-200 scale-105 rounded-xl p-4 border-1 border-black'}`}>
 			<FormLabel>{title}</FormLabel>
 			<div className='mt-4 mb-8 flex flex-wrap items-center gap-4'>
 				<div className='flex gap-4 mr-auto'>

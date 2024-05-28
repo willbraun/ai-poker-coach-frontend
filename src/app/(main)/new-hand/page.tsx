@@ -113,11 +113,6 @@ const NewHand = () => {
 							decision: 'bet',
 							bet: 0,
 						},
-						{
-							player: 3,
-							decision: '',
-							bet: 0,
-						},
 					],
 				},
 				{
@@ -163,7 +158,6 @@ const NewHand = () => {
 
 	const [currentRound, setCurrentRound] = useState(0)
 	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
-	// const [currentRoundBetterCount, setcurrentRoundBetterCount] = useState<number[]>([])
 
 	const round0ActionsFA = useFieldArray({
 		control,
@@ -233,13 +227,9 @@ const NewHand = () => {
 	useEffect(() => {
 		if (!playerCount) return
 
-		const underTheGun = playerCount === 2 ? 1 : 3
-		fieldArrays[0].update(2, { player: underTheGun, decision: '', bet: 0 })
-
 		const properties = Array.from({ length: playerCount }, _ => 'active')
 		const initialStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })))
-		setPlayerStatus({ ...initialStatus, [underTheGun]: 'current' })
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		setPlayerStatus({ ...initialStatus, 2: 'current' })
 	}, [playerCount])
 
 	const currentRoundBetterCount = useMemo(() => {
@@ -266,6 +256,7 @@ const NewHand = () => {
 		const selector = `rounds.${round}.actions` as ActionSelector
 		const actions = getValues(selector)
 		const currentPlayer = Number(Object.entries(playerStatus).find(([_, status]) => status === 'current')?.[0])
+		console.log(playerStatus)
 		if (!currentPlayer) return
 
 		let nextPlayer = currentPlayer
@@ -610,7 +601,10 @@ const NewHand = () => {
 								const startingAction = round === 0 ? 2 : 0
 								return (
 									<div key={i} className='flex flex-col gap-4'>
-										<CardGroupInput groupSelector={`rounds.${round}.cards`} />
+										<CardGroupInput
+											groupSelector={`rounds.${round}.cards`}
+											selected={fieldArrays[round].fields.length === startingAction}
+										/>
 
 										{round === 0 && (
 											<>
@@ -619,11 +613,12 @@ const NewHand = () => {
 											</>
 										)}
 
-										{fieldArrays[round].fields.slice(startingAction).map((action, index) => (
+										{fieldArrays[round].fields.slice(startingAction).map((action, index, arr) => (
 											<ActionInput
 												key={action.id}
 												selector={`rounds.${round}.actions.${index + startingAction}`}
 												player={action.player}
+												disabled={round !== currentRound || index !== arr.length - 1}
 											/>
 										))}
 									</div>
