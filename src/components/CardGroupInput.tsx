@@ -7,7 +7,7 @@ import { FormCardGroup, FormRound, PokerEvaluatorCard, Schema } from '@/app/(mai
 interface CardGroupProps {
 	groupSelector: string
 	player?: number
-	selected?: boolean
+	disabled?: boolean
 }
 
 interface roundDetails {
@@ -15,7 +15,7 @@ interface roundDetails {
 	cardCount: number
 }
 
-const getDetails = (groupSelector: string, player?: number): roundDetails => {
+export const getDetails = (groupSelector: string, player?: number): roundDetails => {
 	if (groupSelector === 'rounds.0.cards') {
 		return {
 			title: 'Your Cards',
@@ -75,7 +75,7 @@ export const isCardGroupComplete = (cards: { value: string; suit: string }[], ca
 	return cards.length === cardCount && cards.every(card => card?.value && card?.suit)
 }
 
-const CardGroup = ({ groupSelector, player, selected }: CardGroupProps) => {
+const CardGroup = ({ groupSelector, player, disabled = false }: CardGroupProps) => {
 	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues() as Schema
 	const { title, cardCount } = getDetails(groupSelector, player)
@@ -112,12 +112,12 @@ const CardGroup = ({ groupSelector, player, selected }: CardGroupProps) => {
 	}, [JSON.stringify(group?.cards)])
 
 	return (
-		<div className={`duration-100 ${selected && 'bg-blue-200 scale-105 rounded-xl p-4 border-1 border-black'}`}>
+		<div className={`duration-100 ${!disabled && 'bg-blue-200 scale-105 rounded-xl p-4 border-1 border-black'}`}>
 			<FormLabel>{title}</FormLabel>
 			<div className='mt-4 mb-8 flex flex-wrap items-center gap-4'>
 				<div className='flex gap-4 mr-auto'>
 					{Array.from({ length: cardCount }).map((_, i) => (
-						<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} />
+						<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} disabled={disabled} />
 					))}
 				</div>
 				<p className=''>{group?.evaluation ?? ''}</p>

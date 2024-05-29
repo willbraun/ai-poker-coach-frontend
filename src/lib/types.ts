@@ -77,7 +77,7 @@ export interface PotAction {
 	bet: number
 }
 
-export type validRound = 0 | 1 | 2 | 3
+export type validRound = -1 | 0 | 1 | 2 | 3
 
 export type ActionSelector = `rounds.${validRound}.actions`
 

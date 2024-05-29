@@ -10,11 +10,12 @@ import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import CardGroupInput, { isCardGroupComplete } from '@/components/CardGroupInput'
+import CardGroupInput, { getDetails, isCardGroupComplete } from '@/components/CardGroupInput'
 import { useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus, validRound } from '@/lib/types'
 import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
+import TypographyH2 from '@/components/ui/typography/TypographyH2'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -156,7 +157,7 @@ const NewHand = () => {
 
 	const methods = useForm()
 
-	const [currentRound, setCurrentRound] = useState(0)
+	const [currentRound, setCurrentRound] = useState(-1)
 	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
 
 	const round0ActionsFA = useFieldArray({
@@ -187,15 +188,25 @@ const NewHand = () => {
 	})
 
 	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
-
-	const disableNext = false // todo
 	const showSubmit = activePlayers.length === 1 || villainFields.length > 0
 	const disableSubmit = watch('villains').some(villain => !isCardGroupComplete(villain.cards, 2))
+	const startingAction = currentRound > 0 ? 0 : 2
 
-	const smallBlind = watch('smallBlind')
-	const bigBlind = watch('bigBlind')
 	const playerCount = Number(watch('playerCount'))
 	const position = Number(watch('position'))
+	const smallBlind = watch('smallBlind')
+	const bigBlind = watch('bigBlind')
+	const currentEval = watch(`rounds.${currentRound}.cards.evaluation`)
+	const currentActionIndex = watch(`rounds.${currentRound}.actions`)?.length - 1
+	const currentAction = watch(`rounds.${currentRound}.actions.${currentActionIndex}`)
+	const isBigBlindAction = currentRound === 0 && currentActionIndex === startingAction - 1
+	const isActionShowing = currentAction && !isBigBlindAction
+	const decisionComplete = ['fold', 'check'].includes(currentAction?.decision) || currentAction?.bet > 0
+
+	const disableNext =
+		currentRound === -1
+			? !playerCount || !position || !smallBlind || !bigBlind
+			: currentEval === '' || currentEval === 'Invalid Hand' || (isActionShowing && !decisionComplete)
 
 	const positionLabels = new Map<number, string>([
 		[1, 'small blind'],
@@ -256,7 +267,6 @@ const NewHand = () => {
 		const selector = `rounds.${round}.actions` as ActionSelector
 		const actions = getValues(selector)
 		const currentPlayer = Number(Object.entries(playerStatus).find(([_, status]) => status === 'current')?.[0])
-		console.log(playerStatus)
 		if (!currentPlayer) return
 
 		let nextPlayer = currentPlayer
@@ -325,18 +335,23 @@ const NewHand = () => {
 				}))
 
 			appendVillains(villainFormData)
-			scrollToBottom()
 			return
 		}
 
 		setCurrentRound(currentRound + 1)
-		scrollToBottom()
 	}
 
 	const handleNext = () => {
+		scrollToBottom()
+
+		if (currentRound === -1) {
+			setCurrentRound(0)
+			return
+		}
+
 		const selector = `rounds.${currentRound}.actions` as ActionSelector
 		const actions = getValues(selector)
-		if (actions.length === 0) {
+		if (actions.length === startingAction) {
 			addAction(currentRound as validRound)
 			return
 		}
@@ -352,7 +367,7 @@ const NewHand = () => {
 				.reduce((a, b) => a + b, 0)
 		})
 
-		const decisionCount = actions.slice(currentRound === 0 ? 2 : 0)
+		const decisionCount = actions.slice(startingAction)
 
 		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && decisionCount.length >= currentRoundBetterCount) {
 			nextRound()
@@ -391,6 +406,10 @@ const NewHand = () => {
 										<FormControl>
 											<Input {...field} />
 										</FormControl>
+										<FormDescription>
+											Recommended - A short, descriptive title to help you remember the hand. For example, &quot;Big pot
+											with aces&quot; or &quot;Bluff gone wrong vs aggressive player&quot;.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -430,8 +449,10 @@ const NewHand = () => {
 								name='playerCount'
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Players dealt in this hand</FormLabel>
-										<Select onValueChange={field.onChange}>
+										<FormLabel>
+											Players dealt in this hand<span className='ml-2 text-pure-red'>*</span>
+										</FormLabel>
+										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
 													<SelectValue placeholder='Select a number' />
@@ -460,8 +481,10 @@ const NewHand = () => {
 								name='position'
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Your position relative to the small blind (1)</FormLabel>
-										<Select onValueChange={field.onChange}>
+										<FormLabel>
+											Your position relative to the small blind (1)<span className='ml-2 text-pure-red'>*</span>
+										</FormLabel>
+										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
 													<SelectValue placeholder='Select a number' />
@@ -489,7 +512,9 @@ const NewHand = () => {
 								name='smallBlind'
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Small Blind</FormLabel>
+										<FormLabel>
+											Small Blind<span className='ml-2 text-pure-red'>*</span>
+										</FormLabel>
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -497,6 +522,7 @@ const NewHand = () => {
 												inputMode='numeric'
 												onChange={e => handleNumberChange(e, field.onChange)}
 												onBlur={e => handleNumberBlur(e, field.onChange)}
+												disabled={currentRound > -1}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -508,7 +534,9 @@ const NewHand = () => {
 								name='bigBlind'
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Big Blind</FormLabel>
+										<FormLabel>
+											Big Blind<span className='ml-2 text-pure-red'>*</span>
+										</FormLabel>
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -516,6 +544,7 @@ const NewHand = () => {
 												inputMode='numeric'
 												onChange={e => handleNumberChange(e, field.onChange)}
 												onBlur={e => handleNumberBlur(e, field.onChange)}
+												disabled={currentRound > -1}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -535,6 +564,7 @@ const NewHand = () => {
 												inputMode='numeric'
 												onChange={e => handleNumberChange(e, field.onChange)}
 												onBlur={e => handleNumberBlur(e, field.onChange)}
+												disabled={currentRound > -1}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -554,6 +584,7 @@ const NewHand = () => {
 												inputMode='numeric'
 												onChange={e => handleNumberChange(e, field.onChange)}
 												onBlur={e => handleNumberBlur(e, field.onChange)}
+												disabled={currentRound > -1}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -573,6 +604,7 @@ const NewHand = () => {
 												inputMode='numeric'
 												onChange={e => handleNumberChange(e, field.onChange)}
 												onBlur={e => handleNumberBlur(e, field.onChange)}
+												disabled={currentRound > -1}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -597,28 +629,30 @@ const NewHand = () => {
 								)}
 							/>
 
+							{currentRound >= 0 && (
+								<>
+									<TypographyH2>Hand Action</TypographyH2>
+
+									<p>{`Player 1 bet ${smallBlind} as the small blind`}</p>
+									<p>{`Player 2 bet ${bigBlind} as the big blind`}</p>
+								</>
+							)}
+
 							{Array.from({ length: currentRound + 1 }, (_, i) => i).map((round, i) => {
-								const startingAction = round === 0 ? 2 : 0
+								const startingActionMap = round === 0 ? 2 : 0
 								return (
 									<div key={i} className='flex flex-col gap-4'>
 										<CardGroupInput
 											groupSelector={`rounds.${round}.cards`}
-											selected={fieldArrays[round].fields.length === startingAction}
+											disabled={fieldArrays[round].fields.length !== startingActionMap}
 										/>
 
-										{round === 0 && (
-											<>
-												<p>{`Player 1 bet ${smallBlind} as the small blind`}</p>
-												<p>{`Player 2 bet ${bigBlind} as the big blind`}</p>
-											</>
-										)}
-
-										{fieldArrays[round].fields.slice(startingAction).map((action, index, arr) => (
+										{fieldArrays[round].fields.slice(startingActionMap).map((action, index, arr) => (
 											<ActionInput
 												key={action.id}
-												selector={`rounds.${round}.actions.${index + startingAction}`}
+												selector={`rounds.${round}.actions.${index + startingActionMap}`}
 												player={action.player}
-												disabled={round !== currentRound || index !== arr.length - 1}
+												disabled={round !== currentRound || index !== arr.length - 1 || villainFields.length > 0}
 											/>
 										))}
 									</div>
@@ -639,9 +673,14 @@ const NewHand = () => {
 									Submit
 								</Button>
 							) : (
-								<Button type='button' className='w-full text-xl' onClick={handleNext} disabled={disableNext}>
-									Next
-								</Button>
+								<div className='flex gap-4'>
+									<Button type='button' className='w-1/2 text-xl' disabled={currentRound === -1}>
+										Back
+									</Button>
+									<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
+										Next
+									</Button>
+								</div>
 							)}
 							{Object.keys(errors).length ? (
 								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>

@@ -11,7 +11,15 @@ import spade from '@/lib/images/icons/spade.svg'
 import { FormLabel } from './ui/form'
 import LargeCard from './LargeCard'
 
-const CardInput = ({ cardIndex, groupSelector }: { cardIndex: number; groupSelector: string }) => {
+const CardInput = ({
+	cardIndex,
+	groupSelector,
+	disabled,
+}: {
+	cardIndex: number
+	groupSelector: string
+	disabled: boolean
+}) => {
 	const { setValue, watch } = useFormContext()
 
 	const cardSelector = `${groupSelector}.cards.${cardIndex}`
@@ -21,9 +29,9 @@ const CardInput = ({ cardIndex, groupSelector }: { cardIndex: number; groupSelec
 
 	return (
 		<Popover>
-			<PopoverTrigger>
+			<PopoverTrigger disabled={disabled}>
 				{card?.value && card?.suit ? (
-					<LargeCard value={card.value} suit={card.suit} />
+					<LargeCard value={card.value} suit={card.suit} disabled={disabled} />
 				) : (
 					<div className='w-24 h-36 border-dashed border-1 border-black rounded-lg flex justify-center items-center bg-slate-200 hover:brightness-105 hover:cursor-pointer'>
 						<Plus size='40px' />
