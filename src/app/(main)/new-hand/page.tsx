@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput, { getDetails, isCardGroupComplete } from '@/components/CardGroupInput'
 import { useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
-import { ActionSelector, PlayerStatus, validRound } from '@/lib/types'
+import { ActionSelector, AllPlayerStatus, PlayerStatus, validRound } from '@/lib/types'
 import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 
@@ -158,7 +158,8 @@ const NewHand = () => {
 	const methods = useForm()
 
 	const [currentRound, setCurrentRound] = useState(-1)
-	const [playerStatus, setPlayerStatus] = useState<{ [key: number]: PlayerStatus }>({})
+	const [playerStatusHistory, setPlayerStatusHistory] = useState<AllPlayerStatus[]>([])
+	const playerStatus = playerStatusHistory.at(-1) ?? {}
 
 	const round0ActionsFA = useFieldArray({
 		control,
@@ -182,7 +183,11 @@ const NewHand = () => {
 
 	const fieldArrays = [round0ActionsFA, round1ActionsFA, round2ActionsFA, round3ActionsFA]
 
-	const { fields: villainFields, append: appendVillains } = useFieldArray({
+	const {
+		fields: villainFields,
+		append: appendVillains,
+		remove: removeVillains,
+	} = useFieldArray({
 		control,
 		name: 'villains',
 	})
@@ -200,8 +205,9 @@ const NewHand = () => {
 	const currentActionIndex = watch(`rounds.${currentRound}.actions`)?.length - 1
 	const currentAction = watch(`rounds.${currentRound}.actions.${currentActionIndex}`)
 	const isBigBlindAction = currentRound === 0 && currentActionIndex === startingAction - 1
-	const isActionShowing = currentAction && !isBigBlindAction
+	const isActionShowing = currentAction && !isBigBlindAction && villainFields.length === 0
 	const decisionComplete = ['fold', 'check'].includes(currentAction?.decision) || currentAction?.bet > 0
+	const isCardGroupShowing = fieldArrays[currentRound]?.fields?.length === startingAction
 
 	const disableNext =
 		currentRound === -1
@@ -239,8 +245,11 @@ const NewHand = () => {
 		if (!playerCount) return
 
 		const properties = Array.from({ length: playerCount }, _ => 'active')
-		const initialStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })))
-		setPlayerStatus({ ...initialStatus, 2: 'current' })
+		const initialStatus: AllPlayerStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })), {
+			2: 'current',
+		})
+
+		setPlayerStatusHistory([initialStatus])
 	}, [playerCount])
 
 	const currentRoundBetterCount = useMemo(() => {
@@ -266,21 +275,21 @@ const NewHand = () => {
 	const addAction = async (round: validRound) => {
 		const selector = `rounds.${round}.actions` as ActionSelector
 		const actions = getValues(selector)
+		const lastAction = actions[actions.length - 1]
 		const currentPlayer = Number(Object.entries(playerStatus).find(([_, status]) => status === 'current')?.[0])
 		if (!currentPlayer) return
 
 		let nextPlayer = currentPlayer
+		let nextStatus = {}
 
 		if (actions.length === 0) {
 			nextPlayer = Math.min(...activePlayers.map(([player]) => Number(player)))
-
-			setPlayerStatus({
+			nextStatus = {
 				...playerStatus,
 				[currentPlayer]: 'active',
 				[nextPlayer]: 'current',
-			})
+			}
 		} else {
-			const lastAction = actions[actions.length - 1]
 			const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
 			if (!valid) return
 
@@ -304,15 +313,17 @@ const NewHand = () => {
 					updatedStatus = 'active'
 			}
 
-			setPlayerStatus({
+			nextStatus = {
 				...playerStatus,
 				[currentPlayer]: updatedStatus as PlayerStatus,
 				[nextPlayer]: 'current',
-			})
-
-			if (activePlayers.length === 2 && lastAction.decision === 'fold') {
-				return
 			}
+		}
+
+		setPlayerStatusHistory([...playerStatusHistory, nextStatus])
+
+		if (activePlayers.length === 2 && lastAction?.decision === 'fold') {
+			return
 		}
 
 		fieldArrays[round].append({
@@ -320,8 +331,6 @@ const NewHand = () => {
 			decision: '',
 			bet: 0,
 		})
-
-		scrollToBottom()
 	}
 
 	const nextRound = () => {
@@ -376,19 +385,24 @@ const NewHand = () => {
 		}
 	}
 
-	const isNextDisabled = (selector: ActionSelector) => {
-		const actions = getValues(selector)
-		const lastAction = actions.at(-1)
-		if (!lastAction?.decision) {
-			return true
-		}
+	const handleBack = () => {
+		if (isActionShowing) {
+			if (!showSubmit) {
+				fieldArrays[currentRound].remove(-1)
+			}
 
-		if (isZeroBet(lastAction.decision)) {
-			return false
-		} else {
-			return Number(lastAction?.bet) === 0
+			if (playerStatusHistory.length === 1) return
+			setPlayerStatusHistory(playerStatusHistory.slice(0, -1))
+		} else if (isCardGroupShowing) {
+			setValue(`rounds.${currentRound}.cards.cards`, [])
+			setValue(`rounds.${currentRound}.cards.evaluation`, '')
+			setCurrentRound(currentRound - 1)
+		} else if (villainFields.length > 0) {
+			removeVillains()
 		}
 	}
+
+	const myHandleSubmit = handleSubmit(data => console.log(data))
 
 	return (
 		<main className='mt-24'>
@@ -396,7 +410,7 @@ const NewHand = () => {
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
-						<form onSubmit={handleSubmit(data => console.log(data))} className='space-y-8'>
+						<form className='space-y-8'>
 							<FormField
 								control={control}
 								name='name'
@@ -652,7 +666,9 @@ const NewHand = () => {
 												key={action.id}
 												selector={`rounds.${round}.actions.${index + startingActionMap}`}
 												player={action.player}
-												disabled={round !== currentRound || index !== arr.length - 1 || villainFields.length > 0}
+												disabled={
+													round !== currentRound || index !== arr.length - 1 || villainFields.length > 0 || showSubmit
+												}
 											/>
 										))}
 									</div>
@@ -663,25 +679,20 @@ const NewHand = () => {
 								<CardGroupInput key={villain.id} groupSelector={`villains.${i}`} player={villain.player} />
 							))}
 
-							{showSubmit ? (
-								<Button
-									type='submit'
-									className='w-full text-xl'
-									onClick={() => console.log('submit')}
-									disabled={disableSubmit}
-								>
-									Submit
+							<div className='flex gap-4'>
+								<Button type='button' className='w-1/2 text-xl' onClick={handleBack} disabled={currentRound === -1}>
+									Back
 								</Button>
-							) : (
-								<div className='flex gap-4'>
-									<Button type='button' className='w-1/2 text-xl' disabled={currentRound === -1}>
-										Back
+								{showSubmit ? (
+									<Button type='button' className='w-1/2 text-xl' onClick={myHandleSubmit} disabled={disableSubmit}>
+										Submit
 									</Button>
+								) : (
 									<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
 										Next
 									</Button>
-								</div>
-							)}
+								)}
+							</div>
 							{Object.keys(errors).length ? (
 								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>
 							) : null}

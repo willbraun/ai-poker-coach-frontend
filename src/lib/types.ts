@@ -82,3 +82,7 @@ export type validRound = -1 | 0 | 1 | 2 | 3
 export type ActionSelector = `rounds.${validRound}.actions`
 
 export type PlayerStatus = 'current' | 'active' | 'all-in' | 'folded'
+
+export interface AllPlayerStatus {
+	[player: number]: PlayerStatus
+}
