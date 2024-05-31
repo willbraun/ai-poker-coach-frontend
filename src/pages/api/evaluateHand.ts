@@ -53,7 +53,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
 	if (cards.length === 2) {
 		if (cards[0] === cards[1]) {
-			newHandName = 'Invalid Hand'
+			newHandName = 'Invalid Hand: Duplicate Cards'
 		} else if (getValue(cards[0]) === getValue(cards[1])) {
 			const value = getValue(cards[0])
 			newHandName = `Pocket ${getDisplay(value, true)}`
@@ -102,7 +102,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 			case 'one pair':
 				const pairValue = getValues(cards).find(value => valueMap.get(value) === 2)
 				if (!pairValue) {
-					newHandName = 'Invalid Hand'
+					newHandName = 'Error processing pair'
 					break
 				}
 				newHandName = `Pair of ${getDisplay(pairValue, true)}`
@@ -116,7 +116,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 			case 'three of a kind':
 				const tripValue = getValues(cards).find(value => valueMap.get(value) === 3)
 				if (!tripValue) {
-					newHandName = 'Invalid Hand'
+					newHandName = 'Error processing three of a kind'
 					break
 				}
 				newHandName = `Three of a Kind: ${getDisplay(tripValue, true)}`
@@ -124,7 +124,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 			case 'straight':
 				const straight = getStraight(cards)
 				if (!straight) {
-					newHandName = 'Invalid Hand'
+					newHandName = 'Error processing straight'
 					break
 				}
 				const [straightLowCard, straightHighCard] = straight
@@ -138,7 +138,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				const fhTripValue = getValues(cards).find(value => valueMap.get(value) === 3)
 				const fhPairValue = getValues(cards).find(value => valueMap.get(value) === 2)
 				if (!fhTripValue || !fhPairValue) {
-					newHandName = 'Invalid Hand'
+					newHandName = 'Error processing full house'
 					break
 				}
 				newHandName = `Full House: ${getDisplay(fhTripValue, true)} full of ${getDisplay(fhPairValue, true)}`
@@ -146,7 +146,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 			case 'four of a kind':
 				const quadValue = getValues(cards).find(value => valueMap.get(value) === 4)
 				if (!quadValue) {
-					newHandName = 'Invalid Hand'
+					newHandName = 'Error processing four of a kind'
 					break
 				}
 				newHandName = `Four of a Kind: ${getDisplay(quadValue, true)}`
@@ -154,7 +154,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 			case 'straight flush':
 				const straightFlush = getStraight(cards)
 				if (!straightFlush) {
-					newHandName = 'Invalid Hand'
+					newHandName = 'Error processing straight flush'
 					break
 				}
 				const [sfLowCard, sfHighCard] = straightFlush
@@ -166,7 +166,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				break
 			case 'invalid hand':
 			default:
-				newHandName = 'Invalid Hand'
+				newHandName = 'Invalid Hand: Duplicate Cards'
 				break
 		}
 
