@@ -16,6 +16,8 @@ import ActionInput from '@/components/ActionInput'
 import { ActionSelector, AllPlayerStatus, PlayerStatus, validRound } from '@/lib/types'
 import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
+import { analyze } from './server'
+import { useFormState, useFormStatus } from 'react-dom'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -154,6 +156,14 @@ const NewHand = () => {
 		watch,
 		trigger,
 	} = form
+
+	const initialState = {
+		analysis: '',
+		error: '',
+	}
+
+	const [state, formAction] = useFormState(analyze, initialState)
+	const { pending } = useFormStatus()
 
 	const methods = useForm()
 
@@ -410,7 +420,7 @@ const NewHand = () => {
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
-						<form className='space-y-8'>
+						<form action={formAction} className='space-y-8'>
 							<FormField
 								control={control}
 								name='name'
