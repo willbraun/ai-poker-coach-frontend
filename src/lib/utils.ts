@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { Hand } from './types'
 import { ChangeEvent } from 'react'
-import { FormCardValue } from '@/app/(main)/new-hand/page'
+import { FormCardValue } from '@/app/(main)/new-hand/formSchema'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))

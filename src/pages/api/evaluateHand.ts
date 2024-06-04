@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as PokerEvaluator from 'poker-evaluator-ts'
 import { valueToDisplay } from '@/lib/utils'
-import { FormCardValue, FormCardSuit, PokerEvaluatorCard } from '@/app/(main)/new-hand/page'
+import { FormCardValue, FormCardSuit, PokerEvaluatorCard } from '@/app/(main)/new-hand/formSchema'
 
 const keys = Object.keys(valueToDisplay) as FormCardValue[]
 

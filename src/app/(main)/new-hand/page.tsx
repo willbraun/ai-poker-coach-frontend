@@ -381,8 +381,7 @@ const NewHand = () => {
 										<FormLabel>Game Style</FormLabel>
 										<FormControl>
 											<RadioGroup
-												{...field}
-												value={field.value.toString()}
+												name={field.name}
 												defaultValue={field.value.toString()}
 												onValueChange={field.onChange}
 												className='flex flex-col space-y-1'
@@ -413,7 +412,8 @@ const NewHand = () => {
 										<FormLabel>
 											Players dealt in this hand<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<Select name={field.name} onValueChange={field.onChange} disabled={currentRound > -1}>
+										<input {...field} className='hidden' />
+										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
 													<SelectValue placeholder='Select a number' />
@@ -445,7 +445,8 @@ const NewHand = () => {
 										<FormLabel>
 											Your position relative to the small blind (1)<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<Select name={field.name} onValueChange={field.onChange} disabled={currentRound > -1}>
+										<input {...field} className='hidden' />
+										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
 													<SelectValue placeholder='Select a number' />
@@ -472,11 +473,12 @@ const NewHand = () => {
 								control={control}
 								name='smallBlind'
 								render={({ field }) => (
-									<FormItem>
+									<FormItem className='w-1/2'>
 										<FormLabel>
 											Small Blind<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<FormControl className='w-1/2'>
+										<input {...field} className='hidden' />
+										<FormControl>
 											<Input
 												{...field}
 												type='text'
@@ -498,6 +500,7 @@ const NewHand = () => {
 										<FormLabel>
 											Big Blind<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
+										<input {...field} className='hidden' />
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -518,6 +521,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Ante</FormLabel>
+										<input {...field} className='hidden' />
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -538,6 +542,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Big Blind Ante</FormLabel>
+										<input {...field} className='hidden' />
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -558,6 +563,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Your stack size at the beginning of the hand</FormLabel>
+										<input {...field} className='hidden' />
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -586,6 +592,28 @@ const NewHand = () => {
 											styles, history, or simply set the stage for the hand.{' '}
 										</FormDescription>
 										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='rounds'
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<input {...field} value={JSON.stringify(field.value)} className='hidden' />
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
+								name='villains'
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<input {...field} value={JSON.stringify(field.value)} className='hidden' />
+										</FormControl>
 									</FormItem>
 								)}
 							/>
@@ -640,9 +668,11 @@ const NewHand = () => {
 								</Button>
 								{/* )} */}
 							</div>
+
 							{Object.keys(errors).length ? (
 								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>
 							) : null}
+							{state.error && <p className='text-red-500 mt-2'>{state.error}</p>}
 						</form>
 					</Form>
 				</FormProvider>

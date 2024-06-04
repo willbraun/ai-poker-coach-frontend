@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form'
 import { FormLabel } from '@/components/ui/form'
 import CardInput from './CardInput'
 import { useEffect } from 'react'
-import { FormCardGroup, FormRound, PokerEvaluatorCard, Schema } from '@/app/(main)/new-hand/page'
+import { FormCardGroup, FormRound, PokerEvaluatorCard, Schema } from '@/app/(main)/new-hand/formSchema'
 
 interface CardGroupProps {
 	groupSelector: string
