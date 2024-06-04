@@ -4,7 +4,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { FormSchema, Schema } from './formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -18,71 +18,6 @@ import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
 import { useFormState, useFormStatus } from 'react-dom'
-
-const atMostTwoDigitsAfterDecimal = (value: number) => {
-	const stringValue = value.toString()
-	const decimalIndex = stringValue.indexOf('.')
-
-	if (decimalIndex === -1) {
-		return true
-	}
-
-	const digitsAfterDecimal = stringValue.substring(decimalIndex + 1)
-
-	return digitsAfterDecimal.length <= 2
-}
-
-const zodNumber = z.coerce
-	.number()
-	.gte(0)
-	.refine(atMostTwoDigitsAfterDecimal, { message: 'Cannot have more than 2 digits after the decimal' })
-
-const zodCardValue = z.enum(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'])
-const zodCardSuit = z.enum(['C', 'D', 'H', 'S'])
-
-const zodCardGroup = z.object({
-	player: z.number().gte(0).lte(12),
-	cards: z.array(
-		z.object({
-			value: zodCardValue,
-			suit: zodCardSuit,
-		})
-	),
-	evaluation: z.string(),
-})
-
-const zodAction = z.object({
-	player: z.number().gte(0).lte(12),
-	decision: z.enum(['', 'fold', 'check', 'call', 'bet', 'raise', 'callAllIn', 'betAllIn']),
-	bet: zodNumber,
-})
-
-const zodRound = z.object({
-	cards: zodCardGroup,
-	actions: z.array(zodAction),
-})
-
-const FormSchema = z.object({
-	name: z.string(),
-	gameStyle: z.coerce.number().gte(0).lte(1),
-	playerCount: z.coerce.number().gte(2).lte(12),
-	position: z.coerce.number().gte(1).lte(12),
-	smallBlind: zodNumber,
-	bigBlind: zodNumber,
-	ante: zodNumber,
-	bigBlindAnte: zodNumber,
-	myStack: zodNumber,
-	notes: z.string().optional(),
-	rounds: z.array(zodRound),
-	villains: z.array(zodCardGroup),
-})
-
-export type FormCardValue = z.infer<typeof zodCardValue>
-export type FormCardSuit = z.infer<typeof zodCardSuit>
-export type FormCardGroup = z.infer<typeof zodCardGroup>
-export type FormRound = z.infer<typeof zodRound>
-export type Schema = z.infer<typeof FormSchema>
-export type PokerEvaluatorCard = `${FormCardValue}${FormCardSuit}`
 
 const NewHand = () => {
 	const form = useForm<Schema>({
@@ -163,7 +98,6 @@ const NewHand = () => {
 	}
 
 	const [state, formAction] = useFormState(analyze, initialState)
-	const { pending } = useFormStatus()
 
 	const methods = useForm()
 
@@ -222,7 +156,10 @@ const NewHand = () => {
 	const disableNext =
 		currentRound === -1
 			? !playerCount || !position || !smallBlind || !bigBlind
-			: currentEval === '' || currentEval === 'Invalid Hand' || (isActionShowing && !decisionComplete)
+			: currentEval === '' ||
+			  currentEval.includes('Invalid Hand') ||
+			  currentEval.includes('Error') ||
+			  (isActionShowing && !decisionComplete)
 
 	const positionLabels = new Map<number, string>([
 		[1, 'small blind'],
@@ -412,8 +349,6 @@ const NewHand = () => {
 		}
 	}
 
-	const myHandleSubmit = handleSubmit(data => console.log(data))
-
 	return (
 		<main className='mt-24'>
 			<div className='max-w-screen-sm mx-auto pb-16 px-4'>
@@ -446,8 +381,10 @@ const NewHand = () => {
 										<FormLabel>Game Style</FormLabel>
 										<FormControl>
 											<RadioGroup
-												onValueChange={field.onChange}
+												{...field}
+												value={field.value.toString()}
 												defaultValue={field.value.toString()}
+												onValueChange={field.onChange}
 												className='flex flex-col space-y-1'
 											>
 												<FormItem className='flex items-center space-x-3 space-y-0'>
@@ -476,7 +413,7 @@ const NewHand = () => {
 										<FormLabel>
 											Players dealt in this hand<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
+										<Select name={field.name} onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
 													<SelectValue placeholder='Select a number' />
@@ -508,7 +445,7 @@ const NewHand = () => {
 										<FormLabel>
 											Your position relative to the small blind (1)<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
+										<Select name={field.name} onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
 													<SelectValue placeholder='Select a number' />
@@ -693,15 +630,15 @@ const NewHand = () => {
 								<Button type='button' className='w-1/2 text-xl' onClick={handleBack} disabled={currentRound === -1}>
 									Back
 								</Button>
-								{showSubmit ? (
-									<Button type='button' className='w-1/2 text-xl' onClick={myHandleSubmit} disabled={disableSubmit}>
-										Submit
-									</Button>
-								) : (
-									<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
-										Next
-									</Button>
-								)}
+								{/* {showSubmit ? ( */}
+								<Button type='submit' className='w-1/2 text-xl' disabled={disableSubmit}>
+									Submit
+								</Button>
+								{/* ) : ( */}
+								<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
+									Next
+								</Button>
+								{/* )} */}
 							</div>
 							{Object.keys(errors).length ? (
 								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>
