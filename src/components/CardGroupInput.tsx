@@ -15,6 +15,14 @@ interface roundDetails {
 	cardCount: number
 }
 
+interface handEvaluation {
+	result: {
+		handName: string
+		value: number
+	}
+	error: string
+}
+
 export const getDetails = (groupSelector: string, player?: number): roundDetails => {
 	if (groupSelector === 'rounds.0.cards') {
 		return {
@@ -49,7 +57,7 @@ export const getDetails = (groupSelector: string, player?: number): roundDetails
 	}
 }
 
-const evaluateHand = async (cards: PokerEvaluatorCard[]): Promise<string> => {
+const evaluateHand = async (cards: PokerEvaluatorCard[]): Promise<handEvaluation> => {
 	try {
 		const response = await fetch('/api/evaluateHand', {
 			method: 'POST',
@@ -63,11 +71,18 @@ const evaluateHand = async (cards: PokerEvaluatorCard[]): Promise<string> => {
 			throw new Error('Error evaluating hand')
 		}
 
-		const data = await response.json()
-		return data.result.handName
+		const data: handEvaluation = await response.json()
+
+		return data
 	} catch (error) {
 		console.error(error)
-		return `Error: ${error}`
+		return {
+			result: {
+				handName: '',
+				value: 0,
+			},
+			error: 'Error evaluating hand',
+		}
 	}
 }
 
@@ -105,7 +120,8 @@ const CardGroup = ({ groupSelector, player, disabled = false }: CardGroupProps) 
 
 				const evaluation = await evaluateHand(evalInput)
 
-				setValue(`${groupSelector}.evaluation`, evaluation)
+				setValue(`${groupSelector}.evaluation`, evaluation.result.handName)
+				setValue(`${groupSelector}.value`, evaluation.result.value)
 			}
 		})()
 		// eslint-disable-next-line react-hooks/exhaustive-deps

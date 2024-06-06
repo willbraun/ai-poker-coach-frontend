@@ -4,7 +4,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { FormSchema, Schema } from './formSchema'
+import { FormPotAction, FormRound, FormSchema, Schema } from './formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -33,12 +33,19 @@ const NewHand = () => {
 			bigBlindAnte: 0,
 			myStack: 0,
 			notes: '',
+			pots: [
+				{
+					potIndex: 0,
+					winner: '',
+				},
+			],
 			rounds: [
 				{
 					cards: {
 						player: 0,
 						cards: [],
 						evaluation: '',
+						value: 0,
 					},
 					actions: [
 						{
@@ -52,30 +59,37 @@ const NewHand = () => {
 							bet: 0,
 						},
 					],
+					potActions: [],
 				},
 				{
 					cards: {
 						player: 0,
 						cards: [],
 						evaluation: '',
+						value: 0,
 					},
 					actions: [],
+					potActions: [],
 				},
 				{
 					cards: {
 						player: 0,
 						cards: [],
 						evaluation: '',
+						value: 0,
 					},
 					actions: [],
+					potActions: [],
 				},
 				{
 					cards: {
 						player: 0,
 						cards: [],
 						evaluation: '',
+						value: 0,
 					},
 					actions: [],
+					potActions: [],
 				},
 			],
 			villains: [],
@@ -102,6 +116,7 @@ const NewHand = () => {
 	const methods = useForm()
 
 	const [currentRound, setCurrentRound] = useState(-1)
+	const [currentPotIndex, setCurrentPotIndex] = useState(0)
 	const [playerStatusHistory, setPlayerStatusHistory] = useState<AllPlayerStatus[]>([])
 	const playerStatus = playerStatusHistory.at(-1) ?? {}
 
@@ -280,6 +295,72 @@ const NewHand = () => {
 		})
 	}
 
+	const getPotActions = (round: FormRound) => {
+		const actions = round.actions
+
+		const playerBets: { [player: number]: number } = {}
+		actions
+			.filter(action => action.decision !== 'fold')
+			.forEach(action => {
+				const { player, bet } = action
+				if (playerBets[player] === undefined) {
+					playerBets[player] = 0
+				}
+				playerBets[player] += Number(bet)
+			})
+
+		// if all bets are zero, no potActions
+		const entries = Object.entries(playerBets)
+		if (entries.every(([_, bet]) => bet === 0)) {
+			return []
+		}
+
+		// if all aggregate bets are the same, potActions for one pot
+		let potIndex = currentPotIndex
+		if (entries.every(([_, bet]) => bet === entries[0][1])) {
+			return entries.map(
+				([player, bet]) =>
+					({
+						potIndex,
+						player: parseInt(player),
+						bet,
+					} as FormPotAction)
+			)
+		}
+
+		// if not, potActions for side pots
+		const sortedEntries = entries.toSorted((a, b) => a[1] - b[1])
+		let entryProgress = [...sortedEntries]
+		let result: FormPotAction[] = []
+
+		while (entryProgress.length > 0) {
+			const currentLowestBet = entryProgress[0][1]
+			result.push(
+				...entryProgress.map(
+					([player, _]) =>
+						({
+							potIndex,
+							player: parseInt(player),
+							bet: currentLowestBet,
+						} as FormPotAction)
+				)
+			)
+
+			entryProgress = entryProgress
+				.map(([player, bet]) => [player, bet - currentLowestBet] as [string, number])
+				.filter(([_, bet]) => bet > 0)
+
+			if (entryProgress.length === 0) {
+				break
+			}
+
+			potIndex++
+		}
+		setCurrentPotIndex(potIndex)
+
+		return result
+	}
+
 	const nextRound = () => {
 		if (currentRound === 3) {
 			const villainFormData = Object.entries(playerStatus)
@@ -288,12 +369,17 @@ const NewHand = () => {
 					player: Number(player),
 					cards: [],
 					evaluation: '',
+					value: 0,
 				}))
 
 			appendVillains(villainFormData)
 			return
 		}
 
+		if (currentRound >= 0) {
+			setValue(`rounds.${currentRound}.potActions`, getPotActions(watch(`rounds.${currentRound}`)))
+		}
+		console.log(getValues())
 		setCurrentRound(currentRound + 1)
 	}
 
@@ -597,6 +683,17 @@ const NewHand = () => {
 							/>
 							<FormField
 								control={control}
+								name='pots'
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<input {...field} value={JSON.stringify(field.value)} className='hidden' />
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={control}
 								name='rounds'
 								render={({ field }) => (
 									<FormItem>
@@ -631,6 +728,8 @@ const NewHand = () => {
 								const startingActionMap = round === 0 ? 2 : 0
 								return (
 									<div key={i} className='flex flex-col gap-4'>
+										<FormLabel>The pot is now X</FormLabel>
+
 										<CardGroupInput
 											groupSelector={`rounds.${round}.cards`}
 											disabled={fieldArrays[round].fields.length !== startingActionMap}

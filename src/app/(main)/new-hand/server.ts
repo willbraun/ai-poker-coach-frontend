@@ -5,6 +5,8 @@ import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain } 
 import { cookies } from 'next/headers'
 import { FormRound, FormSchema, Schema } from './formSchema'
 
+const decisions = ['folds', 'checks', 'calls', 'bets', 'raises to', 'bets all-in for', 'calls all-in for']
+
 export const analyze = async (prevState: any, formData: FormData) => {
 	const formDataObj = Object.fromEntries(formData)
 	const formDataJson = {
@@ -42,76 +44,84 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		},
 	]
 
-	let currentStep = 0
-	let currentPotIndex = 0
-
-	const getPotActions = (round: FormRound) => {
-		const actions = round.actions
-
-		const playerBets: { [player: number]: number } = {}
-		actions
-			.filter(action => action.decision !== 'fold')
-			.forEach(action => {
-				const { player, bet } = action
-				if (playerBets[player] === undefined) {
-					playerBets[player] = 0
-				}
-				playerBets[player] += bet
-			})
-
-		// if all aggregate bets are the same, one pot
-		const entries = Object.entries(playerBets)
-		if (entries.every(([_, bet]) => bet === entries[0][1])) {
-			return entries.map(
-				([player, bet]) =>
-					({
-						potIndex: currentPotIndex,
-						player: parseInt(player),
-						bet,
-					} as PotAction)
-			)
-		}
-
-		// if not, create potActions for side pots
-		const sortedEntries = entries.toSorted((a, b) => a[1] - b[1])
-		let entryProgress = [...sortedEntries]
-		let result: PotAction[] = []
-
-		while (entryProgress.length > 0) {
-			const currentLowestBet = entryProgress[0][1]
-			result.push(
-				...entryProgress.map(
-					([player, _]) =>
-						({
-							step: currentStep,
-							potIndex: currentPotIndex,
-							player: parseInt(player),
-							bet: currentLowestBet,
-						} as PotAction)
-				)
-			)
-			entryProgress = entryProgress
-				.map(([player, bet]) => [player, bet - currentLowestBet] as [string, number])
-				.filter(([_, bet]) => bet > 0)
-			currentPotIndex++
-		}
-
-		return result
-	}
+	let currentStep = 1
 
 	// create steps
-	// iterate over formData.rounds and create Round objects
+	const handStepsRounds = rounds.map(round => {
+		const cards: Card[] = round.cards.cards.map((card, cardIndex) => ({
+			step: currentStep + cardIndex,
+			player: round.cards.player,
+			value: card.value,
+			suit: card.suit,
+		}))
 
-	// create cards from card group
-	// create actions from action group
-	// create potActions from round actions
+		currentStep += cards.length
 
-	// create villains
-	// iterate over formData.villains and create Villain objects
+		const evaluation: Evaluation = {
+			step: currentStep,
+			player: round.cards.player,
+			value: round.cards.evaluation,
+		}
 
-	// create rounds
+		currentStep++
+
+		const actions: Action[] = round.actions.map((action, actionIndex) => ({
+			step: currentStep + actionIndex,
+			player: action.player,
+			decision: decisions.indexOf(action.decision),
+			bet: action.bet,
+		}))
+
+		currentStep += actions.length
+
+		const potActions: PotAction[] = round.potActions.map((potAction, potActionIndex) => ({
+			step: currentStep + potActionIndex,
+			player: potAction.player,
+			potIndex: potAction.potIndex,
+			bet: potAction.bet,
+		}))
+
+		currentStep += potActions.length
+
+		return {
+			cards,
+			evaluation,
+			actions,
+			potActions,
+		} as Round
+	})
+
+	const handStepsVillains = villains.map(villain => {
+		const cards = villain.cards.map((card, cardIndex) => {
+			return {
+				step: currentStep + cardIndex,
+				player: villain.player,
+				value: card.value,
+				suit: card.suit,
+			} as Card
+		})
+
+		currentStep += cards.length
+
+		const evaluation = {
+			step: currentStep,
+			player: villain.player,
+			value: villain.evaluation,
+		} as Evaluation
+
+		currentStep++
+
+		return {
+			cards,
+			evaluation,
+		} as Villain
+	})
 
 	// create pots
+	// for each pot, get the winner
+	// if there is only one player left, they win
+	// if there are multiple players left, the player with the highest evaluation wins
+	// if there are multiple players with the same evaluation, the pot is split
 
 	// const handSteps = {
 	// 	name,

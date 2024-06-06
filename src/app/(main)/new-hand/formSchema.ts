@@ -30,6 +30,7 @@ const zodCardGroup = z.object({
 		})
 	),
 	evaluation: z.string(),
+	value: z.number(),
 })
 
 const zodAction = z.object({
@@ -38,9 +39,21 @@ const zodAction = z.object({
 	bet: zodNumber,
 })
 
+const zodPotAction = z.object({
+	potIndex: z.number().gte(0),
+	player: z.number().gte(0).lte(12),
+	bet: zodNumber,
+})
+
+const zodPot = z.object({
+	potIndex: z.number().gte(0),
+	winner: z.string(),
+})
+
 const zodRound = z.object({
 	cards: zodCardGroup,
 	actions: z.array(zodAction),
+	potActions: z.array(zodPotAction),
 })
 
 export const FormSchema = z.object({
@@ -54,6 +67,7 @@ export const FormSchema = z.object({
 	bigBlindAnte: zodNumber,
 	myStack: zodNumber,
 	notes: z.string().optional(),
+	pots: z.array(zodPot),
 	rounds: z.array(zodRound),
 	villains: z.array(zodCardGroup),
 })
@@ -61,6 +75,7 @@ export const FormSchema = z.object({
 export type FormCardValue = z.infer<typeof zodCardValue>
 export type FormCardSuit = z.infer<typeof zodCardSuit>
 export type FormCardGroup = z.infer<typeof zodCardGroup>
+export type FormPotAction = z.infer<typeof zodPotAction>
 export type FormRound = z.infer<typeof zodRound>
 export type Schema = z.infer<typeof FormSchema>
 export type PokerEvaluatorCard = `${FormCardValue}${FormCardSuit}`

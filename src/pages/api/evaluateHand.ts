@@ -173,10 +173,18 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 		res.status(200).json({
 			result: {
 				handName: newHandName,
+				value: result.value,
 			},
+			error: '',
 		})
 	} catch (error) {
-		console.log(error)
-		res.status(500).json({ error: 'Error evaluating hand' })
+		console.error(error)
+		res.status(500).json({
+			result: {
+				handName: '',
+				value: 0,
+			},
+			error: 'Error evaluating hand',
+		})
 	}
 }
