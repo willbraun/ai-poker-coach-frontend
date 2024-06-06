@@ -47,6 +47,7 @@ const zodPotAction = z.object({
 
 const zodPot = z.object({
 	potIndex: z.number().gte(0),
+	value: zodNumber,
 	winner: z.string(),
 })
 
@@ -54,6 +55,7 @@ const zodRound = z.object({
 	cards: zodCardGroup,
 	actions: z.array(zodAction),
 	potActions: z.array(zodPotAction),
+	finalPots: z.array(zodNumber),
 })
 
 export const FormSchema = z.object({

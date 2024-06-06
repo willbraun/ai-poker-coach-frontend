@@ -19,6 +19,15 @@ import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
 import { useFormState, useFormStatus } from 'react-dom'
 
+const scrollToBottom = () => {
+	setTimeout(() => {
+		window.scrollTo({
+			top: document.documentElement.scrollHeight,
+			behavior: 'smooth',
+		})
+	}, 0)
+}
+
 const NewHand = () => {
 	const form = useForm<Schema>({
 		resolver: zodResolver(FormSchema),
@@ -36,6 +45,7 @@ const NewHand = () => {
 			pots: [
 				{
 					potIndex: 0,
+					value: 0,
 					winner: '',
 				},
 			],
@@ -60,6 +70,7 @@ const NewHand = () => {
 						},
 					],
 					potActions: [],
+					finalPots: [0],
 				},
 				{
 					cards: {
@@ -70,6 +81,7 @@ const NewHand = () => {
 					},
 					actions: [],
 					potActions: [],
+					finalPots: [0],
 				},
 				{
 					cards: {
@@ -80,6 +92,7 @@ const NewHand = () => {
 					},
 					actions: [],
 					potActions: [],
+					finalPots: [0],
 				},
 				{
 					cards: {
@@ -90,6 +103,7 @@ const NewHand = () => {
 					},
 					actions: [],
 					potActions: [],
+					finalPots: [0],
 				},
 			],
 			villains: [],
@@ -98,7 +112,6 @@ const NewHand = () => {
 
 	const {
 		control,
-		handleSubmit,
 		getValues,
 		setValue,
 		formState: { errors },
@@ -224,15 +237,6 @@ const NewHand = () => {
 		)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [playerCount, currentRound])
-
-	const scrollToBottom = () => {
-		setTimeout(() => {
-			window.scrollTo({
-				top: document.documentElement.scrollHeight,
-				behavior: 'smooth',
-			})
-		}, 0)
-	}
 
 	const addAction = async (round: validRound) => {
 		const selector = `rounds.${round}.actions` as ActionSelector
@@ -376,10 +380,33 @@ const NewHand = () => {
 			return
 		}
 
+		const potActions = getPotActions(watch(`rounds.${currentRound}`))
+
 		if (currentRound >= 0) {
-			setValue(`rounds.${currentRound}.potActions`, getPotActions(watch(`rounds.${currentRound}`)))
+			setValue(`rounds.${currentRound}.potActions`, potActions)
 		}
-		console.log(getValues())
+
+		const betsByPot = potActions.reduce((acc, { potIndex, bet }) => {
+			if (acc[potIndex] === undefined) {
+				acc[potIndex] = 0
+			}
+			acc[potIndex] += bet
+			return acc
+		}, {} as { [potIndex: number]: number })
+
+		Object.entries(betsByPot).forEach(([potIndexString, addedValue]) => {
+			const potIndex = Number(potIndexString)
+			const pot = watch(`pots.${potIndex}`)
+			const newValue = pot.value + addedValue
+
+			setValue(`pots.${potIndex}.value`, newValue)
+		})
+
+		setValue(
+			`rounds.${currentRound}.finalPots`,
+			watch(`pots`).map(pot => pot.value)
+		)
+
 		setCurrentRound(currentRound + 1)
 	}
 
@@ -429,11 +456,19 @@ const NewHand = () => {
 		} else if (isCardGroupShowing) {
 			setValue(`rounds.${currentRound}.cards.cards`, [])
 			setValue(`rounds.${currentRound}.cards.evaluation`, '')
+			setValue(`rounds.${currentRound}.cards.value`, 0)
+
+			if (currentRound > 0) {
+				setValue(`rounds.${currentRound - 1}.potActions`, [])
+			}
+
 			setCurrentRound(currentRound - 1)
 		} else if (villainFields.length > 0) {
 			removeVillains()
 		}
 	}
+
+	console.log(getValues())
 
 	return (
 		<main className='mt-24'>
@@ -728,7 +763,11 @@ const NewHand = () => {
 								const startingActionMap = round === 0 ? 2 : 0
 								return (
 									<div key={i} className='flex flex-col gap-4'>
-										<FormLabel>The pot is now X</FormLabel>
+										{round > 0 &&
+											watch(`rounds.${round - 1}.finalPots`).map((pot, i) => {
+												const potName = i === 0 ? 'Main Pot' : `Side Pot ${i}`
+												return <p key={i} className='text-lg'>{`${potName}: ${pot}`}</p>
+											})}
 
 										<CardGroupInput
 											groupSelector={`rounds.${round}.cards`}
