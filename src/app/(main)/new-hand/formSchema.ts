@@ -55,7 +55,7 @@ const zodRound = z.object({
 	cards: zodCardGroup,
 	actions: z.array(zodAction),
 	potActions: z.array(zodPotAction),
-	finalPots: z.array(zodNumber),
+	finalPots: z.array(zodPot),
 })
 
 export const FormSchema = z.object({

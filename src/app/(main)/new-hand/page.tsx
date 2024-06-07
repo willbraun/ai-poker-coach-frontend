@@ -18,6 +18,7 @@ import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
 import { useFormState, useFormStatus } from 'react-dom'
+import { add } from 'date-fns'
 
 const scrollToBottom = () => {
 	setTimeout(() => {
@@ -26,6 +27,12 @@ const scrollToBottom = () => {
 			behavior: 'smooth',
 		})
 	}, 0)
+}
+
+const initialPot = {
+	potIndex: 0,
+	value: 0,
+	winner: '',
 }
 
 const NewHand = () => {
@@ -42,13 +49,7 @@ const NewHand = () => {
 			bigBlindAnte: 0,
 			myStack: 0,
 			notes: '',
-			pots: [
-				{
-					potIndex: 0,
-					value: 0,
-					winner: '',
-				},
-			],
+			pots: [initialPot],
 			rounds: [
 				{
 					cards: {
@@ -70,7 +71,7 @@ const NewHand = () => {
 						},
 					],
 					potActions: [],
-					finalPots: [0],
+					finalPots: [],
 				},
 				{
 					cards: {
@@ -81,7 +82,7 @@ const NewHand = () => {
 					},
 					actions: [],
 					potActions: [],
-					finalPots: [0],
+					finalPots: [],
 				},
 				{
 					cards: {
@@ -92,7 +93,7 @@ const NewHand = () => {
 					},
 					actions: [],
 					potActions: [],
-					finalPots: [0],
+					finalPots: [],
 				},
 				{
 					cards: {
@@ -103,7 +104,7 @@ const NewHand = () => {
 					},
 					actions: [],
 					potActions: [],
-					finalPots: [0],
+					finalPots: [],
 				},
 			],
 			villains: [],
@@ -129,7 +130,6 @@ const NewHand = () => {
 	const methods = useForm()
 
 	const [currentRound, setCurrentRound] = useState(-1)
-	const [currentPotIndex, setCurrentPotIndex] = useState(0)
 	const [playerStatusHistory, setPlayerStatusHistory] = useState<AllPlayerStatus[]>([])
 	const playerStatus = playerStatusHistory.at(-1) ?? {}
 
@@ -180,6 +180,7 @@ const NewHand = () => {
 	const isActionShowing = currentAction && !isBigBlindAction && villainFields.length === 0
 	const decisionComplete = ['fold', 'check'].includes(currentAction?.decision) || currentAction?.bet > 0
 	const isCardGroupShowing = fieldArrays[currentRound]?.fields?.length === startingAction
+	const pots = watch(`pots`)
 
 	const disableNext =
 		currentRound === -1
@@ -320,7 +321,7 @@ const NewHand = () => {
 		}
 
 		// if all aggregate bets are the same, potActions for one pot
-		let potIndex = currentPotIndex
+		let potIndex = Math.max(...pots.map(pot => pot.potIndex))
 		if (entries.every(([_, bet]) => bet === entries[0][1])) {
 			return entries.map(
 				([player, bet]) =>
@@ -360,26 +361,11 @@ const NewHand = () => {
 
 			potIndex++
 		}
-		setCurrentPotIndex(potIndex)
 
 		return result
 	}
 
-	const nextRound = () => {
-		if (currentRound === 3) {
-			const villainFormData = Object.entries(playerStatus)
-				.filter(([player, status]) => status !== 'folded' && player !== position.toString())
-				.map(([player]) => ({
-					player: Number(player),
-					cards: [],
-					evaluation: '',
-					value: 0,
-				}))
-
-			appendVillains(villainFormData)
-			return
-		}
-
+	const getNewPots = () => {
 		const potActions = getPotActions(watch(`rounds.${currentRound}`))
 
 		if (currentRound >= 0) {
@@ -394,18 +380,45 @@ const NewHand = () => {
 			return acc
 		}, {} as { [potIndex: number]: number })
 
+		const finalPots = [...pots]
+
 		Object.entries(betsByPot).forEach(([potIndexString, addedValue]) => {
 			const potIndex = Number(potIndexString)
-			const pot = watch(`pots.${potIndex}`)
-			const newValue = pot.value + addedValue
+			const pot = pots[potIndex]
+			const value = pot?.value ?? 0
+			const newPot = {
+				potIndex,
+				value: value + addedValue,
+				winner: '',
+			}
 
-			setValue(`pots.${potIndex}.value`, newValue)
+			if (potIndex >= finalPots.length) {
+				finalPots.push(newPot)
+			} else {
+				finalPots[potIndex] = newPot
+			}
 		})
 
-		setValue(
-			`rounds.${currentRound}.finalPots`,
-			watch(`pots`).map(pot => pot.value)
-		)
+		setValue(`rounds.${currentRound}.finalPots`, finalPots)
+		setValue('pots', finalPots)
+	}
+
+	const nextRound = () => {
+		getNewPots()
+
+		if (currentRound === 3) {
+			const villainFormData = Object.entries(playerStatus)
+				.filter(([player, status]) => status !== 'folded' && player !== position.toString())
+				.map(([player]) => ({
+					player: Number(player),
+					cards: [],
+					evaluation: '',
+					value: 0,
+				}))
+
+			appendVillains(villainFormData)
+			return
+		}
 
 		setCurrentRound(currentRound + 1)
 	}
@@ -459,7 +472,13 @@ const NewHand = () => {
 			setValue(`rounds.${currentRound}.cards.value`, 0)
 
 			if (currentRound > 0) {
+				if (currentRound === 1) {
+					setValue('pots', [initialPot])
+				} else {
+					setValue('pots', watch(`rounds.${currentRound - 2}.finalPots`))
+				}
 				setValue(`rounds.${currentRound - 1}.potActions`, [])
+				setValue(`rounds.${currentRound - 1}.finalPots`, [])
 			}
 
 			setCurrentRound(currentRound - 1)
@@ -761,14 +780,9 @@ const NewHand = () => {
 
 							{Array.from({ length: currentRound + 1 }, (_, i) => i).map((round, i) => {
 								const startingActionMap = round === 0 ? 2 : 0
+								const finalPots = watch(`rounds.${round}.finalPots`)
 								return (
 									<div key={i} className='flex flex-col gap-4'>
-										{round > 0 &&
-											watch(`rounds.${round - 1}.finalPots`).map((pot, i) => {
-												const potName = i === 0 ? 'Main Pot' : `Side Pot ${i}`
-												return <p key={i} className='text-lg'>{`${potName}: ${pot}`}</p>
-											})}
-
 										<CardGroupInput
 											groupSelector={`rounds.${round}.cards`}
 											disabled={fieldArrays[round].fields.length !== startingActionMap}
@@ -784,6 +798,12 @@ const NewHand = () => {
 												}
 											/>
 										))}
+
+										{finalPots.length > 0 &&
+											finalPots.map((pot, i) => {
+												const potName = i === 0 ? 'Main Pot' : `Side Pot ${i}`
+												return <p key={i}>{`${potName}: ${pot.value}`}</p>
+											})}
 									</div>
 								)
 							})}
