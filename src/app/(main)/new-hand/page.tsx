@@ -164,11 +164,7 @@ const NewHand = () => {
 		name: 'villains',
 	})
 
-	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
-	const showSubmit = activePlayers.length === 1 || villainFields.length > 0
-	const disableSubmit = watch('villains').some(villain => !isCardGroupComplete(villain.cards, 2))
 	const startingAction = currentRound > 0 ? 0 : 2
-
 	const playerCount = Number(watch('playerCount'))
 	const position = Number(watch('position'))
 	const smallBlind = watch('smallBlind')
@@ -180,7 +176,12 @@ const NewHand = () => {
 	const isActionShowing = currentAction && !isBigBlindAction && villainFields.length === 0
 	const decisionComplete = ['fold', 'check'].includes(currentAction?.decision) || currentAction?.bet > 0
 	const isCardGroupShowing = fieldArrays[currentRound]?.fields?.length === startingAction
-	const pots = watch(`pots`)
+	const pots = watch('pots')
+	const villains = watch('villains')
+
+	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
+	const showSubmit = activePlayers.length === 1 || villainFields.length > 0
+	const villainsCompleted = villains.every(villain => isCardGroupComplete(villain.cards, 2))
 
 	const disableNext =
 		currentRound === -1
@@ -230,18 +231,42 @@ const NewHand = () => {
 
 	useEffect(() => {
 		if (activePlayers.length === 1) {
-			const player = activePlayers[0][0]
-			const newPots = pots.map(pot => ({ ...pot, winner: player }))
+			const winner = activePlayers[0][0]
+			const newPots = pots.map(pot => ({ ...pot, winner }))
 			setValue('pots', newPots)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activePlayers.length, setValue])
 
-	// if villainFields.length > 0, player with highest evaluation value wins pots they have potActions for
-	// sort players by eval highest to lowest. River value or villain value.
-	// For each player starting from the top, distrubte pots for all pots they have pot actions for
-	// If multiple players have the same value, all win the pot and split it
-	// Make a map of <evaluation value>: [players], then go down the keys of the map, split if value is more than 1
+	// villainsCompleted, player with highest evaluation value wins pots they have potActions for
+	useEffect(() => {
+		if (villainsCompleted) {
+			const potProgress = [...pots]
+
+			const evalMap = new Map<number, number[]>()
+			evalMap.set(watch('rounds.3.cards.value'), [position])
+			villains.forEach(villain => {
+				if (evalMap.has(villain.value)) {
+					const existing = evalMap.get(villain.value) ?? []
+					evalMap.set(villain.value, [...existing, villain.player])
+				} else {
+					evalMap.set(villain.value, [villain.player])
+				}
+			})
+
+			const sortedArray = Array.from(evalMap).sort((a, b) => b[0] - a[0])
+			sortedArray.forEach(([_, players]) => {
+				// if players have the exact same evaluation, are they treated the same? NO.
+				// player 1 has 10000, player 2 has 8000, both in side pot, player 3 has 10000 in main pot.
+				// player 1 wins side pot, splits main pot with player 3
+				// start with top eval, get players,
+				// *** FIND ALL POTS that each player has potActions for, create object to track each pot as a key, with array of players who have potActions for it
+				// For each pot key, winner is player. Any pots shared by more than one player are split between those players with the same eval.
+				// remove pot from potProgress
+				// move on to next eval, continue while potProgress.length > 0
+			})
+		}
+	}, [villainsCompleted, pots, position, villains, watch])
 
 	const currentRoundBetterCount = useMemo(() => {
 		return (
@@ -839,7 +864,7 @@ const NewHand = () => {
 									Back
 								</Button>
 								{/* {showSubmit ? ( */}
-								<Button type='submit' className='w-1/2 text-xl' disabled={disableSubmit}>
+								<Button type='submit' className='w-1/2 text-xl' disabled={!villainsCompleted}>
 									Submit
 								</Button>
 								{/* ) : ( */}
