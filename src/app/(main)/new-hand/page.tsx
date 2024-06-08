@@ -228,6 +228,21 @@ const NewHand = () => {
 		setPlayerStatusHistory([initialStatus])
 	}, [playerCount])
 
+	useEffect(() => {
+		if (activePlayers.length === 1) {
+			const player = activePlayers[0][0]
+			const newPots = pots.map(pot => ({ ...pot, winner: player }))
+			setValue('pots', newPots)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [activePlayers.length, setValue])
+
+	// if villainFields.length > 0, player with highest evaluation value wins pots they have potActions for
+	// sort players by eval highest to lowest. River value or villain value.
+	// For each player starting from the top, distrubte pots for all pots they have pot actions for
+	// If multiple players have the same value, all win the pot and split it
+	// Make a map of <evaluation value>: [players], then go down the keys of the map, split if value is more than 1
+
 	const currentRoundBetterCount = useMemo(() => {
 		return (
 			playerCount -
@@ -798,6 +813,13 @@ const NewHand = () => {
 												}
 											/>
 										))}
+
+										{activePlayers.length === 1 && (
+											<p>{`Player ${activePlayers[0][0]} wins ${
+												pots.reduce((acc, i) => acc + i.value, 0) +
+												watch(`rounds.${round}.actions`).reduce((acc, i) => acc + Number(i.bet), 0)
+											}`}</p>
+										)}
 
 										{finalPots.length > 0 &&
 											finalPots.map((pot, i) => {
