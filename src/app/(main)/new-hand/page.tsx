@@ -260,8 +260,9 @@ const NewHand = () => {
 				// player 1 has 10000, player 2 has 8000, both in side pot, player 3 has 10000 in main pot.
 				// player 1 wins side pot, splits main pot with player 3
 				// start with top eval, get players,
-				// *** FIND ALL POTS that each player has potActions for, create object to track each pot as a key, with array of players who have potActions for it
+				// *** FIND ALL POTS that each player has potActions for, and still in potProgress, create object to track each pot as a key, with array of players who have potActions for it
 				// For each pot key, winner is player. Any pots shared by more than one player are split between those players with the same eval.
+				// update pot with winners, comma-separated
 				// remove pot from potProgress
 				// move on to next eval, continue while potProgress.length > 0
 			})
