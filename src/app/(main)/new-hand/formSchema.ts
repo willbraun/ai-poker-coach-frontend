@@ -78,6 +78,7 @@ export type FormCardValue = z.infer<typeof zodCardValue>
 export type FormCardSuit = z.infer<typeof zodCardSuit>
 export type FormCardGroup = z.infer<typeof zodCardGroup>
 export type FormPotAction = z.infer<typeof zodPotAction>
+export type FormPot = z.infer<typeof zodPot>
 export type FormRound = z.infer<typeof zodRound>
 export type Schema = z.infer<typeof FormSchema>
 export type PokerEvaluatorCard = `${FormCardValue}${FormCardSuit}`

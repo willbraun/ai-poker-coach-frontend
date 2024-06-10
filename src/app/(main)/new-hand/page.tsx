@@ -4,13 +4,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { FormPotAction, FormRound, FormSchema, Schema } from './formSchema'
+import { FormPot, FormPotAction, FormRound, FormSchema, Schema } from './formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import CardGroupInput, { getDetails, isCardGroupComplete } from '@/components/CardGroupInput'
+import CardGroupInput, { getDetails } from '@/components/CardGroupInput'
 import { useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, AllPlayerStatus, PlayerStatus, validRound } from '@/lib/types'
@@ -177,11 +177,13 @@ const NewHand = () => {
 	const decisionComplete = ['fold', 'check'].includes(currentAction?.decision) || currentAction?.bet > 0
 	const isCardGroupShowing = fieldArrays[currentRound]?.fields?.length === startingAction
 	const pots = watch('pots')
+	const rounds = watch('rounds')
 	const villains = watch('villains')
 
 	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
 	const showSubmit = activePlayers.length === 1 || villainFields.length > 0
-	const villainsCompleted = villains.every(villain => isCardGroupComplete(villain.cards, 2))
+	const villainsCompleted =
+		villains.length > 0 && villains.every(villain => villain.evaluation !== '' && villain.value > 0)
 
 	const disableNext =
 		currentRound === -1
@@ -238,11 +240,20 @@ const NewHand = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activePlayers.length, setValue])
 
-	// villainsCompleted, player with highest evaluation value wins pots they have potActions for
+	const getPlayerPots = (player: number) => {
+		const potsAllRounds: number[] = []
+		rounds.forEach(round => {
+			const pots = round.potActions
+				.filter(potAction => potAction.player === player)
+				.map(potAction => potAction.potIndex)
+			potsAllRounds.push(...pots)
+		})
+		return Array.from(new Set(potsAllRounds))
+	}
+
 	useEffect(() => {
 		if (villainsCompleted) {
-			const potProgress = [...pots]
-
+			console.log('villainsCompleted')
 			const evalMap = new Map<number, number[]>()
 			evalMap.set(watch('rounds.3.cards.value'), [position])
 			villains.forEach(villain => {
@@ -254,20 +265,41 @@ const NewHand = () => {
 				}
 			})
 
+			let potProgress = pots.map(pot => pot.potIndex)
+			const potWinners: { [key: number]: number[] } = {}
 			const sortedArray = Array.from(evalMap).sort((a, b) => b[0] - a[0])
-			sortedArray.forEach(([_, players]) => {
-				// if players have the exact same evaluation, are they treated the same? NO.
-				// player 1 has 10000, player 2 has 8000, both in side pot, player 3 has 10000 in main pot.
-				// player 1 wins side pot, splits main pot with player 3
-				// start with top eval, get players,
-				// *** FIND ALL POTS that each player has potActions for, and still in potProgress, create object to track each pot as a key, with array of players who have potActions for it
-				// For each pot key, winner is player. Any pots shared by more than one player are split between those players with the same eval.
-				// update pot with winners, comma-separated
-				// remove pot from potProgress
-				// move on to next eval, continue while potProgress.length > 0
+
+			for (const [_, players] of sortedArray) {
+				if (potProgress.length === 0) {
+					break
+				}
+
+				players.forEach(player => {
+					const playerPots = getPlayerPots(player)
+					const remainingPots = playerPots.filter(pot => potProgress.includes(pot))
+
+					remainingPots.forEach(potIndex => {
+						if (potWinners[potIndex] === undefined) {
+							potWinners[potIndex] = [player]
+						} else {
+							potWinners[potIndex].push(player)
+						}
+					})
+				})
+
+				const wonPots = Object.keys(potWinners).map(Number)
+				potProgress = potProgress.filter(pot => !wonPots.includes(pot))
+			}
+
+			Object.entries(potWinners).forEach(([potIndex, winners]) => {
+				const pot = pots.find(pot => pot.potIndex === Number(potIndex))
+				if (pot) {
+					setValue(`pots.${pot.potIndex}.winner`, winners.map(winner => winner.toString()).join(','))
+				}
 			})
 		}
-	}, [villainsCompleted, pots, position, villains, watch])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [villainsCompleted, JSON.stringify(villains), watch])
 
 	const currentRoundBetterCount = useMemo(() => {
 		return (
@@ -850,7 +882,7 @@ const NewHand = () => {
 										{finalPots.length > 0 &&
 											finalPots.map((pot, i) => {
 												const potName = i === 0 ? 'Main Pot' : `Side Pot ${i}`
-												return <p key={i}>{`${potName}: ${pot.value}`}</p>
+												return <p key={i} className='text-lg'>{`${potName}: ${pot.value}`}</p>
 											})}
 									</div>
 								)
@@ -859,6 +891,22 @@ const NewHand = () => {
 							{villainFields.map((villain, i) => (
 								<CardGroupInput key={villain.id} groupSelector={`villains.${i}`} player={villain.player} />
 							))}
+
+							{villainsCompleted && (
+								<>
+									<TypographyH2>Results</TypographyH2>
+									{pots.map((pot, i) => {
+										const winners = pot.winner
+											.split(',')
+											.map(winner => `Player ${winner}`)
+											.join(', ')
+										const verb = pot.winner.length > 1 ? 'split' : 'wins'
+										const potName = i === 0 ? 'main pot' : `side pot ${i}`
+
+										return <p key={i} className='text-lg'>{`${winners} ${verb} the ${potName}: ${pot.value}`}</p>
+									})}
+								</>
+							)}
 
 							<div className='flex gap-4'>
 								<Button type='button' className='w-1/2 text-xl' onClick={handleBack} disabled={currentRound === -1}>

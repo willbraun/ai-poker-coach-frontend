@@ -86,7 +86,7 @@ const evaluateHand = async (cards: PokerEvaluatorCard[]): Promise<handEvaluation
 	}
 }
 
-export const isCardGroupComplete = (cards: { value: string; suit: string }[], cardCount: number) => {
+const isCardGroupEntered = (cards: { value: string; suit: string }[], cardCount: number) => {
 	return cards.length === cardCount && cards.every(card => card?.value && card?.suit)
 }
 
@@ -99,7 +99,7 @@ const CardGroup = ({ groupSelector, player, disabled = false }: CardGroupProps) 
 
 	useEffect(() => {
 		;(async () => {
-			if (isCardGroupComplete(group?.cards, cardCount)) {
+			if (isCardGroupEntered(group?.cards, cardCount)) {
 				let evalInput: PokerEvaluatorCard[] = []
 				if (groupSelector.startsWith('rounds')) {
 					const round = parseInt(groupSelector.split('.')[1])
