@@ -1,6 +1,6 @@
 'use server'
 
-import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain } from '@/lib/types'
+import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, Pot } from '@/lib/types'
 // import { isAuthData } from '@/lib/types'
 import { cookies } from 'next/headers'
 import { FormRound, FormSchema, Schema } from './formSchema'
@@ -11,6 +11,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 	const formDataObj = Object.fromEntries(formData)
 	const formDataJson = {
 		...formDataObj,
+		pots: JSON.parse(formDataObj.pots as string),
 		rounds: JSON.parse(formDataObj.rounds as string),
 		villains: JSON.parse(formDataObj.villains as string),
 	}
@@ -33,20 +34,20 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		bigBlindAnte,
 		myStack,
 		notes,
+		pots,
 		rounds,
 		villains,
 	} = parsed.data
 
-	const pots = [
-		{
-			potIndex: 0,
-			winner: '',
-		},
-	]
-
 	let currentStep = 1
 
-	// create steps
+	const handStepsPots = pots.map((pot, potIndex) => {
+		return {
+			potIndex: potIndex,
+			winner: pot.winner,
+		} as Pot
+	})
+
 	const handStepsRounds = rounds.map(round => {
 		const cards: Card[] = round.cards.cards.map((card, cardIndex) => ({
 			step: currentStep + cardIndex,
@@ -117,29 +118,21 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		} as Villain
 	})
 
-	// create pots
-	// for each pot, get the winner
-	// if there is only one player left, they win
-	// if there are multiple players left, the player with the highest evaluation wins
-	// if there are multiple players with the same evaluation, the pot is split
-
-	// const handSteps = {
-	// 	name,
-	// 	gameStyle,
-	// 	playerCount,
-	// 	position,
-	// 	smallBlind,
-	// 	bigBlind,
-	// 	ante,
-	// 	bigBlindAnte,
-	// 	myStack,
-	// 	notes,
-	// 	pots: [],
-	// 	rounds: [],
-	// 	villains: [],
-	// } as HandSteps
-
-	const handSteps = {} as HandSteps
+	const handSteps = {
+		name,
+		gameStyle,
+		playerCount,
+		position,
+		smallBlind,
+		bigBlind,
+		ante,
+		bigBlindAnte,
+		myStack,
+		notes,
+		pots: handStepsPots,
+		rounds: handStepsRounds,
+		villains: handStepsVillains,
+	} as HandSteps
 
 	// const res = await fetch(`${process.env.API_URL}/hand/analyze`, {
 	// 	method: 'POST',
