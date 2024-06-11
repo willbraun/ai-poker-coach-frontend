@@ -1,8 +1,10 @@
 import { useFormContext } from 'react-hook-form'
-import { FormLabel } from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import CardInput from './CardInput'
 import { useEffect } from 'react'
 import { FormCardGroup, FormRound, PokerEvaluatorCard, Schema } from '@/app/(main)/new-hand/formSchema'
+import { handleNumberChange, handleNumberBlur, isZeroBet } from '@/lib/utils'
+import { Input } from 'postcss'
 
 interface CardGroupProps {
 	groupSelector: string
@@ -96,6 +98,7 @@ const CardGroup = ({ groupSelector, player, disabled = false }: CardGroupProps) 
 	const { title, cardCount } = getDetails(groupSelector, player)
 
 	const group: FormCardGroup = watch(groupSelector)
+	const groupString = JSON.stringify(group?.cards)
 
 	useEffect(() => {
 		;(async () => {
@@ -121,11 +124,10 @@ const CardGroup = ({ groupSelector, player, disabled = false }: CardGroupProps) 
 				const evaluation = await evaluateHand(evalInput)
 
 				setValue(`${groupSelector}.evaluation`, evaluation.result.handName)
-				setValue(`${groupSelector}.value`, evaluation.result.value)
+				setValue(`${groupSelector}.value`, evaluation.result.value ?? 0)
 			}
 		})()
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [JSON.stringify(group?.cards)])
+	}, [cardCount, group.cards, groupSelector, setValue, values.rounds, groupString])
 
 	return (
 		<div className={`duration-100 ${!disabled && 'bg-blue-200 scale-105 rounded-xl p-4 border-1 border-black'}`}>

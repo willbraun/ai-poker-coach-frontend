@@ -159,6 +159,7 @@ const NewHand = () => {
 		fields: villainFields,
 		append: appendVillains,
 		remove: removeVillains,
+		replace: replaceVillains,
 	} = useFieldArray({
 		control,
 		name: 'villains',
@@ -181,9 +182,9 @@ const NewHand = () => {
 	const villains = watch('villains')
 
 	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
-	const showSubmit = activePlayers.length === 1 || villainFields.length > 0
 	const villainsCompleted =
 		villains.length > 0 && villains.every(villain => villain.evaluation !== '' && villain.value > 0)
+	const showSubmit = activePlayers.length === 1 || villainsCompleted
 
 	const disableNext =
 		currentRound === -1
@@ -253,7 +254,6 @@ const NewHand = () => {
 
 	useEffect(() => {
 		if (villainsCompleted) {
-			console.log('villainsCompleted')
 			const evalMap = new Map<number, number[]>()
 			evalMap.set(watch('rounds.3.cards.value'), [position])
 			villains.forEach(villain => {
@@ -297,6 +297,8 @@ const NewHand = () => {
 					setValue(`pots.${pot.potIndex}.winner`, winners.map(winner => winner.toString()).join(','))
 				}
 			})
+
+			scrollToBottom()
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [villainsCompleted, JSON.stringify(villains), watch])
@@ -311,6 +313,16 @@ const NewHand = () => {
 		)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [playerCount, currentRound])
+
+	useEffect(() => {
+		replaceVillains(villains)
+	}, [JSON.stringify(villains)])
+
+	useEffect(() => {
+		if (state.analysis) {
+			scrollToBottom()
+		}
+	}, [state.analysis])
 
 	const addAction = async (round: validRound) => {
 		const selector = `rounds.${round}.actions` as ActionSelector
@@ -558,9 +570,16 @@ const NewHand = () => {
 		} else if (villainFields.length > 0) {
 			removeVillains()
 		}
+
+		state.error = ''
 	}
 
 	console.log(getValues())
+
+	const seeSubmit = (payload: FormData) => {
+		console.log(payload.get('villains'))
+		formAction(payload)
+	}
 
 	return (
 		<main className='mt-24'>
@@ -568,7 +587,7 @@ const NewHand = () => {
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
-						<form action={formAction} className='space-y-8'>
+						<form action={seeSubmit} className='space-y-8'>
 							<FormField
 								control={control}
 								name='name'
@@ -912,16 +931,18 @@ const NewHand = () => {
 								<Button type='button' className='w-1/2 text-xl' onClick={handleBack} disabled={currentRound === -1}>
 									Back
 								</Button>
-								{/* {showSubmit ? ( */}
-								<Button type='submit' className='w-1/2 text-xl' disabled={!villainsCompleted}>
-									Submit
-								</Button>
-								{/* ) : ( */}
-								<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
-									Next
-								</Button>
-								{/* )} */}
+								{showSubmit ? (
+									<Button type='submit' className='w-1/2 text-xl' disabled={!villainsCompleted}>
+										Submit
+									</Button>
+								) : (
+									<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
+										Next
+									</Button>
+								)}
 							</div>
+
+							{state.analysis && <p>{state.analysis}</p>}
 
 							{Object.keys(errors).length ? (
 								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>

@@ -5,9 +5,12 @@ import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, P
 import { cookies } from 'next/headers'
 import { FormRound, FormSchema, Schema } from './formSchema'
 
-const decisions = ['folds', 'checks', 'calls', 'bets', 'raises to', 'bets all-in for', 'calls all-in for']
+const decisions = ['fold', 'check', 'call', 'bet', 'raise', 'callAllIn', 'betAllIn']
 
 export const analyze = async (prevState: any, formData: FormData) => {
+	const authCookie = cookies().get('auth')?.value ?? '{}'
+	const accessToken = JSON.parse(authCookie)?.accessToken as string
+
 	const formDataObj = Object.fromEntries(formData)
 	const formDataJson = {
 		...formDataObj,
@@ -15,11 +18,11 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		rounds: JSON.parse(formDataObj.rounds as string),
 		villains: JSON.parse(formDataObj.villains as string),
 	}
-	const parsed = FormSchema.safeParse(formDataJson)
+	const parsedForm = FormSchema.safeParse(formDataJson)
 
-	if (!parsed.success) {
+	if (!parsedForm.success) {
 		return {
-			error: `Error: ${parsed.error.issues.map(issue => issue.message).join('\n')}`,
+			error: `Error: ${parsedForm.error.issues.map(issue => JSON.stringify(issue)).join('\n')}`,
 		}
 	}
 
@@ -37,7 +40,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		pots,
 		rounds,
 		villains,
-	} = parsed.data
+	} = parsedForm.data
 
 	let currentStep = 1
 
@@ -134,21 +137,29 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		villains: handStepsVillains,
 	} as HandSteps
 
-	// const res = await fetch(`${process.env.API_URL}/hand/analyze`, {
-	// 	method: 'POST',
-	// 	headers: {
-	// 		'Content-Type': 'application/json',
-	// 	},
-	// 	body: JSON.stringify(handSteps),
-	// })
+	const res = await fetch(`${process.env.API_URL}/hand/analyze`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(handSteps),
+	})
 
-	// if (res.status !== 200) {
-	// 	return {
-	// 		error: `Error: ${res.status} - ${res.statusText}`,
-	// 	}
-	// }
+	const data = await res.json()
 
-	// const data = await res.json()
+	console.log(data)
+
+	if (data.status !== 200) {
+		const errors: { [key: string]: string[] } = data.errors
+		const error = Object.entries(errors)
+			.map(([key, value]) => `${key}: ${value.join(', ')}`)
+			.join('\n')
+
+		return {
+			error: `Error: ${error}`,
+		}
+	}
 
 	// check for analysis response type
 
@@ -158,8 +169,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 	// 	}
 	// }
 
-	// const analysis = data.analysis
-	const analysis = 'analysis'
+	const analysis = data.analysis
 
 	// postHand(handSteps, analysis).catch(error => {
 	// 	console.error(error)
@@ -173,7 +183,9 @@ export const analyze = async (prevState: any, formData: FormData) => {
 
 export const postHand = async (handSteps: HandSteps, analysis: string) => {
 	const authCookie = cookies().get('auth')?.value ?? '{}'
-	const applicationUserId = JSON.parse(authCookie)?.userId
+	const parsedCookie = JSON.parse(authCookie)
+	const applicationUserId = parsedCookie?.userId
+	const accessToken = parsedCookie?.accessToken
 
 	const res = await fetch(`${process.env.API_URL}/hand`, {
 		method: 'POST',
