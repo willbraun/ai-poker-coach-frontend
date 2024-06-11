@@ -10,7 +10,7 @@ import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import CardGroupInput, { getDetails } from '@/components/CardGroupInput'
+import CardGroupInput from '@/components/CardGroupInput'
 import { useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, AllPlayerStatus, PlayerStatus, validRound } from '@/lib/types'
@@ -18,7 +18,7 @@ import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
 import { useFormState, useFormStatus } from 'react-dom'
-import { add } from 'date-fns'
+import Analysis from '@/components/Analysis'
 
 const scrollToBottom = () => {
 	setTimeout(() => {
@@ -33,6 +33,23 @@ const initialPot = {
 	potIndex: 0,
 	value: 0,
 	winner: '',
+}
+
+const Submit = ({
+	setAnalyzePending,
+	disabled,
+}: {
+	setAnalyzePending: (pending: boolean) => void
+	disabled: boolean
+}) => {
+	const { pending } = useFormStatus()
+	setAnalyzePending(pending)
+
+	return (
+		<Button type='submit' className='w-1/2 text-xl' disabled={disabled || pending}>
+			{pending ? 'Analyzing...' : 'Submit'}
+		</Button>
+	)
 }
 
 const NewHand = () => {
@@ -126,6 +143,7 @@ const NewHand = () => {
 	}
 
 	const [state, formAction] = useFormState(analyze, initialState)
+	const [analyzePending, setAnalyzePending] = useState(false)
 
 	const methods = useForm()
 
@@ -313,10 +331,6 @@ const NewHand = () => {
 		)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [playerCount, currentRound])
-
-	useEffect(() => {
-		replaceVillains(villains)
-	}, [JSON.stringify(villains)])
 
 	useEffect(() => {
 		if (state.analysis) {
@@ -574,20 +588,13 @@ const NewHand = () => {
 		state.error = ''
 	}
 
-	console.log(getValues())
-
-	const seeSubmit = (payload: FormData) => {
-		console.log(payload.get('villains'))
-		formAction(payload)
-	}
-
 	return (
 		<main className='mt-24'>
 			<div className='max-w-screen-sm mx-auto pb-16 px-4'>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
-						<form action={seeSubmit} className='space-y-8'>
+						<form action={formAction} className='space-y-8'>
 							<FormField
 								control={control}
 								name='name'
@@ -622,13 +629,13 @@ const NewHand = () => {
 													<FormControl>
 														<RadioGroupItem value='0' />
 													</FormControl>
-													<p className='font-normal'>Tournament</p>
+													<p className='font-normal'>Cash Game</p>
 												</FormItem>
 												<FormItem className='flex items-center space-x-3 space-y-0'>
 													<FormControl>
 														<RadioGroupItem value='1' />
 													</FormControl>
-													<p className='font-normal'>Cash Game</p>
+													<p className='font-normal'>Tournament</p>
 												</FormItem>
 											</RadioGroup>
 										</FormControl>
@@ -833,7 +840,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<input {...field} value={JSON.stringify(field.value)} className='hidden' />
+											<input {...field} value={JSON.stringify(pots)} className='hidden' />
 										</FormControl>
 									</FormItem>
 								)}
@@ -844,7 +851,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<input {...field} value={JSON.stringify(field.value)} className='hidden' />
+											<input {...field} value={JSON.stringify(rounds)} className='hidden' />
 										</FormControl>
 									</FormItem>
 								)}
@@ -855,7 +862,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<input {...field} value={JSON.stringify(field.value)} className='hidden' />
+											<input {...field} value={JSON.stringify(villains)} className='hidden' />
 										</FormControl>
 									</FormItem>
 								)}
@@ -932,9 +939,7 @@ const NewHand = () => {
 									Back
 								</Button>
 								{showSubmit ? (
-									<Button type='submit' className='w-1/2 text-xl' disabled={!villainsCompleted}>
-										Submit
-									</Button>
+									<Submit setAnalyzePending={setAnalyzePending} disabled={!villainsCompleted || !!state.analysis} />
 								) : (
 									<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
 										Next
@@ -942,7 +947,8 @@ const NewHand = () => {
 								)}
 							</div>
 
-							{state.analysis && <p>{state.analysis}</p>}
+							{analyzePending && <p>Analyzing...</p>}
+							{state.analysis && <Analysis analysis={state.analysis} />}
 
 							{Object.keys(errors).length ? (
 								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>

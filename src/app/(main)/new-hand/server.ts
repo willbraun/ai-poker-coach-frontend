@@ -42,6 +42,16 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		villains,
 	} = parsedForm.data
 
+	let handStepsName = name
+	if (name === '') {
+		const latestEval = rounds
+			.map(round => round.cards.evaluation)
+			.filter(evaluation => evaluation !== '')
+			.at(-1)
+		const now = new Date()
+		handStepsName = `${latestEval} - ${now.toLocaleString()}`
+	}
+
 	let currentStep = 1
 
 	const handStepsPots = pots.map((pot, potIndex) => {
@@ -122,7 +132,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 	})
 
 	const handSteps = {
-		name,
+		name: handStepsName,
 		gameStyle,
 		playerCount,
 		position,
@@ -146,11 +156,9 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		body: JSON.stringify(handSteps),
 	})
 
-	const data = await res.json()
+	if (res.status === 400) {
+		const data = await res.json()
 
-	console.log(data)
-
-	if (data.status !== 200) {
 		const errors: { [key: string]: string[] } = data.errors
 		const error = Object.entries(errors)
 			.map(([key, value]) => `${key}: ${value.join(', ')}`)
@@ -161,6 +169,14 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		}
 	}
 
+	if (res.status !== 200) {
+		return {
+			error: `Error: ${res.status} - ${res.statusText}`,
+		}
+	}
+
+	const data = await res.json()
+
 	// check for analysis response type
 
 	// if (!isAuthData(data)) {
@@ -169,14 +185,12 @@ export const analyze = async (prevState: any, formData: FormData) => {
 	// 	}
 	// }
 
-	const analysis = data.analysis
-
 	// postHand(handSteps, analysis).catch(error => {
 	// 	console.error(error)
 	// })
 
 	return {
-		analysis: analysis,
+		analysis: data.analysis,
 		error: '',
 	}
 }

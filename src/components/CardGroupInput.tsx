@@ -127,7 +127,8 @@ const CardGroup = ({ groupSelector, player, disabled = false }: CardGroupProps) 
 				setValue(`${groupSelector}.value`, evaluation.result.value ?? 0)
 			}
 		})()
-	}, [cardCount, group.cards, groupSelector, setValue, values.rounds, groupString])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [groupString, setValue])
 
 	return (
 		<div className={`duration-100 ${!disabled && 'bg-blue-200 scale-105 rounded-xl p-4 border-1 border-black'}`}>
