@@ -1,7 +1,7 @@
 'use server'
 
 import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, Pot } from '@/lib/types'
-// import { isAuthData } from '@/lib/types'
+import { isAnalysisData } from '@/lib/types'
 import { cookies } from 'next/headers'
 import { FormRound, FormSchema, Schema } from './formSchema'
 
@@ -177,13 +177,11 @@ export const analyze = async (prevState: any, formData: FormData) => {
 
 	const data = await res.json()
 
-	// check for analysis response type
-
-	// if (!isAuthData(data)) {
-	// 	return {
-	// 		error: `Unknown error: ${JSON.stringify(data)}`,
-	// 	}
-	// }
+	if (!isAnalysisData(data)) {
+		return {
+			error: `Unknown error: ${JSON.stringify(data)}`,
+		}
+	}
 
 	// postHand(handSteps, analysis).catch(error => {
 	// 	console.error(error)

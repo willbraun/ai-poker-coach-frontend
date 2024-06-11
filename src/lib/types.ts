@@ -86,3 +86,11 @@ export type PlayerStatus = 'current' | 'active' | 'all-in' | 'folded'
 export interface AllPlayerStatus {
 	[player: number]: PlayerStatus
 }
+
+export interface AnalysisData {
+	analysis: string
+}
+
+export const isAnalysisData = (value: any): value is AnalysisData => {
+	return Object.keys(value).length === 1 && typeof value.analysis === 'string'
+}
