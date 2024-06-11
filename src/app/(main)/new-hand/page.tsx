@@ -935,7 +935,12 @@ const NewHand = () => {
 							)}
 
 							<div className='flex gap-4'>
-								<Button type='button' className='w-1/2 text-xl' onClick={handleBack} disabled={currentRound === -1}>
+								<Button
+									type='button'
+									className='w-1/2 text-xl'
+									onClick={handleBack}
+									disabled={currentRound === -1 || !!state.analysis}
+								>
 									Back
 								</Button>
 								{showSubmit ? (
