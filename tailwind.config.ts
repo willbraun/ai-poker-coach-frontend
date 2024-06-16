@@ -84,9 +84,7 @@ const config = {
 					'100%': { transform: 'translateX(-100%)' },
 				},
 				fadeIn: {
-					'0%': { opacity: '1' },
-					'25%': { opacity: '0' },
-					'40%': { opacity: '0' },
+					from: { opacity: '0' },
 					to: { opacity: '1' },
 				},
 				fadeUp: {

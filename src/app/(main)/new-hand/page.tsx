@@ -184,8 +184,10 @@ const NewHand = () => {
 	const startingAction = currentRound > 0 ? 0 : 2
 	const playerCount = Number(watch('playerCount'))
 	const position = Number(watch('position'))
-	const smallBlind = watch('smallBlind')
-	const bigBlind = watch('bigBlind')
+	const smallBlind = Number(watch('smallBlind'))
+	const bigBlind = Number(watch('bigBlind'))
+	const ante = Number(watch('ante'))
+	const bigBlindAnte = Number(watch('bigBlindAnte'))
 	const currentEval = watch(`rounds.${currentRound}.cards.evaluation`)
 	const currentActionIndex = watch(`rounds.${currentRound}.actions`)?.length - 1
 	const currentAction = watch(`rounds.${currentRound}.actions.${currentActionIndex}`)
@@ -236,6 +238,10 @@ const NewHand = () => {
 	useEffect(() => {
 		setValue('rounds.0.actions.1.bet', bigBlind ?? 0)
 	}, [bigBlind, setValue])
+
+	useEffect(() => {
+		setValue('pots.0.value', ante * playerCount + bigBlindAnte ?? 0)
+	}, [ante, bigBlindAnte, playerCount, setValue])
 
 	useEffect(() => {
 		if (!playerCount) return
@@ -570,7 +576,7 @@ const NewHand = () => {
 
 			if (currentRound > 0) {
 				if (currentRound === 1) {
-					setValue('pots', [initialPot])
+					setValue('pots', [{ ...initialPot, value: ante * playerCount + bigBlindAnte ?? 0 }])
 				} else {
 					setValue('pots', watch(`rounds.${currentRound - 2}.finalPots`))
 				}
@@ -585,6 +591,8 @@ const NewHand = () => {
 
 		state.error = ''
 	}
+
+	console.log(getValues())
 
 	return (
 		<main className='mt-24'>
@@ -870,6 +878,9 @@ const NewHand = () => {
 								<>
 									<TypographyH2>Hand Action</TypographyH2>
 
+									{ante > 0 ? <p>{`All players bet ante of ${ante}`}</p> : null}
+									{bigBlindAnte > 0 ? <p>{`Player 2 bets big blind ante of ${bigBlindAnte}`}</p> : null}
+
 									<p>{`Player 1 bet ${smallBlind} as the small blind`}</p>
 									<p>{`Player 2 bet ${bigBlind} as the big blind`}</p>
 								</>
@@ -955,7 +966,7 @@ const NewHand = () => {
 									<Image src={pokerChip} alt='loading' width={150} height={150} className='animate-slowSpin mx-auto ' />
 								</div>
 							)}
-							{state.analysis && <Analysis className='animate-fadeRightDemo' analysis={state.analysis} />}
+							{state.analysis && <Analysis className='animate-fadeRight' analysis={state.analysis} />}
 							{state.handId && (
 								<Button asChild variant='success' className='animate-fadeRight w-full text-xl p-8'>
 									<Link href={`/hand/${state.handId}`}>Hand added successfully! 🎉 Click here to view</Link>
