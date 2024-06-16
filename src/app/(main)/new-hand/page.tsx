@@ -2,7 +2,7 @@
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import { FormPot, FormPotAction, FormRound, FormSchema, Schema } from './formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,6 +19,10 @@ import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
 import { useFormState, useFormStatus } from 'react-dom'
 import Analysis from '@/components/Analysis'
+import { cookies } from 'next/headers'
+import Link from 'next/link'
+import Image from 'next/image'
+import pokerChip from '@/lib/images/icons/poker_chip.svg'
 
 const scrollToBottom = () => {
 	setTimeout(() => {
@@ -35,18 +39,12 @@ const initialPot = {
 	winner: '',
 }
 
-const Submit = ({
-	setAnalyzePending,
-	disabled,
-}: {
-	setAnalyzePending: (pending: boolean) => void
-	disabled: boolean
-}) => {
+const Submit = ({ setPending, disabled }: { setPending: (pending: boolean) => void; disabled: boolean }) => {
 	const { pending } = useFormStatus()
-	setAnalyzePending(pending)
+	setPending(pending)
 
 	return (
-		<Button type='submit' className='w-1/2 text-xl' disabled={disabled || pending}>
+		<Button type='submit' className='w-1/2 text-xl' disabled={disabled || pending} onClick={scrollToBottom}>
 			{pending ? 'Analyzing...' : 'Submit'}
 		</Button>
 	)
@@ -139,11 +137,12 @@ const NewHand = () => {
 
 	const initialState = {
 		analysis: '',
+		handId: '',
 		error: '',
 	}
 
 	const [state, formAction] = useFormState(analyze, initialState)
-	const [analyzePending, setAnalyzePending] = useState(false)
+	const [pending, setPending] = useState(false)
 
 	const methods = useForm()
 
@@ -177,7 +176,6 @@ const NewHand = () => {
 		fields: villainFields,
 		append: appendVillains,
 		remove: removeVillains,
-		replace: replaceVillains,
 	} = useFieldArray({
 		control,
 		name: 'villains',
@@ -944,7 +942,7 @@ const NewHand = () => {
 									Back
 								</Button>
 								{showSubmit ? (
-									<Submit setAnalyzePending={setAnalyzePending} disabled={!villainsCompleted || !!state.analysis} />
+									<Submit setPending={setPending} disabled={!villainsCompleted || !!state.analysis} />
 								) : (
 									<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
 										Next
@@ -952,8 +950,17 @@ const NewHand = () => {
 								)}
 							</div>
 
-							{analyzePending && <p>Analyzing...</p>}
-							{state.analysis && <Analysis analysis={state.analysis} />}
+							{pending && (
+								<div className='animate-scalePulse mx-auto w-full'>
+									<Image src={pokerChip} alt='loading' width={150} height={150} className='animate-slowSpin mx-auto ' />
+								</div>
+							)}
+							{state.analysis && <Analysis className='animate-fadeRightDemo' analysis={state.analysis} />}
+							{state.handId && (
+								<Button asChild variant='success' className='animate-fadeRight w-full text-xl p-8'>
+									<Link href={`/hand/${state.handId}`}>Hand added successfully! 🎉 Click here to view</Link>
+								</Button>
+							)}
 
 							{Object.keys(errors).length ? (
 								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>

@@ -94,3 +94,21 @@ export interface AnalysisData {
 export const isAnalysisData = (value: any): value is AnalysisData => {
 	return Object.keys(value).length === 1 && typeof value.analysis === 'string'
 }
+
+export interface PostHandOutput {
+	id: string
+	applicationUserId: string
+	handSteps: HandSteps
+	analysis: string
+	createdTime: Date
+}
+
+export const isPostHandOutput = (value: any): value is PostHandOutput => {
+	return (
+		Object.keys(value).length === 5 &&
+		typeof value.id === 'string' &&
+		typeof value.applicationUserId === 'string' &&
+		typeof value.analysis === 'string' &&
+		value.createdTime instanceof Date
+	)
+}

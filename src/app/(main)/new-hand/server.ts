@@ -1,6 +1,6 @@
 'use server'
 
-import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, Pot } from '@/lib/types'
+import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, Pot, PostHandOutput } from '@/lib/types'
 import { isAnalysisData } from '@/lib/types'
 import { cookies } from 'next/headers'
 import { FormRound, FormSchema, Schema } from './formSchema'
@@ -183,12 +183,17 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		}
 	}
 
-	// postHand(handSteps, analysis).catch(error => {
-	// 	console.error(error)
-	// })
+	const postData = await postHand(handSteps, data.analysis)
+
+	if (postData.error) {
+		return {
+			error: `Error: ${postData.error}`,
+		}
+	}
 
 	return {
 		analysis: data.analysis,
+		handId: postData.id,
 		error: '',
 	}
 }
@@ -202,6 +207,7 @@ export const postHand = async (handSteps: HandSteps, analysis: string) => {
 	const res = await fetch(`${process.env.API_URL}/hand`, {
 		method: 'POST',
 		headers: {
+			Authorization: `Bearer ${accessToken}`,
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
@@ -213,11 +219,19 @@ export const postHand = async (handSteps: HandSteps, analysis: string) => {
 
 	if (res.status !== 200) {
 		return {
+			id: '',
+			applicationUserId: '',
+			handSteps: {},
+			analysis: '',
+			createdTime: new Date(),
 			error: `Error: ${res.status} - ${res.statusText}`,
 		}
 	}
 
-	const data = await res.json()
+	const data: PostHandOutput = await res.json()
 
-	return data
+	return {
+		...data,
+		error: '',
+	}
 }
