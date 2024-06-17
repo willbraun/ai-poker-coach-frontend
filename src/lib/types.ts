@@ -11,10 +11,20 @@ export const isAuthData = (value: any): value is AuthData => {
 
 export interface Hand {
 	id: UUID
-	applicationUserId: string
+	applicationUserId: UUID
 	handSteps: HandSteps
 	analysis: string
 	createdTime: Date
+}
+
+export const isHand = (value: any): value is Hand => {
+	return (
+		Object.keys(value).length === 5 &&
+		typeof value.id === 'string' &&
+		typeof value.applicationUserId === 'string' &&
+		typeof value.analysis === 'string' &&
+		value.createdTime instanceof Date
+	)
 }
 
 export interface HandSteps {
@@ -93,22 +103,4 @@ export interface AnalysisData {
 
 export const isAnalysisData = (value: any): value is AnalysisData => {
 	return Object.keys(value).length === 1 && typeof value.analysis === 'string'
-}
-
-export interface PostHandOutput {
-	id: string
-	applicationUserId: string
-	handSteps: HandSteps
-	analysis: string
-	createdTime: Date
-}
-
-export const isPostHandOutput = (value: any): value is PostHandOutput => {
-	return (
-		Object.keys(value).length === 5 &&
-		typeof value.id === 'string' &&
-		typeof value.applicationUserId === 'string' &&
-		typeof value.analysis === 'string' &&
-		value.createdTime instanceof Date
-	)
 }

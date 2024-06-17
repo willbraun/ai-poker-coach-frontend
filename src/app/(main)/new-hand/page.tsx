@@ -966,9 +966,9 @@ const NewHand = () => {
 									<Image src={pokerChip} alt='loading' width={150} height={150} className='animate-slowSpin mx-auto ' />
 								</div>
 							)}
-							{state.analysis && <Analysis className='animate-fadeRight' analysis={state.analysis} />}
+							{state.analysis && <Analysis className='animate-fadeIn' analysis={state.analysis} />}
 							{state.handId && (
-								<Button asChild variant='success' className='animate-fadeRight w-full text-xl p-8'>
+								<Button asChild variant='success' className='animate-fadeIn w-full text-xl p-8'>
 									<Link href={`/hand/${state.handId}`}>Hand added successfully! 🎉 Click here to view</Link>
 								</Button>
 							)}

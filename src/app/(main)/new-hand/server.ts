@@ -1,9 +1,9 @@
 'use server'
 
-import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, Pot, PostHandOutput } from '@/lib/types'
+import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, Pot } from '@/lib/types'
 import { isAnalysisData } from '@/lib/types'
 import { cookies } from 'next/headers'
-import { FormRound, FormSchema, Schema } from './formSchema'
+import { FormSchema } from './formSchema'
 
 const decisions = ['fold', 'check', 'call', 'bet', 'raise', 'callAllIn', 'betAllIn']
 
@@ -228,7 +228,7 @@ export const postHand = async (handSteps: HandSteps, analysis: string) => {
 		}
 	}
 
-	const data: PostHandOutput = await res.json()
+	const data: Hand = await res.json()
 
 	return {
 		...data,

@@ -1,13 +1,25 @@
 import Analysis from '@/components/Analysis'
 import ScrollToTop from '@/components/ScrollToTop'
 import SmallCard from '@/components/SmallCard'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog'
 import { Action, Card as CardType, Hand, Pot, Round } from '@/lib/types'
 import { getIsWin } from '@/lib/utils'
 import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
+import { cookies } from 'next/headers'
+import DeleteHandDialogContent from './DeleteHandDialogContent'
 
 const getHand = async (id: string): Promise<Hand> => {
 	const res = await fetch(`${process.env.API_URL}/hand/${id}`, { next: { revalidate: 60 } })
@@ -166,8 +178,13 @@ const RoundDetails = ({
 }
 
 const HandPage = async ({ params }: { params: { id: UUID } }) => {
+	const authCookie = cookies().get('auth')?.value ?? '{}'
+	const parsedCookie = JSON.parse(authCookie)
+	const authUserId = parsedCookie?.userId
+	const accessToken = parsedCookie?.accessToken
+
 	const hand = await getHand(params.id)
-	const { handSteps, analysis, createdTime } = hand
+	const { handSteps, analysis, createdTime, applicationUserId } = hand
 	const {
 		name,
 		gameStyle,
@@ -266,6 +283,22 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 						<TypographyH2 className='mb-4'>Analysis</TypographyH2>
 						<Analysis analysis={analysis} />
 					</section>
+					<Dialog>
+						{authUserId === applicationUserId && (
+							<DialogTrigger asChild>
+								<Button variant={'destructive'} className='w-fit ml-auto'>
+									Delete Hand
+								</Button>
+							</DialogTrigger>
+						)}
+						<DialogContent className='sm:max-w-[425px]'>
+							<DeleteHandDialogContent
+								handId={params.id}
+								accessToken={accessToken}
+								apiUrl={process.env.API_URL ?? ''}
+							/>
+						</DialogContent>
+					</Dialog>
 				</Card>
 			</main>
 		</>

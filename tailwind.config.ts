@@ -145,7 +145,7 @@ const config = {
 				expand: 'expand 400ms cubic-bezier(1, 0, 0.25, 1)',
 				glowBoxHighlight: 'glowBoxHighlight 5s linear infinite',
 				scrollLeft: 'scrollLeft var(--marquee-duration) linear infinite',
-				fadeIn: 'fadeIn 1800ms linear',
+				fadeIn: 'fadeIn 500ms linear',
 				fadeUp: 'fadeUp 2000ms cubic-bezier(0.25,1,0.5,1)',
 				fadeDown: 'fadeDown 2000ms cubic-bezier(0.25,1,0.5,1)',
 				fadeLeft: 'fadeLeft 2000ms cubic-bezier(0.25,1,0.5,1)',
