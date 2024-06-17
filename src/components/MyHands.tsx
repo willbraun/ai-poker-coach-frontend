@@ -3,7 +3,7 @@ import { AuthData, Hand } from '@/lib/types'
 import { cookies } from 'next/headers'
 
 const getHands = async (userId: string): Promise<Hand[]> => {
-	const res = await fetch(`${process.env.API_URL}/hand?userId=${userId}`, { next: { revalidate: 60 } })
+	const res = await fetch(`${process.env.API_URL}/hand?userId=${userId}`)
 	return res.json()
 }
 

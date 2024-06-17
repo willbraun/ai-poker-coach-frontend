@@ -1,10 +1,8 @@
 'use client'
 
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { set } from 'date-fns'
-import Cookies from 'js-cookie'
-import { revalidatePath } from 'next/cache'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 interface DeleteHandDialogContentProps {
@@ -14,6 +12,7 @@ interface DeleteHandDialogContentProps {
 }
 
 const DeleteHandDialogContent = ({ handId, accessToken, apiUrl }: DeleteHandDialogContentProps) => {
+	const router = useRouter()
 	const [loading, setLoading] = useState(false)
 	const [success, setSuccess] = useState('')
 	const [error, setError] = useState('')
@@ -39,8 +38,7 @@ const DeleteHandDialogContent = ({ handId, accessToken, apiUrl }: DeleteHandDial
 		if (res.status === 200) {
 			setSuccess('Hand deleted successfully. Redirecting...')
 			setTimeout(() => {
-				revalidatePath('/', 'layout')
-				window.location.href = '/my-hands'
+				router.push('/my-hands')
 			}, 3000)
 		} else {
 			console.error(res)
