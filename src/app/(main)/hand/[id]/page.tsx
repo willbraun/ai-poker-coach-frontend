@@ -5,20 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Action, Card as CardType, Hand, Pot, Round } from '@/lib/types'
 import { getIsWin } from '@/lib/utils'
 import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
-import { cookies } from 'next/headers'
 import DeleteHandDialogContent from './DeleteHandDialogContent'
 import { getAuthData } from '@/lib/server_utils'
 
