@@ -88,8 +88,9 @@ const evaluateHand = async (cards: PokerEvaluatorCard[]): Promise<handEvaluation
 	}
 }
 
-const isCardGroupEntered = (cards: { value: string; suit: string }[], cardCount: number) => {
-	return cards.length === cardCount && cards.every(card => card?.value && card?.suit)
+const isCardGroupEntered = (cards: ({ value: string; suit: string } | undefined)[], cardCount: number) => {
+	const filtered = cards.filter(Boolean)
+	return filtered.length === cardCount && filtered.every(card => card?.value && card?.suit)
 }
 
 const CardGroup = ({ groupSelector, player, disabled = false }: CardGroupProps) => {
