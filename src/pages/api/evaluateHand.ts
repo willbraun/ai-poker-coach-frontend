@@ -55,6 +55,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				handName: 'Invalid Hand: Duplicate Cards',
 				value: 0,
 			},
+			error: '',
 		})
 
 		return
@@ -76,6 +77,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				handName: newHandName,
 				value: 0,
 			},
+			error: '',
 		})
 
 		return
