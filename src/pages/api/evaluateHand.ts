@@ -49,12 +49,21 @@ const getDisplay = (value: FormCardValue, plural: boolean) => {
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
 	const cards: PokerEvaluatorCard[] = req.body.cards
 
+	if (new Set(cards).size !== cards.length) {
+		res.status(200).json({
+			result: {
+				handName: 'Invalid Hand: Duplicate Cards',
+				value: 0,
+			},
+		})
+
+		return
+	}
+
 	let newHandName = ''
 
 	if (cards.length === 2) {
-		if (cards[0] === cards[1]) {
-			newHandName = 'Invalid Hand: Duplicate Cards'
-		} else if (getValue(cards[0]) === getValue(cards[1])) {
+		if (getValue(cards[0]) === getValue(cards[1])) {
 			const value = getValue(cards[0])
 			newHandName = `Pocket ${getDisplay(value, true)}`
 		} else {
@@ -65,6 +74,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 		res.status(200).json({
 			result: {
 				handName: newHandName,
+				value: 0,
 			},
 		})
 
@@ -166,7 +176,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				break
 			case 'invalid hand':
 			default:
-				newHandName = 'Invalid Hand: Duplicate Cards'
+				newHandName = 'Invalid Hand'
 				break
 		}
 
