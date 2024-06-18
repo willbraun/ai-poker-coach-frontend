@@ -1,6 +1,6 @@
 import HandPreview from '@/components/HandPreview'
-import { AuthData, Hand } from '@/lib/types'
-import { cookies } from 'next/headers'
+import { getAuthData } from '@/lib/server_utils'
+import { Hand } from '@/lib/types'
 
 const getHands = async (userId: string): Promise<Hand[]> => {
 	const res = await fetch(`${process.env.API_URL}/hand?userId=${userId}`)
@@ -8,9 +8,8 @@ const getHands = async (userId: string): Promise<Hand[]> => {
 }
 
 const MyHands = async () => {
-	const authCookie = cookies().get('auth')?.value ?? '{}'
-	const parsed: AuthData = JSON.parse(authCookie)
-	const hands = await getHands(parsed.userId)
+	const { userId } = getAuthData()
+	const hands = await getHands(userId)
 
 	return (
 		<>

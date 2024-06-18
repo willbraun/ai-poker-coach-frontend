@@ -4,12 +4,12 @@ import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, P
 import { isAnalysisData } from '@/lib/types'
 import { cookies } from 'next/headers'
 import { FormSchema } from './formSchema'
+import { getAuthData } from '@/lib/server_utils'
 
 const decisions = ['fold', 'check', 'call', 'bet', 'raise', 'callAllIn', 'betAllIn']
 
 export const analyze = async (prevState: any, formData: FormData) => {
-	const authCookie = cookies().get('auth')?.value ?? '{}'
-	const accessToken = JSON.parse(authCookie)?.accessToken as string
+	const { accessToken } = getAuthData()
 
 	const formDataObj = Object.fromEntries(formData)
 	const formDataJson = {
@@ -199,10 +199,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 }
 
 export const postHand = async (handSteps: HandSteps, analysis: string) => {
-	const authCookie = cookies().get('auth')?.value ?? '{}'
-	const parsedCookie = JSON.parse(authCookie)
-	const applicationUserId = parsedCookie?.userId
-	const accessToken = parsedCookie?.accessToken
+	const { userId, accessToken } = getAuthData()
 
 	const res = await fetch(`${process.env.API_URL}/hand`, {
 		method: 'POST',
@@ -211,7 +208,7 @@ export const postHand = async (handSteps: HandSteps, analysis: string) => {
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
-			applicationUserId,
+			applicationUserId: userId,
 			handSteps,
 			analysis,
 		}),

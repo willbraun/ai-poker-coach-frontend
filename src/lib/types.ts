@@ -3,10 +3,18 @@ import { UUID } from 'crypto'
 export interface AuthData {
 	userId: string
 	accessToken: string
+	expiresIn: number
+	refreshToken: string
 }
 
 export const isAuthData = (value: any): value is AuthData => {
-	return Object.keys(value).length === 2 && typeof value.userId === 'string' && typeof value.accessToken === 'string'
+	return (
+		Object.keys(value).length === 4 &&
+		typeof value.userId === 'string' &&
+		typeof value.accessToken === 'string' &&
+		typeof value.expiresIn === 'number' &&
+		typeof value.refreshToken === 'string'
+	)
 }
 
 export interface Hand {

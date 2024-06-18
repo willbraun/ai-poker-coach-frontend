@@ -20,6 +20,7 @@ import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
 import { cookies } from 'next/headers'
 import DeleteHandDialogContent from './DeleteHandDialogContent'
+import { getAuthData } from '@/lib/server_utils'
 
 const getHand = async (id: string): Promise<Hand> => {
 	const res = await fetch(`${process.env.API_URL}/hand/${id}`, { next: { revalidate: 60 } })
@@ -178,10 +179,7 @@ const RoundDetails = ({
 }
 
 const HandPage = async ({ params }: { params: { id: UUID } }) => {
-	const authCookie = cookies().get('auth')?.value ?? '{}'
-	const parsedCookie = JSON.parse(authCookie)
-	const authUserId = parsedCookie?.userId
-	const accessToken = parsedCookie?.accessToken
+	const { userId, accessToken } = getAuthData()
 
 	const hand = await getHand(params.id)
 	const { handSteps, analysis, createdTime, applicationUserId } = hand
@@ -284,7 +282,7 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 						<Analysis analysis={analysis} />
 					</section>
 					<Dialog>
-						{authUserId === applicationUserId && (
+						{userId === applicationUserId && (
 							<DialogTrigger asChild>
 								<Button variant={'destructive'} className='w-fit ml-auto'>
 									Delete Hand

@@ -59,8 +59,11 @@ export const login = async (prevState: any, formData: FormData) => {
 		JSON.stringify({
 			userId: data.userId,
 			accessToken: data.accessToken,
+			refreshToken: data.refreshToken,
+			expires: new Date(Date.now() + data.expiresIn * 1000),
 		}),
 		{
+			httpOnly: true,
 			maxAge: 60 * 60 * 24 * 7,
 		}
 	)
