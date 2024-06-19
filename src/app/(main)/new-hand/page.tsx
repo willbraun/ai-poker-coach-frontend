@@ -178,11 +178,7 @@ const NewHand: FC = () => {
 
 	const fieldArrays = [round0ActionsFA, round1ActionsFA, round2ActionsFA, round3ActionsFA]
 
-	const {
-		fields: villainFields,
-		append: appendVillains,
-		remove: removeVillains,
-	} = useFieldArray({
+	const { append: appendVillains, remove: removeVillains } = useFieldArray({
 		control,
 		name: 'villains',
 	})
@@ -194,16 +190,16 @@ const NewHand: FC = () => {
 	const bigBlind = Number(watch('bigBlind'))
 	const ante = Number(watch('ante'))
 	const bigBlindAnte = Number(watch('bigBlindAnte'))
+	const pots = watch('pots')
+	const rounds = watch('rounds')
+	const villains = watch('villains')
 	const currentEval = watch(`rounds.${currentRound}.cards.evaluation`)
 	const currentActionIndex = watch(`rounds.${currentRound}.actions`)?.length - 1
 	const currentAction = watch(`rounds.${currentRound}.actions.${currentActionIndex}`)
 	const isBigBlindAction = currentRound === 0 && currentActionIndex === startingAction - 1
-	const isActionShowing = currentAction && !isBigBlindAction && villainFields.length === 0
+	const isActionShowing = currentAction && !isBigBlindAction && villains.length === 0
 	const decisionComplete = ['fold', 'check'].includes(currentAction?.decision) || currentAction?.bet > 0
 	const isCardGroupShowing = fieldArrays[currentRound]?.fields?.length === startingAction
-	const pots = watch('pots')
-	const rounds = watch('rounds')
-	const villains = watch('villains')
 
 	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
 	const villainsCompleted =
@@ -588,7 +584,7 @@ const NewHand: FC = () => {
 			}
 
 			setCurrentRound(currentRound - 1)
-		} else if (villainFields.length > 0) {
+		} else if (villains.length > 0) {
 			removeVillains()
 		}
 
@@ -905,7 +901,7 @@ const NewHand: FC = () => {
 												selector={`rounds.${round}.actions.${index + startingActionMap}`}
 												player={action.player}
 												disabled={
-													round !== currentRound || index !== arr.length - 1 || villainFields.length > 0 || showSubmit
+													round !== currentRound || index !== arr.length - 1 || villains.length > 0 || showSubmit
 												}
 											/>
 										))}
@@ -926,8 +922,8 @@ const NewHand: FC = () => {
 								)
 							})}
 
-							{villainFields.map((villain, i) => (
-								<CardGroupInput key={villain.id} groupSelector={`villains.${i}`} player={villain.player} />
+							{villains.map((villain, i) => (
+								<CardGroupInput key={i} groupSelector={`villains.${i}`} player={villain.player} />
 							))}
 
 							{villainsCompleted && (
