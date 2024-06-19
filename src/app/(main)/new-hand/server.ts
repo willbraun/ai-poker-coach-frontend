@@ -2,7 +2,6 @@
 
 import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, Pot } from '@/lib/types'
 import { isAnalysisData } from '@/lib/types'
-import { cookies } from 'next/headers'
 import { FormSchema } from './formSchema'
 import { getAuthData } from '@/lib/server_utils'
 
@@ -73,7 +72,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 
 		const evaluation: Evaluation = {
 			step: currentStep,
-			player: round.cards.player,
+			player: position,
 			value: round.cards.evaluation,
 		}
 

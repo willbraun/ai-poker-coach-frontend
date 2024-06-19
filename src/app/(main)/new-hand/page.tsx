@@ -226,9 +226,6 @@ const NewHand = () => {
 
 	useEffect(() => {
 		setValue('rounds.0.cards.player', position)
-		setValue('rounds.1.cards.player', position)
-		setValue('rounds.2.cards.player', position)
-		setValue('rounds.3.cards.player', position)
 	}, [position, setValue])
 
 	useEffect(() => {
