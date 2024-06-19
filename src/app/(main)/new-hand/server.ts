@@ -4,6 +4,7 @@ import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, P
 import { isAnalysisData } from '@/lib/types'
 import { FormSchema } from './formSchema'
 import { getAuthData } from '@/lib/server_utils'
+import { revalidatePath } from 'next/cache'
 
 const decisions = ['fold', 'check', 'call', 'bet', 'raise', 'callAllIn', 'betAllIn']
 
@@ -189,6 +190,8 @@ export const analyze = async (prevState: any, formData: FormData) => {
 			error: `Error: ${postData.error}`,
 		}
 	}
+
+	revalidatePath('/', 'layout')
 
 	return {
 		analysis: data.analysis,
