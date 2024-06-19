@@ -4,8 +4,9 @@ import { Book, CircleUser, Plus } from 'lucide-react'
 import Link from 'next/link'
 import LogoutDropdownItem from './LogoutDropdownItem'
 import { Button } from './ui/button'
+import { FC } from 'react'
 
-const Header = () => {
+const Header: FC = () => {
 	const isAuth = getAuth()
 
 	return (

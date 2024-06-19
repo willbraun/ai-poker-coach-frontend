@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { FC, useState } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 
@@ -8,7 +8,7 @@ interface PasswordFieldProps {
 	className?: string
 }
 
-const PasswordField = ({ password, setPassword, className }: PasswordFieldProps) => {
+const PasswordField: FC<PasswordFieldProps> = ({ password, setPassword, className }) => {
 	const [show, setShow] = useState(false)
 
 	const toggleShow = () => setShow(!show)

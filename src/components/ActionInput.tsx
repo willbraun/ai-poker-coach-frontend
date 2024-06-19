@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { useFormContext } from 'react-hook-form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChangeEvent } from 'react'
+import { ChangeEvent, FC } from 'react'
 import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 
 interface ActionInputProps {
@@ -11,7 +11,7 @@ interface ActionInputProps {
 	disabled: boolean
 }
 
-const ActionInput = ({ selector, player, disabled }: ActionInputProps) => {
+const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 	const { setValue, watch, control } = useFormContext()
 	const decision: string = watch(`${selector}.decision`)
 	const position: string = watch('position')

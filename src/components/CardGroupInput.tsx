@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import CardInput from './CardInput'
-import { useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import { FormCardGroup, FormRound, PokerEvaluatorCard, Schema } from '@/app/(main)/new-hand/formSchema'
 import { handleNumberChange, handleNumberBlur, isZeroBet } from '@/lib/utils'
 import { Input } from 'postcss'
@@ -93,7 +93,7 @@ const isCardGroupEntered = (cards: ({ value: string; suit: string } | undefined)
 	return filtered.length === cardCount && filtered.every(card => card?.value && card?.suit)
 }
 
-const CardGroup = ({ groupSelector, player, disabled = false }: CardGroupProps) => {
+const CardGroup: FC<CardGroupProps> = ({ groupSelector, player, disabled = false }) => {
 	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues() as Schema
 	const { title, cardCount } = getDetails(groupSelector, player)

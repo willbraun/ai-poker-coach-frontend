@@ -3,6 +3,7 @@ import club from '@/lib/images/icons/club.svg'
 import diamond from '@/lib/images/icons/diamond.svg'
 import heart from '@/lib/images/icons/heart.svg'
 import spade from '@/lib/images/icons/spade.svg'
+import { FC } from 'react'
 
 const suitMap: Record<string, JSX.Element> = {
 	C: <Image src={club} alt={'club'} />,
@@ -11,7 +12,7 @@ const suitMap: Record<string, JSX.Element> = {
 	S: <Image src={spade} alt={'spade'} />,
 }
 
-const SuitIcon = ({ suit }: { suit: string }) => {
+const SuitIcon: FC<{ suit: string }> = ({ suit }) => {
 	return <>{suitMap[suit]}</>
 }
 

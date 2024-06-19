@@ -6,11 +6,11 @@ import { Input } from '@/components/ui/input'
 import { login } from './server'
 import Link from 'next/link'
 import FormError from '@/components/FormError'
-import { useState } from 'react'
+import { FC, useState } from 'react'
 import PasswordField from '@/components/PasswordField'
 import { Home } from 'lucide-react'
 
-const LoginFormDetails = () => {
+const LoginFormDetails: FC = () => {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const { pending } = useFormStatus()
@@ -29,7 +29,7 @@ const LoginFormDetails = () => {
 	)
 }
 
-const Login = () => {
+const Login: FC = () => {
 	const initialState = {
 		error: '',
 	}

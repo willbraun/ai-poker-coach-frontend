@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createAccount } from './server'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import FormError from '@/components/FormError'
 import PasswordField from '@/components/PasswordField'
 import { Home } from 'lucide-react'
@@ -18,7 +18,7 @@ interface PasswordValidation {
 	nonAlphanumeric: boolean
 }
 
-const CreateAccountFormDetails = () => {
+const CreateAccountFormDetails: FC = () => {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
@@ -74,7 +74,7 @@ const CreateAccountFormDetails = () => {
 	)
 }
 
-const CreateAccount = () => {
+const CreateAccount: FC = () => {
 	const initialState = {
 		error: '',
 	}

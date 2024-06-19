@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
-import { useEffect, useMemo, useState } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, AllPlayerStatus, PlayerStatus, validRound } from '@/lib/types'
 import { handleNumberBlur, handleNumberChange } from '@/lib/utils'
@@ -38,9 +38,16 @@ const initialPot = {
 	winner: '',
 }
 
-const Submit = ({ setPending, disabled }: { setPending: (pending: boolean) => void; disabled: boolean }) => {
+interface SubmitProps {
+	setPending: (pending: boolean) => void
+	disabled: boolean
+}
+
+const Submit: FC<SubmitProps> = ({ setPending, disabled }) => {
 	const { pending } = useFormStatus()
-	setPending(pending)
+	useEffect(() => {
+		setPending(pending)
+	}, [pending, setPending])
 
 	return (
 		<Button type='submit' className='w-1/2 text-xl' disabled={disabled || pending} onClick={scrollToBottom}>
@@ -49,7 +56,7 @@ const Submit = ({ setPending, disabled }: { setPending: (pending: boolean) => vo
 	)
 }
 
-const NewHand = () => {
+const NewHand: FC = () => {
 	const form = useForm<Schema>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {

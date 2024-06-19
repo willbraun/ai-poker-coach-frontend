@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { FC, useEffect } from 'react'
 
-const ScrollToTop = () => {
+const ScrollToTop: FC = () => {
 	useEffect(() => {
 		window.scrollTo(0, 0)
 	}, [])

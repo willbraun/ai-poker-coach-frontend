@@ -12,6 +12,7 @@ import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
 import DeleteHandDialogContent from './DeleteHandDialogContent'
 import { getAuthData } from '@/lib/server_utils'
+import { FC } from 'react'
 
 const getHand = async (id: string): Promise<Hand> => {
 	const res = await fetch(`${process.env.API_URL}/hand/${id}`, { next: { revalidate: 60 } })
@@ -169,7 +170,7 @@ const RoundDetails = ({
 	)
 }
 
-const HandPage = async ({ params }: { params: { id: UUID } }) => {
+const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 	const { userId, accessToken } = getAuthData()
 
 	const hand = await getHand(params.id)

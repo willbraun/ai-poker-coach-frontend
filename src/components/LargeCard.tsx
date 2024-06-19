@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import SuitIcon from './SuitIcon'
 
 type LargeCardProps = {
@@ -7,7 +7,7 @@ type LargeCardProps = {
 	disabled?: boolean
 }
 
-const LargeCard: React.FC<LargeCardProps> = ({ value, suit, disabled = false }) => {
+const LargeCard: FC<LargeCardProps> = ({ value, suit, disabled = false }) => {
 	const valueStyle = `text-3xl font-bold text-left ${['D', 'H'].includes(suit) && 'text-pure-red'} ${
 		['6', '9'].includes(value) && 'underline decoration-2 underline-offset-4'
 	}`

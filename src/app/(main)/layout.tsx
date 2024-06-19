@@ -1,6 +1,7 @@
 import Header from '@/components/Header'
+import { FC } from 'react'
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
+const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
 	return (
 		<>
 			<Header />

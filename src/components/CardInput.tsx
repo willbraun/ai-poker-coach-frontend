@@ -10,16 +10,15 @@ import heart from '@/lib/images/icons/heart.svg'
 import spade from '@/lib/images/icons/spade.svg'
 import { FormLabel } from './ui/form'
 import LargeCard from './LargeCard'
+import { FC } from 'react'
 
-const CardInput = ({
-	cardIndex,
-	groupSelector,
-	disabled,
-}: {
+interface CardInputProps {
 	cardIndex: number
 	groupSelector: string
 	disabled: boolean
-}) => {
+}
+
+const CardInput: FC<CardInputProps> = ({ cardIndex, groupSelector, disabled }) => {
 	const { setValue, watch } = useFormContext()
 
 	const cardSelector = `${groupSelector}.cards.${cardIndex}`

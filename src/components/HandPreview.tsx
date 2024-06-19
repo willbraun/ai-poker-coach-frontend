@@ -7,8 +7,9 @@ import Link from 'next/link'
 import Analysis from './Analysis'
 import SmallCard from './SmallCard'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
+import { FC } from 'react'
 
-const HandPreview = ({ hand }: { hand: Hand }) => {
+const HandPreview: FC<{ hand: Hand }> = ({ hand }) => {
 	const isWin = getIsWin(hand)
 
 	return (
