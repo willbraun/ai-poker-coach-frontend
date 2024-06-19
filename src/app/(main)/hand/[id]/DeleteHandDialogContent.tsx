@@ -3,15 +3,9 @@
 import { Button } from '@/components/ui/button'
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import { useFormState, useFormStatus } from 'react-dom'
 import { deleteHand } from './server'
-
-interface DeleteHandDialogContentProps {
-	handId: string
-	accessToken: string
-	apiUrl: string
-}
 
 const Submit = () => {
 	const { pending } = useFormStatus()
@@ -23,7 +17,7 @@ const Submit = () => {
 	)
 }
 
-const DeleteHandDialogContent = ({ handId, accessToken, apiUrl }: DeleteHandDialogContentProps) => {
+export const DeleteHandDialogContent: FC<{ handId: string }> = ({ handId }) => {
 	const initialState = {
 		success: '',
 		error: '',

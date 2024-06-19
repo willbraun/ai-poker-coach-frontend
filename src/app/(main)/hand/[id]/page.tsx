@@ -171,7 +171,7 @@ const RoundDetails = ({
 }
 
 const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
-	const { userId, accessToken } = getAuthData()
+	const { userId } = getAuthData()
 
 	const hand = await getHand(params.id)
 	const { handSteps, analysis, createdTime, applicationUserId } = hand
@@ -282,11 +282,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 							</DialogTrigger>
 						)}
 						<DialogContent className='sm:max-w-[450px]'>
-							<DeleteHandDialogContent
-								handId={params.id}
-								accessToken={accessToken}
-								apiUrl={process.env.API_URL ?? ''}
-							/>
+							<DeleteHandDialogContent handId={params.id} />
 						</DialogContent>
 					</Dialog>
 				</Card>
