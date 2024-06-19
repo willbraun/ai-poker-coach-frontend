@@ -14,7 +14,7 @@ import CardGroupInput from '@/components/CardGroupInput'
 import { useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, AllPlayerStatus, PlayerStatus, validRound } from '@/lib/types'
-import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
+import { handleNumberBlur, handleNumberChange } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
 import { useFormState, useFormStatus } from 'react-dom'
@@ -653,7 +653,7 @@ const NewHand = () => {
 										<FormLabel>
 											Players dealt in this hand<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<input {...field} className='hidden' />
+										<input {...field} type='hidden' />
 										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
@@ -686,7 +686,7 @@ const NewHand = () => {
 										<FormLabel>
 											Your position relative to the small blind (1)<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<input {...field} className='hidden' />
+										<input {...field} type='hidden' />
 										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
@@ -718,7 +718,7 @@ const NewHand = () => {
 										<FormLabel>
 											Small Blind<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<input {...field} className='hidden' />
+										<input {...field} type='hidden' />
 										<FormControl>
 											<Input
 												{...field}
@@ -741,7 +741,7 @@ const NewHand = () => {
 										<FormLabel>
 											Big Blind<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
-										<input {...field} className='hidden' />
+										<input {...field} type='hidden' />
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -762,7 +762,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Ante</FormLabel>
-										<input {...field} className='hidden' />
+										<input {...field} type='hidden' />
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -783,7 +783,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Big Blind Ante</FormLabel>
-										<input {...field} className='hidden' />
+										<input {...field} type='hidden' />
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -804,7 +804,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Your stack size at the beginning of the hand</FormLabel>
-										<input {...field} className='hidden' />
+										<input {...field} type='hidden' />
 										<FormControl className='w-1/2'>
 											<Input
 												{...field}
@@ -842,7 +842,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<input {...field} value={JSON.stringify(pots)} className='hidden' />
+											<input {...field} type='hidden' value={JSON.stringify(pots)} />
 										</FormControl>
 									</FormItem>
 								)}
@@ -853,7 +853,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<input {...field} value={JSON.stringify(rounds)} className='hidden' />
+											<input {...field} type='hidden' value={JSON.stringify(rounds)} />
 										</FormControl>
 									</FormItem>
 								)}
@@ -864,7 +864,7 @@ const NewHand = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormControl>
-											<input {...field} value={JSON.stringify(villains)} className='hidden' />
+											<input {...field} type='hidden' value={JSON.stringify(villains)} />
 										</FormControl>
 									</FormItem>
 								)}

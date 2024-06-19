@@ -3,7 +3,9 @@
 import { Button } from '@/components/ui/button'
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect } from 'react'
+import { useFormState, useFormStatus } from 'react-dom'
+import { deleteHand } from './server'
 
 interface DeleteHandDialogContentProps {
 	handId: string
@@ -11,43 +13,32 @@ interface DeleteHandDialogContentProps {
 	apiUrl: string
 }
 
+const Submit = () => {
+	const { pending } = useFormStatus()
+
+	return (
+		<Button type='submit' variant='destructive' disabled={pending}>
+			{pending ? 'Deleting...' : 'Delete'}
+		</Button>
+	)
+}
+
 const DeleteHandDialogContent = ({ handId, accessToken, apiUrl }: DeleteHandDialogContentProps) => {
+	const initialState = {
+		success: '',
+		error: '',
+	}
+
+	const [state, formAction] = useFormState(deleteHand, initialState)
 	const router = useRouter()
-	const [loading, setLoading] = useState(false)
-	const [success, setSuccess] = useState('')
-	const [error, setError] = useState('')
 
-	const deleteHand = async (id: string, accessToken: string) => {
-		if (!apiUrl) {
-			setError('API URL not found.')
-			return
-		}
-
-		setLoading(true)
-
-		const res = await fetch(`${apiUrl}/hand/${id}`, {
-			method: 'DELETE',
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				'Content-Type': 'application/json',
-			},
-		})
-
-		setLoading(false)
-
-		if (res.status === 200) {
-			setSuccess('Hand deleted successfully. Redirecting...')
+	useEffect(() => {
+		if (state.success) {
 			setTimeout(() => {
 				router.push('/my-hands')
 			}, 3000)
-		} else {
-			console.error(res)
-			setError(res.statusText)
-			return
 		}
-
-		return
-	}
+	}, [state.success, router])
 
 	return (
 		<>
@@ -56,21 +47,18 @@ const DeleteHandDialogContent = ({ handId, accessToken, apiUrl }: DeleteHandDial
 				<DialogDescription>This action cannot be undone.</DialogDescription>
 			</DialogHeader>
 			<DialogFooter>
-				{success ? (
-					<p className='w-full text-center text-green-600'>{success}</p>
+				{state.success ? (
+					<p className='w-full text-center text-green-600'>{state.success}</p>
 				) : (
-					<Button
-						variant={'destructive'}
-						onClick={async () => await deleteHand(handId, accessToken)}
-						disabled={loading}
-					>
-						Delete
-					</Button>
+					<form action={formAction}>
+						<input type='hidden' name='handId' value={handId} />
+						<Submit />
+					</form>
 				)}
 
-				{error && (
+				{state.error && (
 					<div className='w-full'>
-						<p className='text-pure-red'>{error}</p>
+						<p className='text-pure-red'>{state.error}</p>
 					</div>
 				)}
 			</DialogFooter>

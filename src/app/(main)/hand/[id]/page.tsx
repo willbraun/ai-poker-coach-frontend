@@ -280,7 +280,7 @@ const HandPage = async ({ params }: { params: { id: UUID } }) => {
 								</Button>
 							</DialogTrigger>
 						)}
-						<DialogContent className='sm:max-w-[425px]'>
+						<DialogContent className='sm:max-w-[450px]'>
 							<DeleteHandDialogContent
 								handId={params.id}
 								accessToken={accessToken}
