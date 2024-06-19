@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
-import { ActionSelector, AllPlayerStatus, PlayerStatus, validRound } from '@/lib/types'
+import { ActionSelector, PlayerStatus } from '@/lib/types'
 import { handleNumberBlur, handleNumberChange } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
@@ -153,8 +153,12 @@ const NewHand: FC = () => {
 	const methods = useForm()
 
 	const [currentRound, setCurrentRound] = useState(-1)
-	const [playerStatusHistory, setPlayerStatusHistory] = useState<AllPlayerStatus[]>([])
-	const playerStatus = playerStatusHistory.at(-1) ?? {}
+	const [playerStatusHistory, setPlayerStatusHistory] = useState<PlayerStatus[]>([])
+	const [playerStatus, setPlayerStatus] = useState<PlayerStatus>({})
+
+	useEffect(() => {
+		setPlayerStatus(playerStatusHistory.at(-1) ?? {})
+	}, [playerStatusHistory])
 
 	const round0ActionsFA = useFieldArray({
 		control,
@@ -246,7 +250,7 @@ const NewHand: FC = () => {
 		if (!playerCount) return
 
 		const properties = Array.from({ length: playerCount }, _ => 'active')
-		const initialStatus: AllPlayerStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })), {
+		const initialStatus: PlayerStatus = Object.assign({}, ...properties.map((prop, i) => ({ [i + 1]: prop })), {
 			2: 'current',
 		})
 
@@ -273,56 +277,59 @@ const NewHand: FC = () => {
 		return Array.from(new Set(potsAllRounds))
 	}
 
-	useEffect(() => {
-		if (villainsCompleted) {
-			const evalMap = new Map<number, number[]>()
-			evalMap.set(watch('rounds.3.cards.value'), [position])
-			villains.forEach(villain => {
-				if (evalMap.has(villain.value)) {
-					const existing = evalMap.get(villain.value) ?? []
-					evalMap.set(villain.value, [...existing, villain.player])
-				} else {
-					evalMap.set(villain.value, [villain.player])
-				}
-			})
+	const setPotWinners = () => {
+		const evalMap = new Map<number, number[]>()
+		evalMap.set(watch('rounds.3.cards.value'), [position])
+		villains.forEach(villain => {
+			if (evalMap.has(villain.value)) {
+				const existing = evalMap.get(villain.value) ?? []
+				evalMap.set(villain.value, [...existing, villain.player])
+			} else {
+				evalMap.set(villain.value, [villain.player])
+			}
+		})
 
-			let potProgress = pots.map(pot => pot.potIndex)
-			const potWinners: { [key: number]: number[] } = {}
-			const sortedArray = Array.from(evalMap).sort((a, b) => b[0] - a[0])
+		let potProgress = pots.map(pot => pot.potIndex)
+		const potWinners: { [key: number]: number[] } = {}
+		const sortedArray = Array.from(evalMap).sort((a, b) => b[0] - a[0])
 
-			for (const [_, players] of sortedArray) {
-				if (potProgress.length === 0) {
-					break
-				}
-
-				players.forEach(player => {
-					const playerPots = getPlayerPots(player)
-					const remainingPots = playerPots.filter(pot => potProgress.includes(pot))
-
-					remainingPots.forEach(potIndex => {
-						if (potWinners[potIndex] === undefined) {
-							potWinners[potIndex] = [player]
-						} else {
-							potWinners[potIndex].push(player)
-						}
-					})
-				})
-
-				const wonPots = Object.keys(potWinners).map(Number)
-				potProgress = potProgress.filter(pot => !wonPots.includes(pot))
+		for (const [_, players] of sortedArray) {
+			if (potProgress.length === 0) {
+				break
 			}
 
-			Object.entries(potWinners).forEach(([potIndex, winners]) => {
-				const pot = pots.find(pot => pot.potIndex === Number(potIndex))
-				if (pot) {
-					setValue(`pots.${pot.potIndex}.winner`, winners.map(winner => winner.toString()).join(','))
-				}
+			players.forEach(player => {
+				const playerPots = getPlayerPots(player)
+				const remainingPots = playerPots.filter(pot => potProgress.includes(pot))
+
+				remainingPots.forEach(potIndex => {
+					if (potWinners[potIndex] === undefined) {
+						potWinners[potIndex] = [player]
+					} else {
+						potWinners[potIndex].push(player)
+					}
+				})
 			})
 
+			const wonPots = Object.keys(potWinners).map(Number)
+			potProgress = potProgress.filter(pot => !wonPots.includes(pot))
+		}
+
+		Object.entries(potWinners).forEach(([potIndex, winners]) => {
+			const pot = pots.find(pot => pot.potIndex === Number(potIndex))
+			if (pot) {
+				setValue(`pots.${pot.potIndex}.winner`, winners.map(winner => winner.toString()).join(','))
+			}
+		})
+	}
+
+	useEffect(() => {
+		if (villainsCompleted) {
+			setPotWinners()
 			scrollToBottom()
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [villainsCompleted, JSON.stringify(villains), watch])
+	}, [villainsCompleted])
 
 	const currentRoundBetterCount = useMemo(() => {
 		return (
@@ -341,62 +348,52 @@ const NewHand: FC = () => {
 		}
 	}, [state.analysis])
 
-	const addAction = async (round: validRound) => {
-		const selector = `rounds.${round}.actions` as ActionSelector
-		const actions = getValues(selector)
-		const lastAction = actions[actions.length - 1]
-		const currentPlayer = Number(Object.entries(playerStatus).find(([_, status]) => status === 'current')?.[0])
-		if (!currentPlayer) return
+	const getCurrentPlayer = () => {
+		return Number(Object.entries(playerStatus).find(([_, status]) => status === 'current')?.[0])
+	}
 
+	const getNextPlayer = () => {
+		const currentPlayer = getCurrentPlayer()
 		let nextPlayer = currentPlayer
-		let nextStatus = {}
-
-		if (actions.length === 0) {
-			nextPlayer = Math.min(...activePlayers.map(([player]) => Number(player)))
-			nextStatus = {
-				...playerStatus,
-				[currentPlayer]: 'active',
-				[nextPlayer]: 'current',
+		do {
+			nextPlayer++
+			if (nextPlayer > playerCount) {
+				nextPlayer = 1
 			}
-		} else {
-			const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
-			if (!valid) return
+		} while (['folded', 'all-in'].includes(playerStatus[nextPlayer]))
 
-			do {
-				nextPlayer++
-				if (nextPlayer > playerCount) {
-					nextPlayer = 1
-				}
-			} while (playerStatus[nextPlayer] === 'folded')
+		return nextPlayer
+	}
 
-			let updatedStatus = ''
-			switch (lastAction.decision) {
-				case 'fold':
-					updatedStatus = 'folded'
-					break
-				case 'betAllIn':
-				case 'callAllIn':
-					updatedStatus = 'all-in'
-					break
-				default:
-					updatedStatus = 'active'
-			}
-
-			nextStatus = {
-				...playerStatus,
-				[currentPlayer]: updatedStatus as PlayerStatus,
-				[nextPlayer]: 'current',
-			}
+	const getNextPlayerStatus = (nextPlayer: number) => {
+		const currentPlayer = getCurrentPlayer()
+		let updatedStatus = ''
+		if (!currentAction) {
+			return { ...playerStatus }
 		}
 
-		setPlayerStatusHistory([...playerStatusHistory, nextStatus])
-
-		if (activePlayers.length === 2 && lastAction?.decision === 'fold') {
-			return
+		switch (currentAction.decision) {
+			case 'fold':
+				updatedStatus = 'folded'
+				break
+			case 'betAllIn':
+			case 'callAllIn':
+				updatedStatus = 'all-in'
+				break
+			default:
+				updatedStatus = 'active'
 		}
 
-		fieldArrays[round].append({
-			player: nextPlayer,
+		return {
+			...playerStatus,
+			[currentPlayer]: updatedStatus,
+			[nextPlayer]: 'current',
+		} as PlayerStatus
+	}
+
+	const appendAction = async (player: number) => {
+		fieldArrays[currentRound].append({
+			player,
 			decision: '',
 			bet: 0,
 		})
@@ -525,7 +522,7 @@ const NewHand: FC = () => {
 		setCurrentRound(currentRound + 1)
 	}
 
-	const handleNext = () => {
+	const handleNext = async () => {
 		scrollToBottom()
 
 		if (currentRound === -1) {
@@ -535,14 +532,28 @@ const NewHand: FC = () => {
 
 		const selector = `rounds.${currentRound}.actions` as ActionSelector
 		const actions = getValues(selector)
-		if (actions.length === startingAction) {
-			addAction(currentRound as validRound)
+
+		const nextPlayer = getNextPlayer()
+		const nextStatus = getNextPlayerStatus(nextPlayer)
+		setPlayerStatusHistory([...playerStatusHistory, nextStatus])
+
+		const bettingPlayers = Object.entries(nextStatus)
+			.filter(([_, status]) => ['active', 'current'].includes(status))
+			.map(([player]) => Number(player))
+
+		if (bettingPlayers.length < 2) {
+			nextRound()
 			return
 		}
 
-		const bettingPlayers = Object.entries(playerStatus)
-			.filter(([_, status]) => ['active', 'current'].includes(status))
-			.map(([player]) => Number(player))
+		if (actions.length === 0) {
+			const firstPlayer = Math.min(...activePlayers.map(([player]) => Number(player)))
+			appendAction(firstPlayer)
+			return
+		}
+
+		const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
+		if (!valid) return
 
 		const playerBetSums = bettingPlayers.map(player => {
 			return actions
@@ -556,7 +567,7 @@ const NewHand: FC = () => {
 		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && decisionCount.length >= currentRoundBetterCount) {
 			nextRound()
 		} else {
-			addAction(currentRound as validRound)
+			appendAction(nextPlayer)
 		}
 	}
 
@@ -585,6 +596,9 @@ const NewHand: FC = () => {
 
 			setCurrentRound(currentRound - 1)
 		} else if (villains.length > 0) {
+			setValue('pots', watch(`rounds.${currentRound - 1}.finalPots`))
+			setValue(`rounds.${currentRound}.potActions`, [])
+			setValue(`rounds.${currentRound}.finalPots`, [])
 			removeVillains()
 		}
 
@@ -892,7 +906,11 @@ const NewHand: FC = () => {
 									<div key={i} className='flex flex-col gap-4'>
 										<CardGroupInput
 											groupSelector={`rounds.${round}.cards`}
-											disabled={fieldArrays[round].fields.length !== startingActionMap}
+											disabled={
+												fieldArrays[round].fields.length !== startingActionMap ||
+												round !== currentRound ||
+												villains.length > 0
+											}
 										/>
 
 										{fieldArrays[round].fields.slice(startingActionMap).map((action, index, arr) => (
@@ -923,7 +941,12 @@ const NewHand: FC = () => {
 							})}
 
 							{villains.map((villain, i) => (
-								<CardGroupInput key={i} groupSelector={`villains.${i}`} player={villain.player} />
+								<CardGroupInput
+									key={i}
+									groupSelector={`villains.${i}`}
+									player={villain.player}
+									disabled={!!state.analysis}
+								/>
 							))}
 
 							{villainsCompleted && (
