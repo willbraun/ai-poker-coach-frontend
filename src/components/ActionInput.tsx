@@ -19,6 +19,7 @@ const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 	const identifier = player === Number(position) ? `you (player ${player})` : `player ${player}`
 
 	const onDecisionChange = (value: string) => {
+		console.log('action', value)
 		setValue(`${selector}.decision`, value)
 		if (isZeroBet(value)) {
 			setValue(`${selector}.bet`, '0')

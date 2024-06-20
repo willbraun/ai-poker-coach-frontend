@@ -61,49 +61,51 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		} as Pot
 	})
 
-	const handStepsRounds = rounds.map(round => {
-		const cards: Card[] = round.cards.cards.map((card, cardIndex) => ({
-			step: currentStep + cardIndex,
-			player: round.cards.player,
-			value: card.value,
-			suit: card.suit,
-		}))
+	const handStepsRounds = rounds
+		.filter(round => round.actions.length > 0)
+		.map(round => {
+			const cards: Card[] = round.cards.cards.map((card, cardIndex) => ({
+				step: currentStep + cardIndex,
+				player: round.cards.player,
+				value: card.value,
+				suit: card.suit,
+			}))
 
-		currentStep += cards.length
+			currentStep += cards.length
 
-		const evaluation: Evaluation = {
-			step: currentStep,
-			player: position,
-			value: round.cards.evaluation,
-		}
+			const evaluation: Evaluation = {
+				step: currentStep,
+				player: position,
+				value: round.cards.evaluation,
+			}
 
-		currentStep++
+			currentStep++
 
-		const actions: Action[] = round.actions.map((action, actionIndex) => ({
-			step: currentStep + actionIndex,
-			player: action.player,
-			decision: decisions.indexOf(action.decision),
-			bet: action.bet,
-		}))
+			const actions: Action[] = round.actions.map((action, actionIndex) => ({
+				step: currentStep + actionIndex,
+				player: action.player,
+				decision: decisions.indexOf(action.decision),
+				bet: action.bet,
+			}))
 
-		currentStep += actions.length
+			currentStep += actions.length
 
-		const potActions: PotAction[] = round.potActions.map((potAction, potActionIndex) => ({
-			step: currentStep + potActionIndex,
-			player: potAction.player,
-			potIndex: potAction.potIndex,
-			bet: potAction.bet,
-		}))
+			const potActions: PotAction[] = round.potActions.map((potAction, potActionIndex) => ({
+				step: currentStep + potActionIndex,
+				player: potAction.player,
+				potIndex: potAction.potIndex,
+				bet: potAction.bet,
+			}))
 
-		currentStep += potActions.length
+			currentStep += potActions.length
 
-		return {
-			cards,
-			evaluation,
-			actions,
-			potActions,
-		} as Round
-	})
+			return {
+				cards,
+				evaluation,
+				actions,
+				potActions,
+			} as Round
+		})
 
 	const handStepsVillains = villains.map(villain => {
 		const cards = villain.cards.map((card, cardIndex) => {
@@ -171,7 +173,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 
 	if (res.status !== 200) {
 		return {
-			error: `Error: ${res.status} - ${res.statusText}`,
+			error: `Error analyzing hand: ${res.status} - ${res.statusText}`,
 		}
 	}
 
@@ -223,7 +225,7 @@ export const postHand = async (handSteps: HandSteps, analysis: string) => {
 			handSteps: {},
 			analysis: '',
 			createdTime: new Date(),
-			error: `Error: ${res.status} - ${res.statusText}`,
+			error: `Error posting hand: ${res.status} - ${res.statusText}`,
 		}
 	}
 

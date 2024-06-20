@@ -116,7 +116,7 @@ const ActionLine = ({ action, position }: { action: Action; position: number }) 
 	const betSize = action.decision > 1 ? ` ${action.bet}` : ''
 	return (
 		<div className='flex'>
-			<p key={action.step} className='text-xl'>{`${message}${betSize}.`}</p>
+			<p key={action.step} className='text-xl'>{`${message}${betSize}`}</p>
 		</div>
 	)
 }
@@ -256,7 +256,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 							pot.winner.split(',').map((winner, winnerIndex, winners) => {
 								return (
 									<div key={`${pot.potIndex}_${winnerIndex}`} className='flex items-center gap-4'>
-										<p className='text-xl'>Player {winner} wins</p>
+										<p className='text-xl'>{`${Number(winner) === position ? 'I win' : `Player ${winner} wins`}`}</p>
 										<PotView value={potStatusByRound.at(-1)![pot.potIndex] / winners.length} index={pot.potIndex} />
 									</div>
 								)

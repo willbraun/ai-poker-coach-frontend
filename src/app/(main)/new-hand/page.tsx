@@ -210,7 +210,8 @@ const NewHand: FC = () => {
 			.filter(([_, status]) => status !== 'folded')
 			.map(([player]) => Number(player))
 	}
-	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
+
+	const activePlayers = getActivePlayers(playerStatus)
 	const villainsCompleted =
 		villains.length > 0 && villains.every(villain => villain.evaluation !== '' && villain.value > 0)
 	const showSubmit = activePlayers.length === 1 || villainsCompleted
@@ -261,15 +262,6 @@ const NewHand: FC = () => {
 
 		setPlayerStatusHistory([initialStatus])
 	}, [playerCount])
-
-	useEffect(() => {
-		if (activePlayers.length === 1) {
-			const winner = activePlayers[0][0]
-			const newPots = pots.map(pot => ({ ...pot, winner }))
-			setValue('pots', newPots)
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [activePlayers.length, setValue])
 
 	const getPlayerPots = (player: number) => {
 		const potsAllRounds: number[] = []
@@ -336,16 +328,12 @@ const NewHand: FC = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [villainsCompleted])
 
-	const currentRoundBetterCount = useMemo(() => {
-		return (
-			playerCount -
-			fieldArrays
-				.slice(0, currentRound)
-				.flatMap(fa => fa.fields)
-				.filter(action => ['fold', 'betAllIn', 'callAllIn'].includes(action.decision)).length
-		)
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [playerCount, currentRound])
+	const currentRoundStartingBetterCount =
+		playerCount -
+		rounds
+			.slice(0, currentRound)
+			.flatMap(round => round.actions)
+			.filter(action => ['fold', 'betAllIn', 'callAllIn'].includes(action.decision)).length
 
 	useEffect(() => {
 		if (state.analysis) {
@@ -410,10 +398,11 @@ const NewHand: FC = () => {
 
 	const getPotActions = (round: FormRound) => {
 		const actions = round.actions
+		const foldedPlayers = actions.filter(action => action.decision === 'fold').map(action => action.player)
 
 		const playerBets: { [player: number]: number } = {}
 		actions
-			.filter(action => action.decision !== 'fold')
+			.filter(action => !foldedPlayers.includes(action.player))
 			.forEach(action => {
 				const { player, bet } = action
 				if (playerBets[player] === undefined) {
@@ -428,7 +417,7 @@ const NewHand: FC = () => {
 			return []
 		}
 
-		// if all aggregate bets are the same, potActions for one pot
+		// if all aggregate bets for non-folded players are the same, potActions for one pot
 		let potIndex = Math.max(...pots.map(pot => pot.potIndex))
 		if (entries.every(([_, bet]) => bet === entries[0][1])) {
 			return entries.map(
@@ -545,18 +534,27 @@ const NewHand: FC = () => {
 		let nextPlayer = getNextPlayer()
 		let nextStatus = getNextPlayerStatus(nextPlayer)
 
-		const bettingPlayersAfterAction = Object.entries(nextStatus)
+		const nextActivePlayers = getActivePlayers(nextStatus)
+		if (nextActivePlayers.length === 1) {
+			const winner = nextActivePlayers[0]
+			const newPots = pots.map(pot => ({ ...pot, winner: winner.toString() }))
+			setValue('pots', newPots)
+			setPlayerStatusHistory([...playerStatusHistory, nextStatus])
+			return
+		}
+
+		const nextBettingPlayers = Object.entries(nextStatus)
 			.filter(([_, status]) => ['active', 'current'].includes(status))
 			.map(([player]) => Number(player))
 
-		if (bettingPlayersAfterAction.length < 2) {
+		if (nextBettingPlayers.length < 2) {
 			setPlayerStatusHistory([...playerStatusHistory, nextStatus])
 			nextRound()
 			return
 		}
 
 		if (actions.length === 0) {
-			nextPlayer = Math.min(...bettingPlayersAfterAction)
+			nextPlayer = Math.min(...nextBettingPlayers)
 			nextStatus = getNextPlayerStatus(nextPlayer)
 			setPlayerStatusHistory([...playerStatusHistory, nextStatus])
 			appendAction(nextPlayer)
@@ -566,7 +564,7 @@ const NewHand: FC = () => {
 		const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
 		if (!valid) return
 
-		const playerBetSums = bettingPlayersAfterAction.map(player => {
+		const playerBetSums = nextBettingPlayers.map(player => {
 			return actions
 				.filter(action => action.player === player)
 				.map(action => Number(action.bet))
@@ -575,7 +573,10 @@ const NewHand: FC = () => {
 
 		const decisionCount = actions.slice(startingAction)
 
-		if (playerBetSums.every((bet, _, arr) => bet === arr[0]) && decisionCount.length >= currentRoundBetterCount) {
+		if (
+			playerBetSums.every((bet, _, arr) => bet === arr[0]) &&
+			decisionCount.length >= currentRoundStartingBetterCount
+		) {
 			nextRound()
 		} else {
 			appendAction(nextPlayer)
@@ -937,7 +938,7 @@ const NewHand: FC = () => {
 										))}
 
 										{activePlayers.length === 1 && (
-											<p>{`Player ${activePlayers[0][0]} wins ${
+											<p className='text-lg'>{`Player ${activePlayers[0]} wins ${
 												pots.reduce((acc, i) => acc + i.value, 0) +
 												watch(`rounds.${round}.actions`).reduce((acc, i) => acc + Number(i.bet), 0)
 											}`}</p>
@@ -987,7 +988,10 @@ const NewHand: FC = () => {
 									Back
 								</Button>
 								{showSubmit ? (
-									<Submit setPending={setPending} disabled={!villainsCompleted || !!state.analysis} />
+									<Submit
+										setPending={setPending}
+										disabled={activePlayers.length === 1 ? false : !villainsCompleted || !!state.analysis}
+									/>
 								) : (
 									<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
 										Next
