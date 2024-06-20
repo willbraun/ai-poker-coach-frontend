@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
-import { ActionSelector, PlayerStatus } from '@/lib/types'
+import { ActionSelector, PlayerStatus, SinglePlayerStatus } from '@/lib/types'
 import { handleNumberBlur, handleNumberChange } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
@@ -205,6 +205,11 @@ const NewHand: FC = () => {
 	const decisionComplete = ['fold', 'check'].includes(currentAction?.decision) || currentAction?.bet > 0
 	const isCardGroupShowing = fieldArrays[currentRound]?.fields?.length === startingAction
 
+	const getActivePlayers = (status: PlayerStatus) => {
+		return Object.entries(status)
+			.filter(([_, status]) => status !== 'folded')
+			.map(([player]) => Number(player))
+	}
 	const activePlayers = Object.entries(playerStatus).filter(([_, status]) => status !== 'folded')
 	const villainsCompleted =
 		villains.length > 0 && villains.every(villain => villain.evaluation !== '' && villain.value > 0)
@@ -365,11 +370,15 @@ const NewHand: FC = () => {
 		return nextPlayer
 	}
 
-	const getNextPlayerStatus = (nextPlayer: number) => {
+	const getNextPlayerStatus = (nextPlayer: number): PlayerStatus => {
 		const currentPlayer = getCurrentPlayer()
 		let updatedStatus = ''
 		if (!currentAction) {
-			return { ...playerStatus }
+			return {
+				...playerStatus,
+				[currentPlayer]: 'active',
+				[nextPlayer]: 'current',
+			}
 		}
 
 		switch (currentAction.decision) {
@@ -386,9 +395,9 @@ const NewHand: FC = () => {
 
 		return {
 			...playerStatus,
-			[currentPlayer]: updatedStatus,
+			[currentPlayer]: updatedStatus as SinglePlayerStatus,
 			[nextPlayer]: 'current',
-		} as PlayerStatus
+		}
 	}
 
 	const appendAction = async (player: number) => {
@@ -533,29 +542,31 @@ const NewHand: FC = () => {
 		const selector = `rounds.${currentRound}.actions` as ActionSelector
 		const actions = getValues(selector)
 
-		const nextPlayer = getNextPlayer()
-		const nextStatus = getNextPlayerStatus(nextPlayer)
-		setPlayerStatusHistory([...playerStatusHistory, nextStatus])
+		let nextPlayer = getNextPlayer()
+		let nextStatus = getNextPlayerStatus(nextPlayer)
 
-		const bettingPlayers = Object.entries(nextStatus)
+		const bettingPlayersAfterAction = Object.entries(nextStatus)
 			.filter(([_, status]) => ['active', 'current'].includes(status))
 			.map(([player]) => Number(player))
 
-		if (bettingPlayers.length < 2) {
+		if (bettingPlayersAfterAction.length < 2) {
+			setPlayerStatusHistory([...playerStatusHistory, nextStatus])
 			nextRound()
 			return
 		}
 
 		if (actions.length === 0) {
-			const firstPlayer = Math.min(...activePlayers.map(([player]) => Number(player)))
-			appendAction(firstPlayer)
+			nextPlayer = Math.min(...bettingPlayersAfterAction)
+			nextStatus = getNextPlayerStatus(nextPlayer)
+			setPlayerStatusHistory([...playerStatusHistory, nextStatus])
+			appendAction(nextPlayer)
 			return
 		}
 
 		const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
 		if (!valid) return
 
-		const playerBetSums = bettingPlayers.map(player => {
+		const playerBetSums = bettingPlayersAfterAction.map(player => {
 			return actions
 				.filter(action => action.player === player)
 				.map(action => Number(action.bet))
@@ -569,6 +580,7 @@ const NewHand: FC = () => {
 		} else {
 			appendAction(nextPlayer)
 		}
+		setPlayerStatusHistory([...playerStatusHistory, nextStatus])
 	}
 
 	const handleBack = () => {
