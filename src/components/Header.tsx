@@ -1,10 +1,11 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { getAuth } from '@/lib/server_utils'
-import { Book, CircleUser, Plus } from 'lucide-react'
+import { Book, CircleUser } from 'lucide-react'
 import Link from 'next/link'
 import LogoutDropdownItem from './LogoutDropdownItem'
 import { Button } from './ui/button'
 import { FC } from 'react'
+import NewHandLink from './NewHandLink'
 
 const Header: FC = () => {
 	const isAuth = getAuth()
@@ -16,12 +17,7 @@ const Header: FC = () => {
 			</Link>
 			{isAuth ? (
 				<>
-					<Link href='/new-hand' className='ml-auto hover:bg-slate-200 rounded-full p-1'>
-						<div className='flex gap-2 items-center px-2'>
-							<p className='hidden md:block'>New Hand</p>
-							<Plus size='32px' />
-						</div>
-					</Link>
+					<NewHandLink />
 					<DropdownMenu>
 						<DropdownMenuTrigger className='outline-none hover:bg-slate-200 rounded-full p-1' asChild>
 							<div className='flex gap-2 items-center px-2'>

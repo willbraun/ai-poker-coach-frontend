@@ -23,6 +23,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import pokerChip from '@/lib/images/icons/poker_chip.svg'
 
+const scrollToTop = () => {
+	setTimeout(() => {
+		window.scrollTo({
+			top: 0,
+		})
+	}, 0)
+}
+
 const scrollToBottom = () => {
 	setTimeout(() => {
 		window.scrollTo({
@@ -57,6 +65,10 @@ const Submit: FC<SubmitProps> = ({ setPending, disabled }) => {
 }
 
 const NewHand: FC = () => {
+	useEffect(() => {
+		scrollToTop()
+	}, [])
+
 	const form = useForm<Schema>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -543,17 +555,31 @@ const NewHand: FC = () => {
 			return
 		}
 
-		const nextBettingPlayers = Object.entries(nextStatus)
-			.filter(([_, status]) => ['active', 'current'].includes(status))
-			.map(([player]) => Number(player))
-
-		if (nextBettingPlayers.length < 2) {
-			setPlayerStatusHistory([...playerStatusHistory, nextStatus])
-			nextRound()
-			return
-		}
+		const playersThisRound = new Set(actions.map(action => action.player))
+		const playersNotBettingFull = new Set<number>()
+		actions.forEach(({ player, decision }) => {
+			if (decision === 'fold' || decision === 'callAllIn') {
+				playersNotBettingFull.add(player)
+			}
+		})
+		const playersBettingFull = new Set<number>()
+		playersThisRound.forEach(player => {
+			if (!playersNotBettingFull.has(player)) {
+				playersBettingFull.add(player)
+			}
+		})
 
 		if (actions.length === 0) {
+			const nextBettingPlayers = Object.entries(nextStatus)
+				.filter(([_, status]) => ['active', 'current'].includes(status))
+				.map(([player]) => Number(player))
+
+			if (nextBettingPlayers.length < 2) {
+				setPlayerStatusHistory([...playerStatusHistory, nextStatus])
+				nextRound()
+				return
+			}
+
 			nextPlayer = Math.min(...nextBettingPlayers)
 			nextStatus = getNextPlayerStatus(nextPlayer)
 			setPlayerStatusHistory([...playerStatusHistory, nextStatus])
@@ -564,7 +590,7 @@ const NewHand: FC = () => {
 		const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
 		if (!valid) return
 
-		const playerBetSums = nextBettingPlayers.map(player => {
+		const playerBetSums = Array.from(playersBettingFull).map(player => {
 			return actions
 				.filter(action => action.player === player)
 				.map(action => Number(action.bet))

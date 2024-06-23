@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { useFormContext } from 'react-hook-form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChangeEvent, FC } from 'react'
+import { FC } from 'react'
 import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
 
 interface ActionInputProps {
@@ -19,7 +19,6 @@ const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 	const identifier = player === Number(position) ? `you (player ${player})` : `player ${player}`
 
 	const onDecisionChange = (value: string) => {
-		console.log('action', value)
 		setValue(`${selector}.decision`, value)
 		if (isZeroBet(value)) {
 			setValue(`${selector}.bet`, '0')
