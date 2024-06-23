@@ -8,6 +8,7 @@ import Analysis from './Analysis'
 import SmallCard from './SmallCard'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { FC } from 'react'
+import { buttonVariants } from './ui/button'
 
 const HandPreview: FC<{ hand: Hand }> = ({ hand }) => {
 	const isWin = getIsWin(hand)
@@ -16,14 +17,16 @@ const HandPreview: FC<{ hand: Hand }> = ({ hand }) => {
 		<Card className='relative mb-2 rounded-none lg:mb-4 lg:rounded-xl'>
 			<CardHeader>
 				<div className='flex justify-between'>
-					<CardTitle className='flex justify-between'>{hand.handSteps.name}</CardTitle>
-					<div className={`rounded px-2 ${isWin ? 'bg-green-200' : 'bg-red-200'}`}>{isWin ? 'Win' : 'Loss'}</div>
+					<CardTitle className='xs:text-2xl flex justify-between lg:text-4xl'>{hand.handSteps.name}</CardTitle>
+					<div className='font-bold'>{isWin ? 'Win' : 'Loss'}</div>
 				</div>
-				<CardDescription>{formatDistanceToNow(hand.createdTime, { addSuffix: true })}</CardDescription>
+				<CardDescription className='lg:text-lg'>
+					{formatDistanceToNow(hand.createdTime, { addSuffix: true })}
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<div className='mb-4 flex flex-wrap items-center gap-y-2'>
-					<p className='pr-8'>{hand.handSteps.rounds.at(-1)?.evaluation.value ?? ''}</p>
+				<div className='mb-4 flex flex-wrap items-center gap-y-2 border-b-1 border-accent pb-8'>
+					<p className='pr-8 lg:text-lg'>{hand.handSteps.rounds.at(-1)?.evaluation.value ?? ''}</p>
 					<div className='flex items-center'>
 						<div className='flex gap-2 border-r-2 border-black pr-4'>
 							<SmallCard card={hand.handSteps.rounds[0].cards[0]} />
@@ -39,8 +42,8 @@ const HandPreview: FC<{ hand: Hand }> = ({ hand }) => {
 				<Analysis analysis={hand.analysis} />
 			</CardContent>
 			<CardFooter className='justify-end'>
-				<Link href={`/hand/${hand.id}`} className='rounded-full hover:bg-slate-200'>
-					<Image src={ellipsis} alt='see hand details' className='m-1 h-8 w-8' />
+				<Link href={`/hand/${hand.id}`} className={buttonVariants({ variant: 'default' })}>
+					See more
 				</Link>
 			</CardFooter>
 		</Card>

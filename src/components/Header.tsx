@@ -11,7 +11,7 @@ const Header: FC = () => {
 	const isAuth = getAuth()
 
 	return (
-		<header className='fixed top-0 z-20 flex h-16 w-full items-center gap-4 bg-white px-4 shadow'>
+		<header className='fixed top-0 z-20 flex h-16 w-full items-center gap-4 border-1 border-b bg-background px-4'>
 			<Link href='/'>
 				<p className='text-2xl font-semibold tracking-tight'>AI Poker Coach</p>
 			</Link>
@@ -19,14 +19,14 @@ const Header: FC = () => {
 				<>
 					<NewHandLink />
 					<DropdownMenu>
-						<DropdownMenuTrigger className='rounded-full p-1 outline-none hover:bg-slate-200' asChild>
+						<DropdownMenuTrigger className='rounded p-1 outline-none hover:cursor-pointer hover:underline' asChild>
 							<div className='flex items-center gap-2 px-2'>
 								<p className='hidden md:block'>My Account</p>
 								<CircleUser size='32px' />
 							</div>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent className='mr-4'>
-							<Link href='/my-hands' className='flex items-center'>
+							<Link href='/my-hands' className='flex items-center hover:cursor-pointer'>
 								<DropdownMenuItem className='text-lg'>
 									<Book className='mr-2 h-4 w-4' />
 									<span>My Hands</span>

@@ -8,7 +8,7 @@ interface AnalysisProps {
 
 const Analysis: FC<AnalysisProps> = ({ analysis, className }) => {
 	return (
-		<div className={cn('flex flex-col gap-4 rounded bg-stone-200 p-4 font-serif sm:text-lg lg:text-xl', className)}>
+		<div className={cn('flex flex-col gap-4 rounded p-4 font-serif text-lg md:text-2xl', className)}>
 			{analysis.split('\\n').map((paragraph, i) => (
 				<p key={i}>{paragraph}</p>
 			))}

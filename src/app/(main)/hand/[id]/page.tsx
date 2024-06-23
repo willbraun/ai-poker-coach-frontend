@@ -209,7 +209,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 							{formatDistanceToNow(createdTime, { addSuffix: true })}
 						</p>
 					</section>
-					<section className='rounded-xl border-1 border-slate-300 p-4'>
+					<section className='border-b-1 px-4 pb-12'>
 						<TypographyH2>Details</TypographyH2>
 						<p>{['Tournament', 'Cash Game'][gameStyle]}</p>
 						<p>{playerCount} Players</p>
@@ -224,7 +224,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 							Notes: <span>{notes}</span>
 						</p>
 					</section>
-					<section className='[&>*]:border-b-1 [&>*]:border-slate-300 [&>*]:p-4'>
+					<section className='[&>*]:border-b-1 [&>*]:border-muted [&>*]:p-4'>
 						{ante || bigBlindAnte ? (
 							<div className='flex items-center'>
 								<p className='text-xl'>Pot after antes</p>

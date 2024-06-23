@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export const getAuthData = () => {
 	const authCookie = cookies().get('auth')?.value
 	if (!authCookie) {
-		return
+		return {}
 	}
 
 	return JSON.parse(authCookie)

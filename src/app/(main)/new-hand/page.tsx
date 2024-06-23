@@ -22,6 +22,7 @@ import Analysis from '@/components/Analysis'
 import Link from 'next/link'
 import Image from 'next/image'
 import pokerChip from '@/lib/images/icons/poker_chip.svg'
+import { Card } from '@/components/ui/card'
 
 const scrollToTop = () => {
 	setTimeout(() => {
@@ -631,8 +632,8 @@ const NewHand: FC = () => {
 	console.log(getValues())
 
 	return (
-		<main className='mt-24'>
-			<div className='mx-auto max-w-screen-sm px-4 pb-16'>
+		<main className='mt-24 pb-16'>
+			<Card className='mx-auto max-w-screen-md p-8'>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
@@ -691,7 +692,7 @@ const NewHand: FC = () => {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											Players dealt in this hand<span className='ml-2 text-pure-red'>*</span>
+											Number of players<span className='ml-2 text-pure-red'>*</span>
 										</FormLabel>
 										<input {...field} type='hidden' />
 										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
@@ -734,16 +735,22 @@ const NewHand: FC = () => {
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												{Array.from({ length: playerCount }).map((_, i) => {
-													const position = i + 1
-													const label = positionLabels.get(position)
-													return (
-														<SelectItem key={`position_choice_${position}`} value={position.toString()}>
-															{position}
-															{label && ` (${label})`}
-														</SelectItem>
-													)
-												})}
+												{playerCount > 0 ? (
+													Array.from({ length: playerCount }).map((_, i) => {
+														const position = i + 1
+														const label = positionLabels.get(position)
+														return (
+															<SelectItem key={`position_choice_${position}`} value={position.toString()}>
+																{position}
+																{label && ` (${label})`}
+															</SelectItem>
+														)
+													})
+												) : (
+													<SelectItem key='none' value='none' disabled>
+														Please select number of players
+													</SelectItem>
+												)}
 											</SelectContent>
 										</Select>
 										<FormMessage />
@@ -1028,7 +1035,7 @@ const NewHand: FC = () => {
 						</form>
 					</Form>
 				</FormProvider>
-			</div>
+			</Card>
 		</main>
 	)
 }

@@ -132,7 +132,7 @@ const CardGroup: FC<CardGroupProps> = ({ groupSelector, player, disabled = false
 	}, [groupString, setValue])
 
 	return (
-		<div className={`duration-100 ${!disabled && 'scale-105 rounded-xl border-1 border-black bg-blue-200 p-4'}`}>
+		<div className={`duration-100 ${!disabled && 'scale-105 rounded-xl border-1 bg-secondary p-4'}`}>
 			<FormLabel>{title}</FormLabel>
 			<div className='mb-8 mt-4 flex flex-wrap items-center gap-4'>
 				<div className='mr-auto flex gap-4'>

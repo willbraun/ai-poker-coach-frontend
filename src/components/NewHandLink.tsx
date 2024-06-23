@@ -16,7 +16,7 @@ const NewHandLink: FC = () => {
 	}
 
 	return (
-		<Link href='/new-hand' onClick={handleReload} className='ml-auto rounded-full p-1 hover:bg-slate-200'>
+		<Link href='/new-hand' onClick={handleReload} className='ml-auto rounded-full p-1 hover:underline'>
 			<div className='flex items-center gap-2 px-2'>
 				<p className='hidden md:block'>New Hand</p>
 				<Plus size='32px' />

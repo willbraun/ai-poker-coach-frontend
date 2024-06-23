@@ -38,7 +38,7 @@ const Login: FC = () => {
 
 	return (
 		<main className='flex h-full w-full justify-end'>
-			<section className='flex w-full items-center justify-center bg-slate-300 lg:w-1/2'>
+			<section className='flex w-full items-center justify-center bg-accent lg:w-1/2'>
 				<div className='w-96 p-4'>
 					<h1 className='mb-4 text-3xl font-bold'>Log in</h1>
 					<form action={formAction}>
