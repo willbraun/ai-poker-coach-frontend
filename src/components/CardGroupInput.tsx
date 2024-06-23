@@ -110,7 +110,7 @@ const CardGroup: FC<CardGroupProps> = ({ groupSelector, player, disabled = false
 					evalInput = values.rounds.slice(0, round + 1).flatMap((round: FormRound) =>
 						round.cards.cards.map(card => {
 							return `${card.value}${card.suit}` as PokerEvaluatorCard
-						})
+						}),
 					)
 				}
 
@@ -132,10 +132,10 @@ const CardGroup: FC<CardGroupProps> = ({ groupSelector, player, disabled = false
 	}, [groupString, setValue])
 
 	return (
-		<div className={`duration-100 ${!disabled && 'bg-blue-200 scale-105 rounded-xl p-4 border-1 border-black'}`}>
+		<div className={`duration-100 ${!disabled && 'scale-105 rounded-xl border-1 border-black bg-blue-200 p-4'}`}>
 			<FormLabel>{title}</FormLabel>
-			<div className='mt-4 mb-8 flex flex-wrap items-center gap-4'>
-				<div className='flex gap-4 mr-auto'>
+			<div className='mb-8 mt-4 flex flex-wrap items-center gap-4'>
+				<div className='mr-auto flex gap-4'>
 					{Array.from({ length: cardCount }).map((_, i) => (
 						<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} disabled={disabled} />
 					))}

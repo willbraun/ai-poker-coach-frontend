@@ -37,15 +37,15 @@ const Login: FC = () => {
 	const [state, formAction] = useFormState(login, initialState)
 
 	return (
-		<main className='w-full h-full flex justify-end'>
-			<section className='w-full lg:w-1/2 bg-slate-300 flex justify-center items-center'>
+		<main className='flex h-full w-full justify-end'>
+			<section className='flex w-full items-center justify-center bg-slate-300 lg:w-1/2'>
 				<div className='w-96 p-4'>
-					<h1 className='mb-4 font-bold text-3xl'>Log in</h1>
+					<h1 className='mb-4 text-3xl font-bold'>Log in</h1>
 					<form action={formAction}>
 						<LoginFormDetails />
 					</form>
 					<FormError error={state.error} />
-					<p className='mt-8 mb-2'>
+					<p className='mb-2 mt-8'>
 						No account? Click{' '}
 						<Link href='/create-account' className='underline'>
 							here

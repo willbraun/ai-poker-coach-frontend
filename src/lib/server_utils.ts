@@ -52,7 +52,7 @@ export const updateSession = async (request: NextRequest) => {
 		{
 			httpOnly: true,
 			maxAge: 60 * 60 * 24 * 7,
-		}
+		},
 	)
 
 	return res

@@ -32,13 +32,13 @@ const CardInput: FC<CardInputProps> = ({ cardIndex, groupSelector, disabled }) =
 				{card?.value && card?.suit ? (
 					<LargeCard value={card.value} suit={card.suit} disabled={disabled} />
 				) : (
-					<div className='w-24 h-36 border-dashed border-1 border-black rounded-lg flex justify-center items-center bg-slate-200 hover:brightness-105 hover:cursor-pointer'>
+					<div className='flex h-36 w-24 items-center justify-center rounded-lg border-1 border-dashed border-black bg-slate-200 hover:cursor-pointer hover:brightness-105'>
 						<Plus size='40px' />
 					</div>
 				)}
 			</PopoverTrigger>
 			<PopoverContent className='flex gap-4'>
-				<div className='w-1/2 text-center flex flex-col gap-4'>
+				<div className='flex w-1/2 flex-col gap-4 text-center'>
 					<FormLabel>Value</FormLabel>
 					<div className=''>
 						<Select value={card?.value ?? ''} onValueChange={value => setValue(cardSelector, { ...card, value })}>
@@ -63,9 +63,9 @@ const CardInput: FC<CardInputProps> = ({ cardIndex, groupSelector, disabled }) =
 						</Select>
 					</div>
 				</div>
-				<div className='w-1/2 text-center flex flex-col gap-4'>
+				<div className='flex w-1/2 flex-col gap-4 text-center'>
 					<FormLabel>Suit</FormLabel>
-					<div className='grid grid-rows-2 grid-cols-2 gap-1'>
+					<div className='grid grid-cols-2 grid-rows-2 gap-1'>
 						<Button
 							variant='ghost'
 							className={`p-0 ${card?.suit === 'C' ? 'border-2 border-black' : ''}`}

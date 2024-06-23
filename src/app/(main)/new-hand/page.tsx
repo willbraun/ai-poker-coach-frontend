@@ -232,9 +232,9 @@ const NewHand: FC = () => {
 		currentRound === -1
 			? !playerCount || !position || !smallBlind || !bigBlind
 			: currentEval === '' ||
-			  currentEval.includes('Invalid Hand') ||
-			  currentEval.includes('Error') ||
-			  (isActionShowing && !decisionComplete)
+				currentEval.includes('Invalid Hand') ||
+				currentEval.includes('Error') ||
+				(isActionShowing && !decisionComplete)
 
 	const positionLabels = new Map<number, string>([
 		[1, 'small blind'],
@@ -438,7 +438,7 @@ const NewHand: FC = () => {
 						potIndex,
 						player: parseInt(player),
 						bet,
-					} as FormPotAction)
+					}) as FormPotAction,
 			)
 		}
 
@@ -456,8 +456,8 @@ const NewHand: FC = () => {
 							potIndex,
 							player: parseInt(player),
 							bet: currentLowestBet,
-						} as FormPotAction)
-				)
+						}) as FormPotAction,
+				),
 			)
 
 			entryProgress = entryProgress
@@ -481,13 +481,16 @@ const NewHand: FC = () => {
 			setValue(`rounds.${currentRound}.potActions`, potActions)
 		}
 
-		const betsByPot = potActions.reduce((acc, { potIndex, bet }) => {
-			if (acc[potIndex] === undefined) {
-				acc[potIndex] = 0
-			}
-			acc[potIndex] += bet
-			return acc
-		}, {} as { [potIndex: number]: number })
+		const betsByPot = potActions.reduce(
+			(acc, { potIndex, bet }) => {
+				if (acc[potIndex] === undefined) {
+					acc[potIndex] = 0
+				}
+				acc[potIndex] += bet
+				return acc
+			},
+			{} as { [potIndex: number]: number },
+		)
 
 		const finalPots = [...pots]
 
@@ -629,7 +632,7 @@ const NewHand: FC = () => {
 
 	return (
 		<main className='mt-24'>
-			<div className='max-w-screen-sm mx-auto pb-16 px-4'>
+			<div className='mx-auto max-w-screen-sm px-4 pb-16'>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
@@ -1007,21 +1010,21 @@ const NewHand: FC = () => {
 							</div>
 
 							{pending && (
-								<div className='animate-scalePulse mx-auto w-full'>
-									<Image src={pokerChip} alt='loading' width={150} height={150} className='animate-slowSpin mx-auto ' />
+								<div className='mx-auto w-full animate-scalePulse'>
+									<Image src={pokerChip} alt='loading' width={150} height={150} className='mx-auto animate-slowSpin' />
 								</div>
 							)}
 							{state.analysis && <Analysis className='animate-fadeIn' analysis={state.analysis} />}
 							{state.handId && (
-								<Button asChild variant='success' className='animate-fadeIn w-full text-xl p-8'>
+								<Button asChild variant='success' className='w-full animate-fadeIn p-8 text-xl'>
 									<Link href={`/hand/${state.handId}`}>Hand added successfully! 🎉 Click here to view</Link>
 								</Button>
 							)}
 
 							{Object.keys(errors).length ? (
-								<p className='text-red-500 mt-2'>Please resolve errors and try again</p>
+								<p className='mt-2 text-red-500'>Please resolve errors and try again</p>
 							) : null}
-							{state.error && <p className='text-red-500 mt-2'>{state.error}</p>}
+							{state.error && <p className='mt-2 text-red-500'>{state.error}</p>}
 						</form>
 					</Form>
 				</FormProvider>

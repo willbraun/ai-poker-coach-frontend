@@ -24,7 +24,7 @@ const PasswordField: FC<PasswordFieldProps> = ({ password, setPassword, classNam
 					setPassword(e.target.value)
 				}}
 			/>
-			<Button type='button' className='w-11 h-6 absolute right-2 top-11 -translate-y-1/2 text-xs' onClick={toggleShow}>
+			<Button type='button' className='absolute right-2 top-11 h-6 w-11 -translate-y-1/2 text-xs' onClick={toggleShow}>
 				{show ? 'Hide' : 'Show'}
 			</Button>
 		</div>

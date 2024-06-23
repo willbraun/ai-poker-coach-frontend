@@ -85,15 +85,15 @@ const CardLine = ({
 	evaluation: string
 }) => {
 	return (
-		<div className='flex items-center flex-wrap gap-y-2'>
-			<div className='flex items-center flex-wrap gap-y-2 mr-auto'>
-				<p className='text-xl pr-4 md:pr-8'>{message}</p>
+		<div className='flex flex-wrap items-center gap-y-2'>
+			<div className='mr-auto flex flex-wrap items-center gap-y-2'>
+				<p className='pr-4 text-xl md:pr-8'>{message}</p>
 				<div className='flex gap-2 pr-4'>
 					<SmallCard card={hole[0]} />
 					<SmallCard card={hole[1]} />
 				</div>
 				{table ? (
-					<div className='flex gap-2 pl-4 border-l-2 border-black '>
+					<div className='flex gap-2 border-l-2 border-black pl-4'>
 						{table.map(card => (
 							<SmallCard key={card.step} card={card} />
 						))}
@@ -122,7 +122,7 @@ const ActionLine = ({ action, position }: { action: Action; position: number }) 
 }
 
 const PotView = ({ value, index }: { value: number; index: number }) => {
-	return <div className={`px-2 py-1 rounded text-xl ${potColors[index]}`}>{value}</div>
+	return <div className={`rounded px-2 py-1 text-xl ${potColors[index]}`}>{value}</div>
 }
 
 const PotLine = ({ message, potStatus }: { message: string; potStatus: number[] }) => {
@@ -201,15 +201,15 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 	return (
 		<>
 			<ScrollToTop />
-			<main className='pt-16 lg:pt-24 lg:pb-16'>
-				<Card className='max-w-screen-lg mx-auto h-full flex flex-col gap-8 p-4 lg:p-16 rounded-none lg:rounded-xl'>
+			<main className='pt-16 lg:pb-16 lg:pt-24'>
+				<Card className='mx-auto flex h-full max-w-screen-lg flex-col gap-8 rounded-none p-4 lg:rounded-xl lg:p-16'>
 					<section>
 						<TypographyH1>{name}</TypographyH1>
-						<p className='text-md text-muted-foreground mt-2'>
+						<p className='text-md mt-2 text-muted-foreground'>
 							{formatDistanceToNow(createdTime, { addSuffix: true })}
 						</p>
 					</section>
-					<section className='rounded-xl p-4 border-1 border-slate-300'>
+					<section className='rounded-xl border-1 border-slate-300 p-4'>
 						<TypographyH2>Details</TypographyH2>
 						<p>{['Tournament', 'Cash Game'][gameStyle]}</p>
 						<p>{playerCount} Players</p>
@@ -224,7 +224,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 							Notes: <span>{notes}</span>
 						</p>
 					</section>
-					<section className='[&>*]:p-4 [&>*]:border-b-1 [&>*]:border-slate-300 '>
+					<section className='[&>*]:border-b-1 [&>*]:border-slate-300 [&>*]:p-4'>
 						{ante || bigBlindAnte ? (
 							<div className='flex items-center'>
 								<p className='text-xl'>Pot after antes</p>
@@ -250,7 +250,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 											evaluation={villain.evaluation.value}
 										/>
 									)
-							  })
+								})
 							: null}
 						{pots.map(pot =>
 							pot.winner.split(',').map((winner, winnerIndex, winners) => {
@@ -260,12 +260,12 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 										<PotView value={potStatusByRound.at(-1)![pot.potIndex] / winners.length} index={pot.potIndex} />
 									</div>
 								)
-							})
+							}),
 						)}
 						{!isWin ? (
-							<div className='text-xl flex items-center gap-4'>
+							<div className='flex items-center gap-4 text-xl'>
 								<p>I lose</p>
-								<p className='px-2 py-1 bg-red-300 rounded'>{loss}</p>
+								<p className='rounded bg-red-300 px-2 py-1'>{loss}</p>
 							</div>
 						) : null}
 					</section>
@@ -276,7 +276,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 					<Dialog>
 						{userId === applicationUserId && (
 							<DialogTrigger asChild>
-								<Button variant={'destructive'} className='w-fit ml-auto'>
+								<Button variant={'destructive'} className='ml-auto w-fit'>
 									Delete Hand
 								</Button>
 							</DialogTrigger>

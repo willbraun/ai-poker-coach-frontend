@@ -5,7 +5,7 @@ interface FormErrorProps {
 }
 
 const FormError: FC<FormErrorProps> = ({ error }) => {
-	return <p className='text-md text-red-500 whitespace-pre-line'>{error}</p>
+	return <p className='text-md whitespace-pre-line text-red-500'>{error}</p>
 }
 
 export default FormError

@@ -1,0 +1,18 @@
+.next
+node_modules
+public
+.env
+.env.local
+
+# Configuration files
+*.config.js
+*.config.cjs
+*.config.mjs
+*.config.ts
+*.config.json
+
+# Data files
+*.csv
+*.tsv
+*.yaml
+*.yml

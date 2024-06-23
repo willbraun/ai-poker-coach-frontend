@@ -92,7 +92,7 @@ export const createAccount = async (prevState: any, formData: FormData) => {
 		{
 			httpOnly: true,
 			maxAge: 60 * 60 * 24 * 7,
-		}
+		},
 	)
 
 	redirect('/')
