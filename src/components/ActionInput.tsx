@@ -3,7 +3,8 @@ import { Input } from '@/components/ui/input'
 import { useFormContext } from 'react-hook-form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FC } from 'react'
-import { handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
+import { getPlayerBetSums, getPlayersBettingFull, handleNumberBlur, handleNumberChange, isZeroBet } from '@/lib/utils'
+import { FormAction } from '@/app/(main)/new-hand/formSchema'
 
 interface ActionInputProps {
 	selector: string
@@ -15,6 +16,7 @@ const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 	const { setValue, watch, control } = useFormContext()
 	const decision: string = watch(`${selector}.decision`)
 	const position: string = watch('position')
+	const roundPreviousActions: FormAction[] = watch(selector.slice(0, -2)).slice(0, -1)
 
 	const identifier = player === Number(position) ? `you (player ${player})` : `player ${player}`
 
@@ -22,6 +24,13 @@ const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 		setValue(`${selector}.decision`, value)
 		if (isZeroBet(value)) {
 			setValue(`${selector}.bet`, '0')
+			return
+		} else if (value === 'call') {
+			const playersBettingFull = getPlayersBettingFull(roundPreviousActions)
+			const playerBetSums = getPlayerBetSums(playersBettingFull, roundPreviousActions)
+			const index = playersBettingFull.indexOf(player)
+			const difference = Math.max(...playerBetSums) - (playerBetSums[index] ?? 0)
+			setValue(`${selector}.bet`, difference.toString())
 		}
 	}
 

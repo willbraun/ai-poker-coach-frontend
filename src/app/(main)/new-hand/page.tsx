@@ -14,7 +14,7 @@ import CardGroupInput from '@/components/CardGroupInput'
 import { FC, useEffect, useMemo, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus, SinglePlayerStatus } from '@/lib/types'
-import { handleNumberBlur, handleNumberChange } from '@/lib/utils'
+import { getPlayerBetSums, getPlayersBettingFull, handleNumberBlur, handleNumberChange } from '@/lib/utils'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { analyze } from './server'
 import { useFormState, useFormStatus } from 'react-dom'
@@ -555,20 +555,6 @@ const NewHand: FC = () => {
 			return
 		}
 
-		const playersThisRound = new Set(actions.map(action => action.player))
-		const playersNotBettingFull = new Set<number>()
-		actions.forEach(({ player, decision }) => {
-			if (decision === 'fold' || decision === 'callAllIn') {
-				playersNotBettingFull.add(player)
-			}
-		})
-		const playersBettingFull = new Set<number>()
-		playersThisRound.forEach(player => {
-			if (!playersNotBettingFull.has(player)) {
-				playersBettingFull.add(player)
-			}
-		})
-
 		if (actions.length === 0) {
 			const nextBettingPlayers = Object.entries(nextStatus)
 				.filter(([_, status]) => ['active', 'current'].includes(status))
@@ -590,13 +576,8 @@ const NewHand: FC = () => {
 		const valid = await trigger(`${selector}.${actions.length - 1}.bet`)
 		if (!valid) return
 
-		const playerBetSums = Array.from(playersBettingFull).map(player => {
-			return actions
-				.filter(action => action.player === player)
-				.map(action => Number(action.bet))
-				.reduce((a, b) => a + b, 0)
-		})
-
+		const playersBettingFull = getPlayersBettingFull(actions)
+		const playerBetSums = getPlayerBetSums(playersBettingFull, actions)
 		const decisionCount = actions.slice(startingAction)
 
 		if (

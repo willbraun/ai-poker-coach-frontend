@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { Hand } from './types'
 import { ChangeEvent } from 'react'
-import { FormCardValue } from '@/app/(main)/new-hand/formSchema'
+import { FormAction, FormCardValue } from '@/app/(main)/new-hand/formSchema'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -49,4 +49,30 @@ export const handleNumberBlur = (event: ChangeEvent<HTMLInputElement>, onBlur: (
 	} else {
 		onBlur(trimmedValue)
 	}
+}
+
+export const getPlayersBettingFull = (actions: FormAction[]) => {
+	const playersThisRound = new Set(actions.map(action => action.player))
+	const playersNotBettingFull = new Set<number>()
+	actions.forEach(({ player, decision }) => {
+		if (decision === 'fold' || decision === 'callAllIn') {
+			playersNotBettingFull.add(player)
+		}
+	})
+	const playersBettingFull = new Set<number>()
+	playersThisRound.forEach(player => {
+		if (!playersNotBettingFull.has(player)) {
+			playersBettingFull.add(player)
+		}
+	})
+	return Array.from(playersBettingFull)
+}
+
+export const getPlayerBetSums = (players: number[], actions: FormAction[]) => {
+	return players.map(player => {
+		return actions
+			.filter(action => action.player === player)
+			.map(action => Number(action.bet))
+			.reduce((a, b) => a + b, 0)
+	})
 }
