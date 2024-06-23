@@ -28,6 +28,13 @@ export const valueToDisplay: Record<FormCardValue, string> = {
 	A: 'Ace',
 }
 
+export const suitToDisplay: Record<string, string> = {
+	C: 'Clubs',
+	D: 'Diamonds',
+	H: 'Hearts',
+	S: 'Spades',
+}
+
 export const isZeroBet = (decision: string) => ['', 'fold', 'check'].includes(decision)
 
 export const handleNumberChange = (event: ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {

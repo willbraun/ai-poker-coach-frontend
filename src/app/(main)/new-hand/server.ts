@@ -22,7 +22,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 
 	if (!parsedForm.success) {
 		return {
-			error: `Error: ${parsedForm.error.issues.map(issue => JSON.stringify(issue)).join('\n')}`,
+			error: `Error: ${parsedForm.error.issues.map(issue => issue.message ?? JSON.stringify(issue)).join('\n')}`,
 		}
 	}
 

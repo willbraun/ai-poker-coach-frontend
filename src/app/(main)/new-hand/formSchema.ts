@@ -1,4 +1,5 @@
-import { z } from 'zod'
+import { suitToDisplay, valueToDisplay } from '@/lib/utils'
+import { ZodIssueCode, z } from 'zod'
 
 const atMostTwoDigitsAfterDecimal = (value: number) => {
 	const stringValue = value.toString()
@@ -13,6 +14,17 @@ const atMostTwoDigitsAfterDecimal = (value: number) => {
 	return digitsAfterDecimal.length <= 2
 }
 
+const getDuplicateCards = (schema: Schema) => {
+	const allCards: FormCard[] = [
+		...schema.rounds.flatMap(round => round.cards.cards),
+		...schema.villains.flatMap(villain => villain.cards),
+	]
+
+	const cardStrings = allCards.map(card => `${card.value}${card.suit}`)
+	const uniqueCardStrings = new Set(cardStrings)
+	return cardStrings.filter(card => !uniqueCardStrings.delete(card))
+}
+
 const zodNumber = z.coerce
 	.number()
 	.gte(0)
@@ -20,15 +32,14 @@ const zodNumber = z.coerce
 
 const zodCardValue = z.enum(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'])
 const zodCardSuit = z.enum(['C', 'D', 'H', 'S'])
+const zodCard = z.object({
+	value: zodCardValue,
+	suit: zodCardSuit,
+})
 
 const zodCardGroup = z.object({
 	player: z.number().gte(0).lte(12),
-	cards: z.array(
-		z.object({
-			value: zodCardValue,
-			suit: zodCardSuit,
-		})
-	),
+	cards: z.array(zodCard),
 	evaluation: z.string(),
 	value: z.number(),
 })
@@ -58,7 +69,7 @@ const zodRound = z.object({
 	finalPots: z.array(zodPot),
 })
 
-export const FormSchema = z.object({
+const RawSchema = z.object({
 	name: z.string(),
 	gameStyle: z.coerce.number().gte(0).lte(1),
 	playerCount: z.coerce.number().gte(2).lte(12),
@@ -74,12 +85,31 @@ export const FormSchema = z.object({
 	villains: z.array(zodCardGroup),
 })
 
+export const FormSchema = RawSchema.superRefine((data, ctx) => {
+	const duplciates = getDuplicateCards(data)
+	if (duplciates.length > 0) {
+		const message = `Duplicate cards found: ${Array.from(duplciates)
+			.map(card => {
+				const value = card[0] as FormCardValue
+				const suit = card[1] as FormCardSuit
+				return `${valueToDisplay[value]} of ${suitToDisplay[suit]}`
+			})
+			.join(', ')}`
+
+		ctx.addIssue({
+			code: ZodIssueCode.custom,
+			message,
+		})
+	}
+})
+
 export type FormCardValue = z.infer<typeof zodCardValue>
 export type FormCardSuit = z.infer<typeof zodCardSuit>
-export type FormAction = z.infer<typeof zodAction>
+export type FormCard = z.infer<typeof zodCard>
 export type FormCardGroup = z.infer<typeof zodCardGroup>
+export type FormAction = z.infer<typeof zodAction>
 export type FormPotAction = z.infer<typeof zodPotAction>
 export type FormPot = z.infer<typeof zodPot>
 export type FormRound = z.infer<typeof zodRound>
-export type Schema = z.infer<typeof FormSchema>
+export type Schema = z.infer<typeof RawSchema>
 export type PokerEvaluatorCard = `${FormCardValue}${FormCardSuit}`
