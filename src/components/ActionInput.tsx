@@ -35,7 +35,7 @@ const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 	}
 
 	return (
-		<div className={`duration-100 ${!disabled && 'scale-105 rounded-xl border-1 border-black bg-accent p-4'}`}>
+		<div className={`duration-100 ${!disabled && 'scale-105 rounded-xl border-none bg-accent p-4'}`}>
 			<FormLabel>{`What did ${identifier} do?`}</FormLabel>
 			<div className='mt-4 grid grid-cols-2 grid-rows-1 gap-4'>
 				<div>

@@ -36,7 +36,6 @@ const scrollToBottom = () => {
 	setTimeout(() => {
 		window.scrollTo({
 			top: document.documentElement.scrollHeight,
-			behavior: 'smooth',
 		})
 	}, 0)
 }
@@ -632,8 +631,8 @@ const NewHand: FC = () => {
 	console.log(getValues())
 
 	return (
-		<main className='mt-24 pb-16'>
-			<Card className='mx-auto max-w-screen-md p-8'>
+		<main className='mt-16 md:mt-24 md:pb-16'>
+			<Card className='mx-auto h-fit max-w-screen-md animate-expand rounded-none border-0 p-8 duration-1000 md:rounded-lg md:border-1'>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
@@ -668,13 +667,13 @@ const NewHand: FC = () => {
 												onValueChange={field.onChange}
 												className='flex flex-col space-y-1'
 											>
-												<FormItem className='flex items-center space-x-3 space-y-0'>
+												<FormItem className='flex items-center space-x-3 space-y-0 text-lg'>
 													<FormControl>
 														<RadioGroupItem value='0' />
 													</FormControl>
 													<p className='font-normal'>Cash Game</p>
 												</FormItem>
-												<FormItem className='flex items-center space-x-3 space-y-0'>
+												<FormItem className='flex items-center space-x-3 space-y-0 text-lg'>
 													<FormControl>
 														<RadioGroupItem value='1' />
 													</FormControl>
@@ -873,7 +872,7 @@ const NewHand: FC = () => {
 									<FormItem>
 										<FormLabel>Notes</FormLabel>
 										<FormControl>
-											<Textarea {...field} />
+											<Textarea {...field} className='text-lg' />
 										</FormControl>
 										<FormDescription>
 											Additional information outside of the hard facts to provide to the AI model. Include player
@@ -998,6 +997,7 @@ const NewHand: FC = () => {
 							<div className='flex gap-4'>
 								<Button
 									type='button'
+									variant='secondary'
 									className='w-1/2 text-xl'
 									onClick={handleBack}
 									disabled={currentRound === -1 || !!state.analysis}

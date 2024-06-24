@@ -202,14 +202,14 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 		<>
 			<ScrollToTop />
 			<main className='pt-16 lg:pb-16 lg:pt-24'>
-				<Card className='mx-auto flex h-full max-w-screen-lg flex-col gap-8 rounded-none p-4 lg:rounded-xl lg:p-16'>
+				<div className='mx-auto flex h-full max-w-screen-lg flex-col gap-8 rounded-none border-none bg-background p-4'>
 					<section>
 						<TypographyH1>{name}</TypographyH1>
 						<p className='text-md mt-2 text-muted-foreground'>
 							{formatDistanceToNow(createdTime, { addSuffix: true })}
 						</p>
 					</section>
-					<section className='border-b-1 px-4 pb-12'>
+					<section className='border-b-1 pb-12'>
 						<TypographyH2>Details</TypographyH2>
 						<p>{['Tournament', 'Cash Game'][gameStyle]}</p>
 						<p>{playerCount} Players</p>
@@ -220,11 +220,9 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 						{ante ? <p>Ante: {ante}</p> : null}
 						{bigBlindAnte ? <p>Big Blind Ante: {bigBlindAnte}</p> : null}
 						<p>Stack: {myStack}</p>
-						<p className='mt-4'>
-							Notes: <span>{notes}</span>
-						</p>
+						{notes ? <p className='mt-4'>Notes: {notes}</p> : null}
 					</section>
-					<section className='[&>*]:border-b-1 [&>*]:border-muted [&>*]:p-4'>
+					<section className='[&>*]:border-b-1 [&>*]:border-muted [&>*]:py-4'>
 						{ante || bigBlindAnte ? (
 							<div className='flex items-center'>
 								<p className='text-xl'>Pot after antes</p>
@@ -285,7 +283,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 							<DeleteHandDialogContent handId={params.id} />
 						</DialogContent>
 					</Dialog>
-				</Card>
+				</div>
 			</main>
 		</>
 	)

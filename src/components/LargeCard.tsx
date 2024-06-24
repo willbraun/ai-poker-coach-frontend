@@ -15,7 +15,7 @@ const LargeCard: FC<LargeCardProps> = ({ value, suit, disabled = false }) => {
 
 	return (
 		<div
-			className={`border-grey grid h-36 w-24 grid-cols-1 grid-rows-3 gap-2 rounded-lg border-1 bg-white p-2 shadow duration-100 ${
+			className={`grid h-36 w-24 grid-cols-1 grid-rows-3 gap-2 rounded-lg border-1 bg-white p-2 shadow duration-100 ${
 				!disabled && 'hover:scale-105'
 			}`}
 		>

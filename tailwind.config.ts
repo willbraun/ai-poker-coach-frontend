@@ -129,6 +129,10 @@ const config = {
 					'35%': { opacity: '0', transform: 'scale(1.2)' },
 					to: { opacity: '1', transform: 'scale(1)' },
 				},
+				clipIn: {
+					'0%': { 'clip-path': 'polygon(0 0, 100% 0, 100% 0, 0 0)' },
+					'100%': { 'clip-path': 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' },
+				},
 				slowSpin: {
 					'0%': { transform: 'rotate(0deg)' },
 					'100%': { transform: 'rotate(360deg)' },
@@ -153,6 +157,7 @@ const config = {
 				blurIn: 'blurIn 1800ms linear',
 				scaleUp: 'scaleUp 2000ms cubic-bezier(0.25,1,0.5,1)',
 				scaleDown: 'scaleDown 2000ms cubic-bezier(0.25,1,0.5,1)',
+				clipIn: 'clipIn 1s ease-out forwards',
 				slowSpin: 'slowSpin 3s linear infinite',
 				scalePulse: 'scalePulse 1s ease-in-out infinite',
 			},

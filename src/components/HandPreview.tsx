@@ -25,7 +25,7 @@ const HandPreview: FC<{ hand: Hand }> = ({ hand }) => {
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<div className='mb-4 flex flex-wrap items-center gap-y-2 border-b-1 border-accent pb-8'>
+				<div className='mb-4 flex flex-wrap items-center gap-y-2 border-b-1 border-accent pb-4 md:mb-8 md:pb-8'>
 					<p className='pr-8 lg:text-lg'>{hand.handSteps.rounds.at(-1)?.evaluation.value ?? ''}</p>
 					<div className='flex items-center'>
 						<div className='flex gap-2 border-r-2 border-black pr-4'>
