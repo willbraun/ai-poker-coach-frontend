@@ -920,11 +920,13 @@ const NewHand: FC = () => {
 								<>
 									<TypographyH2>Hand Action</TypographyH2>
 
-									{ante > 0 ? <p>{`All players bet ante of ${ante}`}</p> : null}
-									{bigBlindAnte > 0 ? <p>{`Player 2 bets big blind ante of ${bigBlindAnte}`}</p> : null}
+									{ante > 0 ? <p className='text-lg'>{`All players bet ante of ${ante}`}</p> : null}
+									{bigBlindAnte > 0 ? (
+										<p className='text-lg'>{`Player 2 bets big blind ante of ${bigBlindAnte}`}</p>
+									) : null}
 
-									<p>{`Player 1 bet ${smallBlind} as the small blind`}</p>
-									<p>{`Player 2 bet ${bigBlind} as the big blind`}</p>
+									<p className='text-lg'>{`Player 1 bet ${smallBlind} as the small blind`}</p>
+									<p className='text-lg'>{`Player 2 bet ${bigBlind} as the big blind`}</p>
 								</>
 							)}
 
