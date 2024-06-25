@@ -12,7 +12,7 @@ const Submit = () => {
 
 	return (
 		<Button type='submit' variant='destructive' disabled={pending}>
-			{pending ? 'Deleting...' : 'Delete'}
+			{pending ? 'Deleting...' : 'Delete Hand'}
 		</Button>
 	)
 }
@@ -37,8 +37,8 @@ export const DeleteHandDialogContent: FC<{ handId: string }> = ({ handId }) => {
 	return (
 		<>
 			<DialogHeader>
-				<DialogTitle>Delete Hand</DialogTitle>
-				<DialogDescription>This action cannot be undone.</DialogDescription>
+				<DialogTitle className='text-2xl'>Warning</DialogTitle>
+				<DialogDescription className='text-lg'>This action cannot be undone.</DialogDescription>
 			</DialogHeader>
 			<DialogFooter>
 				{state.success ? (
