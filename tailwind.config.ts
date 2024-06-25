@@ -157,9 +157,12 @@ const config = {
 				blurIn: 'blurIn 1800ms linear',
 				scaleUp: 'scaleUp 2000ms cubic-bezier(0.25,1,0.5,1)',
 				scaleDown: 'scaleDown 2000ms cubic-bezier(0.25,1,0.5,1)',
-				clipIn: 'clipIn 1s ease-out forwards',
+				clipIn: 'clipIn 1000ms ease-out forwards',
 				slowSpin: 'slowSpin 3s linear infinite',
 				scalePulse: 'scalePulse 1s ease-in-out infinite',
+			},
+			transitionProperty: {
+				height: 'height',
 			},
 		},
 	},

@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
-import { FC, useEffect, useMemo, useState } from 'react'
+import { FC, useEffect, useMemo, useRef, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus, SinglePlayerStatus } from '@/lib/types'
 import { getPlayerBetSums, getPlayersBettingFull, handleNumberBlur, handleNumberChange } from '@/lib/utils'
@@ -628,11 +628,53 @@ const NewHand: FC = () => {
 		state.error = ''
 	}
 
+	const containerRef = useRef<HTMLDivElement | null>(null)
+	const currRoundActionCount = fieldArrays[currentRound]?.fields?.length ?? 0
+	const [containerHeight, setContainerHeight] = useState(containerRef.current?.scrollHeight ?? 0)
+
+	const scrollToBottom2 = (newHeight: number) => {
+		const step = () => {
+			if (containerRef.current) {
+				const scrollTop = containerRef.current.scrollTop
+				const distance = newHeight - scrollTop
+				const increment = distance / 5 // Adjust the divisor to control the speed
+
+				if (Math.abs(distance) > 1) {
+					containerRef.current.scrollTop = scrollTop + increment
+					requestAnimationFrame(step)
+				} else {
+					containerRef.current.scrollTop = newHeight
+				}
+			}
+		}
+		requestAnimationFrame(step)
+	}
+
+	useEffect(() => {
+		const container = containerRef.current
+		console.log('currRoundActionCount', currRoundActionCount)
+
+		if (container) {
+			// Save the current scroll position
+			const newHeight = container.scrollHeight
+
+			console.log('containerHeight', containerHeight)
+			console.log('newHeight', newHeight)
+
+			scrollToBottom2(newHeight)
+			setContainerHeight(newHeight)
+		}
+	}, [currentRound, currRoundActionCount])
+
 	console.log(getValues())
 
 	return (
 		<main className='mt-16 md:mt-24 md:pb-16'>
-			<Card className='mx-auto h-fit max-w-screen-md animate-expand rounded-none border-0 p-8 duration-1000 md:rounded-lg md:border-1'>
+			<Card
+				ref={containerRef}
+				className={`mx-auto max-w-screen-md rounded-none border-0 p-8 md:rounded-lg md:border-1`}
+				style={{ height: containerHeight, transition: 'height 0.5s linear', overflow: 'hidden' }}
+			>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
