@@ -36,6 +36,7 @@ const scrollToBottom = () => {
 	setTimeout(() => {
 		window.scrollTo({
 			top: document.documentElement.scrollHeight,
+			behavior: 'smooth',
 		})
 	}, 0)
 }
@@ -628,52 +629,14 @@ const NewHand: FC = () => {
 		state.error = ''
 	}
 
-	const containerRef = useRef<HTMLDivElement | null>(null)
-	const currRoundActionCount = fieldArrays[currentRound]?.fields?.length ?? 0
-	const [containerHeight, setContainerHeight] = useState(containerRef.current?.scrollHeight ?? 0)
-
-	const scrollToBottom2 = (newHeight: number) => {
-		const step = () => {
-			if (containerRef.current) {
-				const scrollTop = containerRef.current.scrollTop
-				const distance = newHeight - scrollTop
-				const increment = distance / 5 // Adjust the divisor to control the speed
-
-				if (Math.abs(distance) > 1) {
-					containerRef.current.scrollTop = scrollTop + increment
-					requestAnimationFrame(step)
-				} else {
-					containerRef.current.scrollTop = newHeight
-				}
-			}
-		}
-		requestAnimationFrame(step)
-	}
-
-	useEffect(() => {
-		const container = containerRef.current
-		console.log('currRoundActionCount', currRoundActionCount)
-
-		if (container) {
-			// Save the current scroll position
-			const newHeight = container.scrollHeight
-
-			console.log('containerHeight', containerHeight)
-			console.log('newHeight', newHeight)
-
-			scrollToBottom2(newHeight)
-			setContainerHeight(newHeight)
-		}
-	}, [currentRound, currRoundActionCount])
-
 	console.log(getValues())
 
 	return (
-		<main className='mt-16 md:mt-24 md:pb-16'>
+		<main className='mt-16 md:mt-24 md:pb-24'>
 			<Card
-				ref={containerRef}
-				className={`mx-auto max-w-screen-md rounded-none border-0 p-8 md:rounded-lg md:border-1`}
-				style={{ height: containerHeight, transition: 'height 0.5s linear', overflow: 'hidden' }}
+				// ref={containerRef}
+				className={`mx-auto max-w-screen-md rounded-none border-0 p-8 md:rounded-2xl md:border-1`}
+				// style={{ height: containerHeight, transition: 'height 0.5s linear', overflow: 'hidden' }}
 			>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
@@ -962,13 +925,15 @@ const NewHand: FC = () => {
 								<>
 									<TypographyH2>Hand Action</TypographyH2>
 
-									{ante > 0 ? <p className='text-lg'>{`All players bet ante of ${ante}`}</p> : null}
+									{ante > 0 ? (
+										<p className='animate-fadeIn text-lg duration-100'>{`All players bet ante of ${ante}`}</p>
+									) : null}
 									{bigBlindAnte > 0 ? (
-										<p className='text-lg'>{`Player 2 bets big blind ante of ${bigBlindAnte}`}</p>
+										<p className='animate-fadeIn text-lg duration-100'>{`Player 2 bets big blind ante of ${bigBlindAnte}`}</p>
 									) : null}
 
-									<p className='text-lg'>{`Player 1 bet ${smallBlind} as the small blind`}</p>
-									<p className='text-lg'>{`Player 2 bet ${bigBlind} as the big blind`}</p>
+									<p className='animate-fadeIn text-lg duration-100'>{`Player 1 bet ${smallBlind} as the small blind`}</p>
+									<p className='animate-fadeIn text-lg duration-100'>{`Player 2 bet ${bigBlind} as the big blind`}</p>
 								</>
 							)}
 
@@ -1038,26 +1003,28 @@ const NewHand: FC = () => {
 								</>
 							)}
 
-							<div className='flex gap-4'>
-								<Button
-									type='button'
-									variant='secondary'
-									className='w-1/2 text-xl'
-									onClick={handleBack}
-									disabled={currentRound === -1 || !!state.analysis}
-								>
-									Back
-								</Button>
-								{showSubmit ? (
-									<Submit
-										setPending={setPending}
-										disabled={activePlayers.length === 1 ? false : !villainsCompleted || !!state.analysis}
-									/>
-								) : (
-									<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
-										Next
+							<div className='shadow-top fixed bottom-0 left-1/2 mx-auto w-full max-w-screen-lg -translate-x-1/2 bg-background'>
+								<div className='mx-auto flex w-full max-w-screen-md gap-4 px-8 py-4'>
+									<Button
+										type='button'
+										variant='secondary'
+										className='w-1/2 text-xl'
+										onClick={handleBack}
+										disabled={currentRound === -1 || !!state.analysis}
+									>
+										Back
 									</Button>
-								)}
+									{showSubmit ? (
+										<Submit
+											setPending={setPending}
+											disabled={activePlayers.length === 1 ? false : !villainsCompleted || !!state.analysis}
+										/>
+									) : (
+										<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
+											Next
+										</Button>
+									)}
+								</div>
 							</div>
 
 							{pending && (
