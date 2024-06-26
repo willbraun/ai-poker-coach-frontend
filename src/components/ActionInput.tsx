@@ -27,6 +27,11 @@ const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 			return
 		} else if (value === 'call') {
 			const playersBettingFull = getPlayersBettingFull(roundPreviousActions)
+			if (playersBettingFull.length === 0) {
+				setValue(`${selector}.bet`, '0')
+				return
+			}
+
 			const playerBetSums = getPlayerBetSums(playersBettingFull, roundPreviousActions)
 			const index = playersBettingFull.indexOf(player)
 			const difference = Math.max(...playerBetSums) - (playerBetSums[index] ?? 0)
@@ -35,7 +40,7 @@ const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 	}
 
 	return (
-		<div className={`animate-fadeIn duration-100 ${!disabled && 'scale-105 rounded-xl border-none bg-accent p-4'}`}>
+		<div className={`animate-fadeIn duration-100 ${!disabled && 'rounded-xl border-none bg-accent p-4 shadow-md'}`}>
 			<FormLabel>{`What did ${identifier} do?`}</FormLabel>
 			<div className='mt-4 grid grid-cols-2 grid-rows-1 gap-4'>
 				<div>

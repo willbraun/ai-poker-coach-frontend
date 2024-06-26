@@ -12,8 +12,8 @@ const Header: FC = () => {
 
 	return (
 		<header className='fixed top-0 z-20 flex h-16 w-full items-center gap-4 border-1 border-b bg-background px-4'>
-			<Link href='/'>
-				<p className='text-2xl font-semibold tracking-tight'>AI Poker Coach</p>
+			<Link href='/' className='mr-auto'>
+				<p className='text-xl font-semibold tracking-tight sm:text-2xl'>AI Poker Coach</p>
 			</Link>
 			{isAuth ? (
 				<>
@@ -37,13 +37,13 @@ const Header: FC = () => {
 					</DropdownMenu>
 				</>
 			) : (
-				<div className='ml-auto flex items-center gap-4'>
-					<Button size='sm' variant='link'>
-						<Link href='/login' className='underline'>
+				<div className='ml-auto flex items-center'>
+					<Button variant='link'>
+						<Link href='/login' className='text-black underline'>
 							Log in
 						</Link>
 					</Button>
-					<Button size='sm'>
+					<Button className='ml-4'>
 						<Link href='/create-account'>Sign up</Link>
 					</Button>
 				</div>

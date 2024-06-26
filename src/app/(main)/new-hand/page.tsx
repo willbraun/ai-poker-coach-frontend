@@ -56,6 +56,7 @@ const Submit: FC<SubmitProps> = ({ setPending, disabled }) => {
 	const { pending } = useFormStatus()
 	useEffect(() => {
 		setPending(pending)
+		scrollToBottom()
 	}, [pending, setPending])
 
 	return (
@@ -210,6 +211,7 @@ const NewHand: FC = () => {
 	const pots = watch('pots')
 	const rounds = watch('rounds')
 	const villains = watch('villains')
+	const villainString = JSON.stringify(villains)
 	const currentEval = watch(`rounds.${currentRound}.cards.evaluation`)
 	const currentActionIndex = watch(`rounds.${currentRound}.actions`)?.length - 1
 	const currentAction = watch(`rounds.${currentRound}.actions.${currentActionIndex}`)
@@ -339,7 +341,7 @@ const NewHand: FC = () => {
 			scrollToBottom()
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [villainsCompleted])
+	}, [villainsCompleted, villainString])
 
 	const currentRoundStartingBetterCount =
 		playerCount -
@@ -629,15 +631,9 @@ const NewHand: FC = () => {
 		state.error = ''
 	}
 
-	console.log(getValues())
-
 	return (
-		<main className='mt-16 md:mt-24 md:pb-24'>
-			<Card
-				// ref={containerRef}
-				className={`mx-auto max-w-screen-md rounded-none border-0 p-8 md:rounded-2xl md:border-1`}
-				// style={{ height: containerHeight, transition: 'height 0.5s linear', overflow: 'hidden' }}
-			>
+		<main className='mt-16 pb-[4.5rem] md:mt-24 md:pb-24'>
+			<Card className={`mx-auto max-w-screen-md rounded-none border-0 p-4 md:rounded-2xl md:border-1 md:p-8`}>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>
 					<Form {...form}>
@@ -649,7 +645,7 @@ const NewHand: FC = () => {
 									<FormItem>
 										<FormLabel>Title</FormLabel>
 										<FormControl>
-											<Input {...field} />
+											<Input {...field} disabled={!!state.analysis} />
 										</FormControl>
 										<FormDescription>
 											Recommended - A short, descriptive title to help you remember the hand. For example, &quot;Big pot
@@ -877,7 +873,7 @@ const NewHand: FC = () => {
 									<FormItem>
 										<FormLabel>Notes</FormLabel>
 										<FormControl>
-											<Textarea {...field} className='text-lg' />
+											<Textarea {...field} className='text-lg' disabled={!!state.analysis} />
 										</FormControl>
 										<FormDescription>
 											Additional information outside of the hard facts to provide to the AI model. Include player
@@ -983,7 +979,7 @@ const NewHand: FC = () => {
 									key={i}
 									groupSelector={`villains.${i}`}
 									player={villain.player}
-									disabled={!!state.analysis}
+									disabled={!!state.analysis || pending}
 								/>
 							))}
 
@@ -1003,46 +999,49 @@ const NewHand: FC = () => {
 								</>
 							)}
 
-							<div className='shadow-top fixed bottom-0 left-1/2 mx-auto w-full max-w-screen-lg -translate-x-1/2 bg-background'>
-								<div className='mx-auto flex w-full max-w-screen-md gap-4 px-8 py-4'>
-									<Button
-										type='button'
-										variant='secondary'
-										className='w-1/2 text-xl'
-										onClick={handleBack}
-										disabled={currentRound === -1 || !!state.analysis}
-									>
-										Back
-									</Button>
-									{showSubmit ? (
-										<Submit
-											setPending={setPending}
-											disabled={activePlayers.length === 1 ? false : !villainsCompleted || !!state.analysis}
-										/>
-									) : (
-										<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
-											Next
-										</Button>
-									)}
-								</div>
-							</div>
-
-							{pending && (
+							{pending && !state.analysis ? (
 								<div className='mx-auto w-full animate-scalePulse'>
 									<Image src={pokerChip} alt='loading' width={150} height={150} className='mx-auto animate-slowSpin' />
 								</div>
-							)}
-							{state.analysis && <Analysis className='animate-fadeIn' analysis={state.analysis} />}
-							{state.handId && (
-								<Button asChild variant='success' className='w-full animate-fadeIn p-8 text-xl'>
-									<Link href={`/hand/${state.handId}`}>Hand added successfully! 🎉 Click here to view</Link>
-								</Button>
+							) : (
+								<>
+									{Object.keys(errors).length ? (
+										<p className='mt-2 text-lg text-red-500'>Please resolve errors and try again</p>
+									) : null}
+									{state.error && <p className='mt-2 text-lg text-red-500'>{state.error}</p>}
+								</>
 							)}
 
-							{Object.keys(errors).length ? (
-								<p className='mt-2 text-red-500'>Please resolve errors and try again</p>
-							) : null}
-							{state.error && <p className='mt-2 text-red-500'>{state.error}</p>}
+							{state.analysis ? (
+								<div className='flex animate-fadeIn flex-col gap-8'>
+									<TypographyH2>Analysis</TypographyH2>
+									<Analysis analysis={state.analysis} />
+									<Button asChild variant='success' className='w-full p-8 text-xl'>
+										<Link href={`/hand/${state.handId}`}>Hand added successfully! 🎉 Click here to view</Link>
+									</Button>
+								</div>
+							) : (
+								<div className='fixed bottom-0 left-1/2 z-10 mx-auto w-full max-w-screen-lg -translate-x-1/2 border-t-1 bg-background'>
+									<div className='mx-auto flex w-full max-w-screen-md gap-4 px-8 py-4'>
+										<Button
+											type='button'
+											variant='secondary'
+											className='w-1/2 text-xl'
+											onClick={handleBack}
+											disabled={currentRound === -1 || pending}
+										>
+											Back
+										</Button>
+										{showSubmit ? (
+											<Submit setPending={setPending} disabled={!(activePlayers.length === 1 || villainsCompleted)} />
+										) : (
+											<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
+												Next
+											</Button>
+										)}
+									</div>
+								</div>
+							)}
 						</form>
 					</Form>
 				</FormProvider>

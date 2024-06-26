@@ -32,7 +32,7 @@ const CardInput: FC<CardInputProps> = ({ cardIndex, groupSelector, disabled }) =
 				{card?.value && card?.suit ? (
 					<LargeCard value={card.value} suit={card.suit} disabled={disabled} />
 				) : (
-					<div className='flex h-36 w-24 items-center justify-center rounded-lg border-1 border-dashed border-black bg-white hover:cursor-pointer hover:brightness-105'>
+					<div className='flex h-36 w-24 items-center justify-center rounded-lg border-1 border-dashed border-black bg-background hover:cursor-pointer'>
 						<Plus size='40px' />
 					</div>
 				)}

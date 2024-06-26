@@ -42,8 +42,8 @@ const HandPreview: FC<{ hand: Hand }> = ({ hand }) => {
 				<Analysis analysis={hand.analysis} />
 			</CardContent>
 			<CardFooter className='justify-end'>
-				<Link href={`/hand/${hand.id}`} className={buttonVariants({ variant: 'default' })}>
-					See more
+				<Link href={`/hand/${hand.id}`} className={`${buttonVariants({ variant: 'link' })}`}>
+					View details
 				</Link>
 			</CardFooter>
 		</Card>
