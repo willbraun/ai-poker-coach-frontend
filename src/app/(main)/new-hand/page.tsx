@@ -32,13 +32,13 @@ const scrollToTop = () => {
 	}, 0)
 }
 
-const scrollToBottom = () => {
+const scrollToBottom = (delay: number = 0) => {
 	setTimeout(() => {
 		window.scrollTo({
 			top: document.documentElement.scrollHeight,
 			behavior: 'smooth',
 		})
-	}, 0)
+	}, delay)
 }
 
 const initialPot = {
@@ -60,7 +60,7 @@ const Submit: FC<SubmitProps> = ({ setPending, disabled }) => {
 	}, [pending, setPending])
 
 	return (
-		<Button type='submit' className='w-1/2 text-xl' disabled={disabled || pending} onClick={scrollToBottom}>
+		<Button type='submit' className='w-1/2 text-xl' disabled={disabled || pending}>
 			{pending ? 'Analyzing...' : 'Submit'}
 		</Button>
 	)
@@ -629,6 +629,7 @@ const NewHand: FC = () => {
 		}
 
 		state.error = ''
+		scrollToBottom(100)
 	}
 
 	return (
