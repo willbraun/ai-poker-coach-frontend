@@ -1,3 +1,4 @@
+import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import { FC } from 'react'
 
@@ -6,6 +7,7 @@ const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
 		<>
 			<Header />
 			{children}
+			<Footer />
 		</>
 	)
 }

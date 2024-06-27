@@ -14,7 +14,7 @@ const HandPreview: FC<{ hand: Hand }> = ({ hand }) => {
 	const isWin = getIsWin(hand)
 
 	return (
-		<Card className='relative mb-2 rounded-none lg:mb-4 lg:rounded-xl'>
+		<Card className='relative rounded-none lg:rounded-xl'>
 			<CardHeader>
 				<div className='flex justify-between'>
 					<CardTitle className='xs:text-2xl flex justify-between lg:text-4xl'>{hand.handSteps.name}</CardTitle>
