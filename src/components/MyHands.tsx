@@ -19,15 +19,13 @@ const MyHands: FC = async () => {
 				<HandPreview key={hand.id} hand={hand} />
 			))}
 			{hands.length === 0 && (
-				<div className='mb-auto'>
-					<p className='mt-8 text-center text-lg'>
-						You have no hands yet. Click{' '}
-						<Link href='/new-hand' className='underline'>
-							here
-						</Link>{' '}
-						to add one!
-					</p>
-				</div>
+				<p className='mt-8 text-center text-lg'>
+					You have no hands yet. Click{' '}
+					<Link href='/new-hand' className='underline'>
+						here
+					</Link>{' '}
+					to add one!
+				</p>
 			)}
 		</>
 	)
