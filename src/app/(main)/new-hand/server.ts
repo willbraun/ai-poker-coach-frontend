@@ -48,8 +48,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 			.map(round => round.cards.evaluation)
 			.filter(evaluation => evaluation !== '')
 			.at(-1)
-		const now = new Date()
-		handStepsName = `${latestEval} - ${now.toLocaleString()}`
+		handStepsName = latestEval ?? ''
 	}
 
 	let currentStep = 1

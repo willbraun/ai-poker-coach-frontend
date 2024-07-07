@@ -1,8 +1,6 @@
-import ellipsis from '@/lib/images/icons/ellipsis.svg'
 import { Hand } from '@/lib/types'
 import { getIsWin } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
-import Image from 'next/image'
 import Link from 'next/link'
 import Analysis from './Analysis'
 import SmallCard from './SmallCard'

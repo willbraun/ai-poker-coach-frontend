@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import CardGroupInput from '@/components/CardGroupInput'
-import { FC, useEffect, useMemo, useRef, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import ActionInput from '@/components/ActionInput'
 import { ActionSelector, PlayerStatus, SinglePlayerStatus } from '@/lib/types'
 import { getPlayerBetSums, getPlayersBettingFull, handleNumberBlur, handleNumberChange } from '@/lib/utils'
@@ -699,7 +699,7 @@ const NewHand: FC = () => {
 										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
-													<SelectValue placeholder='Select a number' />
+													<SelectValue placeholder='Select' />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
@@ -732,7 +732,7 @@ const NewHand: FC = () => {
 										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
 											<FormControl>
 												<SelectTrigger className='w-1/2'>
-													<SelectValue placeholder='Select a number' />
+													<SelectValue placeholder='Select' />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
