@@ -13,7 +13,7 @@ const Footer = () => {
 	return (
 		<>
 			{showFooter && (
-				<footer className='flex w-full max-w-screen-lg items-center justify-center gap-4 justify-self-end p-4 lg:justify-end'>
+				<footer className='flex w-full items-center justify-center gap-4 p-4'>
 					<p className='font-semibold' style={{ color: 'hsl(0, 0%, 50%)' }}>
 						Will Braun
 					</p>
