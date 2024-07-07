@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 import TypographyH1 from '@/components/ui/typography/TypographyH1'
 import TypographyH2 from '@/components/ui/typography/TypographyH2'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-import { Action, Card as CardType, Hand, Pot, Round } from '@/lib/types'
+import { Action, Card as CardType, ErrorMessage, Hand, isErrorMessage, isHand, Pot, Round } from '@/lib/types'
 import { getIsWin } from '@/lib/utils'
 import { UUID } from 'crypto'
 import { formatDistanceToNow } from 'date-fns'
@@ -14,7 +14,7 @@ import DeleteHandDialogContent from './DeleteHandDialogContent'
 import { getAuthData } from '@/lib/server_utils'
 import { FC } from 'react'
 
-const getHand = async (id: string): Promise<Hand> => {
+const getHand = async (id: string): Promise<Hand | ErrorMessage> => {
 	const res = await fetch(`${process.env.API_URL}/hand/${id}`, { next: { revalidate: 60 } })
 	return res.json()
 }
@@ -174,6 +174,15 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 	const { userId } = getAuthData()
 
 	const hand = await getHand(params.id)
+
+	if (isErrorMessage(hand)) {
+		return (
+			<main className='flex h-full w-full flex-col items-center justify-center p-8'>
+				<p className='mb-8 text-3xl'>Error: {hand.message}</p>
+			</main>
+		)
+	}
+
 	const { handSteps, analysis, createdTime, applicationUserId } = hand
 	const {
 		name,

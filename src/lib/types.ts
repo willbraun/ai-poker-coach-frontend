@@ -112,3 +112,11 @@ export interface AnalysisData {
 export const isAnalysisData = (value: any): value is AnalysisData => {
 	return Object.keys(value).length === 1 && typeof value.analysis === 'string'
 }
+
+export interface ErrorMessage {
+	message: string
+}
+
+export const isErrorMessage = (value: any): value is ErrorMessage => {
+	return Object.keys(value).length === 1 && typeof value.message === 'string'
+}
