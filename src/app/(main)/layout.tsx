@@ -6,8 +6,10 @@ const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
 	return (
 		<>
 			<Header />
-			{children}
-			<Footer />
+			<div className='flex min-h-full flex-col justify-between'>
+				{children}
+				<Footer />
+			</div>
 		</>
 	)
 }
