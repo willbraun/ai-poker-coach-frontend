@@ -1,3 +1,4 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["poker-evaluator-ts"]
+  included_files = ["./node_modules/poker-evaluator-ts/data/HandRanks.dat"]

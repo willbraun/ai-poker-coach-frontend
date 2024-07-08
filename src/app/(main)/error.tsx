@@ -10,7 +10,7 @@ interface ErrorPageProps {
 
 const Error: FC<ErrorPageProps> = ({ error, reset }) => {
 	return (
-		<main className='flex h-full w-full flex-col items-center justify-center'>
+		<main className='flex w-full flex-col items-center justify-center pt-24'>
 			<h1 className='mb-8 text-3xl'>Error: {error.message || 'something went wrong...'}</h1>
 			<Button className='text-xl' onClick={() => reset()}>
 				Try again
