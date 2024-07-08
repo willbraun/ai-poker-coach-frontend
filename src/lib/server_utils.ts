@@ -25,7 +25,7 @@ export const updateSession = async (request: NextRequest) => {
 	const userId = parsed?.userId
 	const refreshToken = parsed?.refreshToken
 
-	const refreshRes = await fetch(`${process.env.API_URL}/refresh`, {
+	const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -50,7 +50,6 @@ export const updateSession = async (request: NextRequest) => {
 			expires: new Date(Date.now() + data.expiresIn * 1000),
 		}),
 		{
-			httpOnly: true,
 			maxAge: 60 * 60 * 24 * 7,
 		},
 	)

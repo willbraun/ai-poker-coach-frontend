@@ -5,13 +5,17 @@ import Link from 'next/link'
 import { FC } from 'react'
 
 const getHands = async (userId: string): Promise<Hand[]> => {
-	const res = await fetch(`${process.env.API_URL}/hand?userId=${userId}`)
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/hand?userId=${userId}`)
 	return res.json()
 }
 
 const MyHands: FC = async () => {
 	const { userId } = getAuthData()
 	const hands = await getHands(userId)
+
+	if (!userId) {
+		return <p>{`Invalid user ID: ${userId}`}</p>
+	}
 
 	return (
 		<>

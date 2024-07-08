@@ -30,7 +30,7 @@ export const DeleteHandDialogContent: FC<{ handId: string }> = ({ handId }) => {
 		if (state.success) {
 			setTimeout(() => {
 				router.push('/my-hands')
-			}, 3000)
+			}, 2000)
 		}
 	}, [state.success, router])
 

@@ -3,7 +3,7 @@ import { Hand } from '@/lib/types'
 import { FC } from 'react'
 
 const getHands = async (): Promise<Hand[]> => {
-	const res = await fetch(`${process.env.API_URL}/hand`)
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/hand`)
 	return res.json()
 }
 

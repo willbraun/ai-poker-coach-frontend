@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { Hand } from './types'
 import { ChangeEvent } from 'react'
+import Cookies from 'js-cookie'
 import { FormAction, FormCardValue } from '@/app/(main)/new-hand/formSchema'
 
 export function cn(...inputs: ClassValue[]) {
@@ -82,4 +83,22 @@ export const getPlayerBetSums = (players: number[], actions: FormAction[]) => {
 			.map(action => Number(action.bet))
 			.reduce((a, b) => a + b, 0)
 	})
+}
+
+export const getAuthDataClient = () => {
+	const authCookie = Cookies.get('auth')
+	console.log(authCookie)
+	if (!authCookie) {
+		return {}
+	}
+
+	return JSON.parse(authCookie)
+}
+
+export const revalidateAllClient = async () => {
+	const response = await fetch(`/api/revalidateAll`)
+	const data = await response.json()
+	if (data.error) {
+		console.error(data)
+	}
 }

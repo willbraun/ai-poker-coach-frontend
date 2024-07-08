@@ -7,7 +7,7 @@ export const deleteHand = async (prevState: any, formData: FormData) => {
 	const { accessToken } = getAuthData()
 	const handId = formData.get('handId') as string
 
-	const res = await fetch(`${process.env.API_URL}/hand/${handId}`, {
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/hand/${handId}`, {
 		method: 'DELETE',
 		headers: {
 			Authorization: `Bearer ${accessToken}`,

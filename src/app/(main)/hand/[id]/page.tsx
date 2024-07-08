@@ -14,7 +14,7 @@ import { getAuthData } from '@/lib/server_utils'
 import { FC } from 'react'
 
 const getHand = async (id: string): Promise<Hand | ErrorMessage> => {
-	const res = await fetch(`${process.env.API_URL}/hand/${id}`, { next: { revalidate: 60 } })
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/hand/${id}`, { next: { revalidate: 60 } })
 	return res.json()
 }
 

@@ -50,7 +50,7 @@ export const createAccount = async (prevState: any, formData: FormData) => {
 		}
 	}
 
-	const res = await fetch(`${process.env.API_URL}/customRegister`, {
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/customRegister`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -90,7 +90,6 @@ export const createAccount = async (prevState: any, formData: FormData) => {
 			expires: new Date(Date.now() + data.expiresIn * 1000),
 		}),
 		{
-			httpOnly: true,
 			maxAge: 60 * 60 * 24 * 7,
 		},
 	)

@@ -1,7 +1,7 @@
 import { UUID } from 'crypto'
 
 export interface AuthData {
-	userId: string
+	userId: UUID
 	accessToken: string
 	expiresIn: number
 	refreshToken: string
@@ -103,14 +103,6 @@ export type SinglePlayerStatus = 'current' | 'active' | 'all-in' | 'folded'
 
 export interface PlayerStatus {
 	[player: number]: SinglePlayerStatus
-}
-
-export interface AnalysisData {
-	analysis: string
-}
-
-export const isAnalysisData = (value: any): value is AnalysisData => {
-	return Object.keys(value).length === 1 && typeof value.analysis === 'string'
 }
 
 export interface ErrorMessage {

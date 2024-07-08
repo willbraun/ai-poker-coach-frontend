@@ -1,27 +1,31 @@
-'use server'
-
 import { Hand, HandSteps, Card, Evaluation, Action, PotAction, Round, Villain, Pot } from '@/lib/types'
-import { isAnalysisData } from '@/lib/types'
-import { FormSchema } from './formSchema'
-import { getAuthData } from '@/lib/server_utils'
-import { revalidatePath } from 'next/cache'
+import { FormSchema, Schema } from './formSchema'
+import { getAuthDataClient } from '@/lib/utils'
+
+interface AnalysisData {
+	analysis: string
+}
+
+const isAnalysisData = (value: any): value is AnalysisData => {
+	return Object.keys(value).length === 1 && typeof value.analysis === 'string'
+}
+
+interface AnalyzeResponse {
+	analysis: string
+	handId: string
+	error: string
+}
 
 const decisions = ['fold', 'check', 'call', 'bet', 'raise', 'callAllIn', 'betAllIn']
 
-export const analyze = async (prevState: any, formData: FormData) => {
-	const { accessToken } = getAuthData()
+export const analyze = async (formValues: Schema): Promise<AnalyzeResponse> => {
+	const { accessToken } = getAuthDataClient()
 
-	const formDataObj = Object.fromEntries(formData)
-	const formDataJson = {
-		...formDataObj,
-		pots: JSON.parse(formDataObj.pots as string),
-		rounds: JSON.parse(formDataObj.rounds as string),
-		villains: JSON.parse(formDataObj.villains as string),
-	}
-	const parsedForm = FormSchema.safeParse(formDataJson)
-
+	const parsedForm = FormSchema.safeParse(formValues)
 	if (!parsedForm.success) {
 		return {
+			analysis: '',
+			handId: '',
 			error: `Error: ${parsedForm.error.issues.map(issue => issue.message ?? JSON.stringify(issue)).join('\n')}`,
 		}
 	}
@@ -40,7 +44,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		pots,
 		rounds,
 		villains,
-	} = parsedForm.data
+	} = formValues
 
 	let handStepsName = name
 	if (name === '') {
@@ -148,7 +152,7 @@ export const analyze = async (prevState: any, formData: FormData) => {
 		villains: handStepsVillains,
 	} as HandSteps
 
-	const res = await fetch(`${process.env.API_URL}/hand/analyze`, {
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/hand/analyze`, {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
@@ -166,12 +170,16 @@ export const analyze = async (prevState: any, formData: FormData) => {
 			.join('\n')
 
 		return {
+			analysis: '',
+			handId: '',
 			error: `Error: ${error}`,
 		}
 	}
 
 	if (res.status !== 200) {
 		return {
+			analysis: '',
+			handId: '',
 			error: `Error analyzing hand: ${res.status} - ${res.statusText}`,
 		}
 	}
@@ -180,6 +188,8 @@ export const analyze = async (prevState: any, formData: FormData) => {
 
 	if (!isAnalysisData(data)) {
 		return {
+			analysis: '',
+			handId: '',
 			error: `Unknown error: ${JSON.stringify(data)}`,
 		}
 	}
@@ -188,11 +198,11 @@ export const analyze = async (prevState: any, formData: FormData) => {
 
 	if (postData.error) {
 		return {
+			analysis: '',
+			handId: '',
 			error: `Error: ${postData.error}`,
 		}
 	}
-
-	revalidatePath('/', 'layout')
 
 	return {
 		analysis: data.analysis,
@@ -201,10 +211,10 @@ export const analyze = async (prevState: any, formData: FormData) => {
 	}
 }
 
-export const postHand = async (handSteps: HandSteps, analysis: string) => {
-	const { userId, accessToken } = getAuthData()
+const postHand = async (handSteps: HandSteps, analysis: string) => {
+	const { userId, accessToken } = getAuthDataClient()
 
-	const res = await fetch(`${process.env.API_URL}/hand`, {
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/hand`, {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
