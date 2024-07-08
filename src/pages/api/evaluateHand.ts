@@ -9,7 +9,9 @@ const getValue = (card: PokerEvaluatorCard) => card.charAt(0) as FormCardValue
 const getValues = (cards: PokerEvaluatorCard[]) => cards.map(getValue)
 
 const cardStrengthsDesc = (values: FormCardValue[]) => {
-	return values.map(value => keys.indexOf(value)).toSorted((a, b) => b - a)
+	const indexes = values.map(value => keys.indexOf(value))
+	indexes.sort((a, b) => b - a)
+	return indexes
 }
 
 const getHighCard = (cards: PokerEvaluatorCard[]) => {
