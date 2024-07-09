@@ -635,7 +635,6 @@ const NewHand: FC = () => {
 
 	return (
 		<main className='mt-16 pb-[4.5rem] md:mt-24 md:pb-24'>
-			<button onClick={revalidateAllClient}>Test</button>
 			<Card className={`mx-auto max-w-screen-md rounded-none border-0 p-4 md:rounded-2xl md:border-1 md:p-8`}>
 				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
 				<FormProvider {...methods}>

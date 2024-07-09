@@ -96,7 +96,9 @@ export const getAuthDataClient = () => {
 }
 
 export const revalidateAllClient = async () => {
-	const response = await fetch(`/api/revalidateAll`)
+	const response = await fetch(`/api/revalidateAll`, {
+		method: 'POST',
+	})
 	const data = await response.json()
 	if (data.error) {
 		console.error(data)
