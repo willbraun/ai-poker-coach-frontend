@@ -1,7 +1,9 @@
+'use client'
+
 import { useFormContext } from 'react-hook-form'
 import { FormLabel } from '@/components/ui/form'
 import CardInput from './CardInput'
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { FormCardGroup, FormRound, PokerEvaluatorCard, Schema } from '@/app/(main)/new-hand/formSchema'
 
 interface CardGroupProps {
@@ -95,6 +97,7 @@ const CardGroup: FC<CardGroupProps> = ({ groupSelector, player, disabled = false
 	const { getValues, setValue, watch } = useFormContext()
 	const values = getValues() as Schema
 	const { title, cardCount } = getDetails(groupSelector, player)
+	const [loading, setLoading] = useState(false)
 
 	const group: FormCardGroup = watch(groupSelector)
 	const groupString = JSON.stringify(group?.cards)
@@ -102,6 +105,7 @@ const CardGroup: FC<CardGroupProps> = ({ groupSelector, player, disabled = false
 	useEffect(() => {
 		;(async () => {
 			if (isCardGroupEntered(group?.cards, cardCount)) {
+				setLoading(true)
 				let evalInput: PokerEvaluatorCard[] = []
 				if (groupSelector.startsWith('rounds')) {
 					const round = parseInt(groupSelector.split('.')[1])
@@ -124,6 +128,7 @@ const CardGroup: FC<CardGroupProps> = ({ groupSelector, player, disabled = false
 
 				setValue(`${groupSelector}.evaluation`, evaluation.result.handName)
 				setValue(`${groupSelector}.value`, evaluation.result.value ?? 0)
+				setLoading(false)
 			}
 		})()
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -138,7 +143,7 @@ const CardGroup: FC<CardGroupProps> = ({ groupSelector, player, disabled = false
 						<CardInput key={`card_${i}`} cardIndex={i} groupSelector={groupSelector} disabled={disabled} />
 					))}
 				</div>
-				<p className=''>{group?.evaluation ?? ''}</p>
+				{!group?.evaluation && loading ? <p>Loading...</p> : <p>{group.evaluation ?? ''}</p>}
 			</div>
 		</div>
 	)
