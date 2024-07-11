@@ -87,7 +87,6 @@ export const getPlayerBetSums = (players: number[], actions: FormAction[]) => {
 
 export const getAuthDataClient = () => {
 	const authCookie = Cookies.get('auth')
-	console.log(authCookie)
 	if (!authCookie) {
 		return {}
 	}

@@ -157,6 +157,7 @@ export const analyze = async (formValues: Schema): Promise<AnalyzeResponse> => {
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 			'Content-Type': 'application/json',
+			Origin: 'https://ai-poker-coach.netlify.app',
 		},
 		body: JSON.stringify(handSteps),
 	})
@@ -219,6 +220,7 @@ const postHand = async (handSteps: HandSteps, analysis: string) => {
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 			'Content-Type': 'application/json',
+			Origin: 'https://ai-poker-coach.netlify.app',
 		},
 		body: JSON.stringify({
 			applicationUserId: userId,
