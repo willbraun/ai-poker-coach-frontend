@@ -26,11 +26,11 @@ const HandPreview: FC<{ hand: Hand }> = ({ hand }) => {
 				<div className='mb-4 flex flex-wrap items-center gap-y-2 border-b-1 border-accent pb-4 md:mb-8 md:pb-8'>
 					<p className='pr-8 lg:text-lg'>{hand.handSteps.rounds.at(-1)?.evaluation.value ?? ''}</p>
 					<div className='flex items-center'>
-						<div className='flex gap-2 border-r-2 border-black pr-4'>
+						<div className='flex gap-2 pr-4'>
 							<SmallCard card={hand.handSteps.rounds[0].cards[0]} />
 							<SmallCard card={hand.handSteps.rounds[0].cards[1]} />
 						</div>
-						<div className='flex gap-2 pl-4'>
+						<div className='flex gap-2 border-l-2 border-black pl-4'>
 							{hand.handSteps.rounds.map(round =>
 								round.cards.filter(card => card.player === 0).map(card => <SmallCard key={card.step} card={card} />),
 							)}

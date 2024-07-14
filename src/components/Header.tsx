@@ -11,7 +11,7 @@ const Header: FC = () => {
 	const isAuth = getAuth()
 
 	return (
-		<header className='fixed top-0 z-20 flex h-16 w-full items-center gap-4 border-1 border-b bg-background px-4'>
+		<header className='fixed top-0 z-20 flex h-16 w-full items-center gap-4 border-b-1 bg-background px-4'>
 			<Link href='/' className='mr-auto'>
 				<p className='text-xl font-semibold tracking-tight sm:text-2xl'>AI Poker Coach</p>
 			</Link>
