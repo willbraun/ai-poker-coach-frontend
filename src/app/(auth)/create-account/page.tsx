@@ -97,7 +97,7 @@ const CreateAccount: FC = () => {
 						</Link>{' '}
 						to log in
 					</p>
-					<Link href='/'>
+					<Link href='/feed'>
 						<Home />
 					</Link>
 				</div>

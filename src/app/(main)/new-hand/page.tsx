@@ -634,420 +634,428 @@ const NewHand: FC = () => {
 	}
 
 	return (
-		<main className='mt-16 pb-[4.5rem] md:mt-24 md:pb-24'>
-			<Card className={`mx-auto max-w-screen-md rounded-none border-0 p-4 md:rounded-2xl md:border-1 md:p-8`}>
-				<TypographyH1 className='mb-8'>Add New Hand</TypographyH1>
-				<FormProvider {...methods}>
-					<Form {...form}>
-						<form onSubmit={handleSubmit} className='space-y-8'>
-							<FormField
-								control={control}
-								name='name'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Title</FormLabel>
-										<FormControl>
-											<Input {...field} disabled={!!state.analysis} />
-										</FormControl>
-										<FormDescription>
-											Recommended - A short, descriptive title to help you remember the hand. For example, &quot;Big pot
-											with aces&quot; or &quot;Bluff gone wrong vs aggressive player&quot;.
-										</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='gameStyle'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Game Style</FormLabel>
-										<FormControl>
-											<RadioGroup
-												name={field.name}
-												defaultValue={field.value.toString()}
-												onValueChange={field.onChange}
-												className='flex flex-col space-y-1'
-											>
-												<FormItem className='flex items-center space-x-3 space-y-0 text-lg'>
-													<FormControl>
-														<RadioGroupItem value='0' />
-													</FormControl>
-													<p className='font-normal'>Cash Game</p>
-												</FormItem>
-												<FormItem className='flex items-center space-x-3 space-y-0 text-lg'>
-													<FormControl>
-														<RadioGroupItem value='1' />
-													</FormControl>
-													<p className='font-normal'>Tournament</p>
-												</FormItem>
-											</RadioGroup>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='playerCount'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>
-											Number of players<span className='ml-2 text-pure-red'>*</span>
-										</FormLabel>
-										<input {...field} type='hidden' />
-										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
+		<main className='mt-12 pb-[4.5rem] md:mt-16 md:pb-24'>
+			<div className='md: mx-auto w-full max-w-screen-md bg-card md:bg-background'>
+				<TypographyH1 className='ml-4 py-8 md:ml-0'>Add New Hand</TypographyH1>
+				<Card className={`mx-auto rounded-none border-0 p-4 md:rounded-2xl md:border-1 md:p-8`}>
+					<FormProvider {...methods}>
+						<Form {...form}>
+							<form onSubmit={handleSubmit} className='space-y-8'>
+								<FormField
+									control={control}
+									name='name'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Title</FormLabel>
 											<FormControl>
-												<SelectTrigger className='w-1/2'>
-													<SelectValue placeholder='Select' />
-												</SelectTrigger>
+												<Input {...field} disabled={!!state.analysis} />
 											</FormControl>
-											<SelectContent>
-												<SelectItem value='2'>2</SelectItem>
-												<SelectItem value='3'>3</SelectItem>
-												<SelectItem value='4'>4</SelectItem>
-												<SelectItem value='5'>5</SelectItem>
-												<SelectItem value='6'>6</SelectItem>
-												<SelectItem value='7'>7</SelectItem>
-												<SelectItem value='8'>8</SelectItem>
-												<SelectItem value='9'>9</SelectItem>
-												<SelectItem value='10'>10</SelectItem>
-												<SelectItem value='11'>11</SelectItem>
-												<SelectItem value='12'>12</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='position'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>
-											Your position relative to the small blind (1)<span className='ml-2 text-pure-red'>*</span>
-										</FormLabel>
-										<input {...field} type='hidden' />
-										<Select onValueChange={field.onChange} disabled={currentRound > -1}>
+											<FormDescription>
+												Recommended - A short, descriptive title to help you remember the hand. For example, &quot;Big
+												pot with aces&quot; or &quot;Bluff gone wrong vs aggressive player&quot;.
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='gameStyle'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Game Style</FormLabel>
 											<FormControl>
-												<SelectTrigger className='w-1/2'>
-													<SelectValue placeholder='Select' />
-												</SelectTrigger>
+												<RadioGroup
+													name={field.name}
+													defaultValue={field.value.toString()}
+													onValueChange={field.onChange}
+													className='flex flex-col space-y-1'
+												>
+													<FormItem className='flex items-center space-x-3 space-y-0 text-lg'>
+														<FormControl>
+															<RadioGroupItem value='0' />
+														</FormControl>
+														<p className='font-normal'>Cash Game</p>
+													</FormItem>
+													<FormItem className='flex items-center space-x-3 space-y-0 text-lg'>
+														<FormControl>
+															<RadioGroupItem value='1' />
+														</FormControl>
+														<p className='font-normal'>Tournament</p>
+													</FormItem>
+												</RadioGroup>
 											</FormControl>
-											<SelectContent>
-												{playerCount > 0 ? (
-													Array.from({ length: playerCount }).map((_, i) => {
-														const position = i + 1
-														const label = positionLabels.get(position)
-														return (
-															<SelectItem key={`position_choice_${position}`} value={position.toString()}>
-																{position}
-																{label && ` (${label})`}
-															</SelectItem>
-														)
-													})
-												) : (
-													<SelectItem key='none' value='none' disabled>
-														Please select number of players
-													</SelectItem>
-												)}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='smallBlind'
-								render={({ field }) => (
-									<FormItem className='w-1/2'>
-										<FormLabel>
-											Small Blind<span className='ml-2 text-pure-red'>*</span>
-										</FormLabel>
-										<input {...field} type='hidden' />
-										<FormControl>
-											<Input
-												{...field}
-												type='text'
-												inputMode='numeric'
-												onChange={e => handleNumberChange(e, field.onChange)}
-												onBlur={e => handleNumberBlur(e, field.onChange)}
-												disabled={currentRound > -1}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='bigBlind'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>
-											Big Blind<span className='ml-2 text-pure-red'>*</span>
-										</FormLabel>
-										<input {...field} type='hidden' />
-										<FormControl className='w-1/2'>
-											<Input
-												{...field}
-												type='text'
-												inputMode='numeric'
-												onChange={e => handleNumberChange(e, field.onChange)}
-												onBlur={e => handleNumberBlur(e, field.onChange)}
-												disabled={currentRound > -1}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='ante'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Ante</FormLabel>
-										<input {...field} type='hidden' />
-										<FormControl className='w-1/2'>
-											<Input
-												{...field}
-												type='text'
-												inputMode='numeric'
-												onChange={e => handleNumberChange(e, field.onChange)}
-												onBlur={e => handleNumberBlur(e, field.onChange)}
-												disabled={currentRound > -1}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='bigBlindAnte'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Big Blind Ante</FormLabel>
-										<input {...field} type='hidden' />
-										<FormControl className='w-1/2'>
-											<Input
-												{...field}
-												type='text'
-												inputMode='numeric'
-												onChange={e => handleNumberChange(e, field.onChange)}
-												onBlur={e => handleNumberBlur(e, field.onChange)}
-												disabled={currentRound > -1}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='myStack'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Your stack size at the beginning of the hand</FormLabel>
-										<input {...field} type='hidden' />
-										<FormControl className='w-1/2'>
-											<Input
-												{...field}
-												type='text'
-												inputMode='numeric'
-												onChange={e => handleNumberChange(e, field.onChange)}
-												onBlur={e => handleNumberBlur(e, field.onChange)}
-												disabled={currentRound > -1}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='notes'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Notes</FormLabel>
-										<FormControl>
-											<Textarea {...field} className='text-lg' disabled={!!state.analysis} />
-										</FormControl>
-										<FormDescription>
-											Additional information outside of the hard facts to provide to the AI model. Include player
-											styles, history, or simply set the stage for the hand.{' '}
-										</FormDescription>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='pots'
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<input {...field} type='hidden' value={JSON.stringify(pots)} />
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='rounds'
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<input {...field} type='hidden' value={JSON.stringify(rounds)} />
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={control}
-								name='villains'
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<input {...field} type='hidden' value={JSON.stringify(villains)} />
-										</FormControl>
-									</FormItem>
-								)}
-							/>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='playerCount'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												Number of players<span className='ml-2 text-pure-red'>*</span>
+											</FormLabel>
+											<input {...field} type='hidden' />
+											<Select onValueChange={field.onChange} disabled={currentRound > -1}>
+												<FormControl>
+													<SelectTrigger className='w-1/2'>
+														<SelectValue placeholder='Select' />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value='2'>2</SelectItem>
+													<SelectItem value='3'>3</SelectItem>
+													<SelectItem value='4'>4</SelectItem>
+													<SelectItem value='5'>5</SelectItem>
+													<SelectItem value='6'>6</SelectItem>
+													<SelectItem value='7'>7</SelectItem>
+													<SelectItem value='8'>8</SelectItem>
+													<SelectItem value='9'>9</SelectItem>
+													<SelectItem value='10'>10</SelectItem>
+													<SelectItem value='11'>11</SelectItem>
+													<SelectItem value='12'>12</SelectItem>
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='position'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												Your position relative to the small blind (1)<span className='ml-2 text-pure-red'>*</span>
+											</FormLabel>
+											<input {...field} type='hidden' />
+											<Select onValueChange={field.onChange} disabled={currentRound > -1}>
+												<FormControl>
+													<SelectTrigger className='w-1/2'>
+														<SelectValue placeholder='Select' />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{playerCount > 0 ? (
+														Array.from({ length: playerCount }).map((_, i) => {
+															const position = i + 1
+															const label = positionLabels.get(position)
+															return (
+																<SelectItem key={`position_choice_${position}`} value={position.toString()}>
+																	{position}
+																	{label && ` (${label})`}
+																</SelectItem>
+															)
+														})
+													) : (
+														<SelectItem key='none' value='none' disabled>
+															Please select number of players
+														</SelectItem>
+													)}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='smallBlind'
+									render={({ field }) => (
+										<FormItem className='w-1/2'>
+											<FormLabel>
+												Small Blind<span className='ml-2 text-pure-red'>*</span>
+											</FormLabel>
+											<input {...field} type='hidden' />
+											<FormControl>
+												<Input
+													{...field}
+													type='text'
+													inputMode='numeric'
+													onChange={e => handleNumberChange(e, field.onChange)}
+													onBlur={e => handleNumberBlur(e, field.onChange)}
+													disabled={currentRound > -1}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='bigBlind'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												Big Blind<span className='ml-2 text-pure-red'>*</span>
+											</FormLabel>
+											<input {...field} type='hidden' />
+											<FormControl className='w-1/2'>
+												<Input
+													{...field}
+													type='text'
+													inputMode='numeric'
+													onChange={e => handleNumberChange(e, field.onChange)}
+													onBlur={e => handleNumberBlur(e, field.onChange)}
+													disabled={currentRound > -1}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='ante'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Ante</FormLabel>
+											<input {...field} type='hidden' />
+											<FormControl className='w-1/2'>
+												<Input
+													{...field}
+													type='text'
+													inputMode='numeric'
+													onChange={e => handleNumberChange(e, field.onChange)}
+													onBlur={e => handleNumberBlur(e, field.onChange)}
+													disabled={currentRound > -1}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='bigBlindAnte'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Big Blind Ante</FormLabel>
+											<input {...field} type='hidden' />
+											<FormControl className='w-1/2'>
+												<Input
+													{...field}
+													type='text'
+													inputMode='numeric'
+													onChange={e => handleNumberChange(e, field.onChange)}
+													onBlur={e => handleNumberBlur(e, field.onChange)}
+													disabled={currentRound > -1}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='myStack'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Your stack size at the beginning of the hand</FormLabel>
+											<input {...field} type='hidden' />
+											<FormControl className='w-1/2'>
+												<Input
+													{...field}
+													type='text'
+													inputMode='numeric'
+													onChange={e => handleNumberChange(e, field.onChange)}
+													onBlur={e => handleNumberBlur(e, field.onChange)}
+													disabled={currentRound > -1}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='notes'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Notes</FormLabel>
+											<FormControl>
+												<Textarea {...field} className='text-lg' disabled={!!state.analysis} />
+											</FormControl>
+											<FormDescription>
+												Additional information outside of the hard facts to provide to the AI model. Include player
+												styles, history, or simply set the stage for the hand.{' '}
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='pots'
+									render={({ field }) => (
+										<FormItem>
+											<FormControl>
+												<input {...field} type='hidden' value={JSON.stringify(pots)} />
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='rounds'
+									render={({ field }) => (
+										<FormItem>
+											<FormControl>
+												<input {...field} type='hidden' value={JSON.stringify(rounds)} />
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={control}
+									name='villains'
+									render={({ field }) => (
+										<FormItem>
+											<FormControl>
+												<input {...field} type='hidden' value={JSON.stringify(villains)} />
+											</FormControl>
+										</FormItem>
+									)}
+								/>
 
-							{currentRound >= 0 && (
-								<>
-									<TypographyH2>Hand Action</TypographyH2>
+								{currentRound >= 0 && (
+									<>
+										<TypographyH2>Hand Action</TypographyH2>
 
-									{ante > 0 ? (
-										<p className='animate-fadeIn text-lg duration-100'>{`All players bet ante of ${ante}`}</p>
-									) : null}
-									{bigBlindAnte > 0 ? (
-										<p className='animate-fadeIn text-lg duration-100'>{`Player 2 bets big blind ante of ${bigBlindAnte}`}</p>
-									) : null}
+										{ante > 0 ? (
+											<p className='animate-fadeIn text-lg duration-100'>{`All players bet ante of ${ante}`}</p>
+										) : null}
+										{bigBlindAnte > 0 ? (
+											<p className='animate-fadeIn text-lg duration-100'>{`Player 2 bets big blind ante of ${bigBlindAnte}`}</p>
+										) : null}
 
-									<p className='animate-fadeIn text-lg duration-100'>{`Player 1 bet ${smallBlind} as the small blind`}</p>
-									<p className='animate-fadeIn text-lg duration-100'>{`Player 2 bet ${bigBlind} as the big blind`}</p>
-								</>
-							)}
+										<p className='animate-fadeIn text-lg duration-100'>{`Player 1 bet ${smallBlind} as the small blind`}</p>
+										<p className='animate-fadeIn text-lg duration-100'>{`Player 2 bet ${bigBlind} as the big blind`}</p>
+									</>
+								)}
 
-							{Array.from({ length: currentRound + 1 }, (_, i) => i).map((round, i) => {
-								const startingActionMap = round === 0 ? 2 : 0
-								const finalPots = watch(`rounds.${round}.finalPots`)
-								return (
-									<div key={i} className='flex flex-col gap-4'>
-										<CardGroupInput
-											groupSelector={`rounds.${round}.cards`}
-											disabled={
-												fieldArrays[round].fields.length !== startingActionMap ||
-												round !== currentRound ||
-												villains.length > 0
-											}
-										/>
-
-										{fieldArrays[round].fields.slice(startingActionMap).map((action, index, arr) => (
-											<ActionInput
-												key={action.id}
-												selector={`rounds.${round}.actions.${index + startingActionMap}`}
-												player={action.player}
+								{Array.from({ length: currentRound + 1 }, (_, i) => i).map((round, i) => {
+									const startingActionMap = round === 0 ? 2 : 0
+									const finalPots = watch(`rounds.${round}.finalPots`)
+									return (
+										<div key={i} className='flex flex-col gap-4'>
+											<CardGroupInput
+												groupSelector={`rounds.${round}.cards`}
 												disabled={
-													round !== currentRound || index !== arr.length - 1 || villains.length > 0 || showSubmit
+													fieldArrays[round].fields.length !== startingActionMap ||
+													round !== currentRound ||
+													villains.length > 0
 												}
 											/>
-										))}
 
-										{activePlayers.length === 1 && (
-											<p className='text-lg'>{`Player ${activePlayers[0]} wins ${
-												pots.reduce((acc, i) => acc + i.value, 0) +
-												watch(`rounds.${round}.actions`).reduce((acc, i) => acc + Number(i.bet), 0)
-											}`}</p>
-										)}
+											{fieldArrays[round].fields.slice(startingActionMap).map((action, index, arr) => (
+												<ActionInput
+													key={action.id}
+													selector={`rounds.${round}.actions.${index + startingActionMap}`}
+													player={action.player}
+													disabled={
+														round !== currentRound || index !== arr.length - 1 || villains.length > 0 || showSubmit
+													}
+												/>
+											))}
 
-										{finalPots.length > 0 &&
-											finalPots.map((pot, i) => {
-												const potName = i === 0 ? 'Main Pot' : `Side Pot ${i}`
-												return <p key={i} className='text-lg'>{`${potName}: ${pot.value}`}</p>
-											})}
+											{activePlayers.length === 1 && (
+												<p className='text-lg'>{`Player ${activePlayers[0]} wins ${
+													pots.reduce((acc, i) => acc + i.value, 0) +
+													watch(`rounds.${round}.actions`).reduce((acc, i) => acc + Number(i.bet), 0)
+												}`}</p>
+											)}
+
+											{finalPots.length > 0 &&
+												finalPots.map((pot, i) => {
+													const potName = i === 0 ? 'Main Pot' : `Side Pot ${i}`
+													return <p key={i} className='text-lg'>{`${potName}: ${pot.value}`}</p>
+												})}
+										</div>
+									)
+								})}
+
+								{villains.map((villain, i) => (
+									<CardGroupInput
+										key={i}
+										groupSelector={`villains.${i}`}
+										player={villain.player}
+										disabled={!!state.analysis || pending}
+									/>
+								))}
+
+								{villainsCompleted && (
+									<>
+										<TypographyH2>Results</TypographyH2>
+										{pots.map((pot, i) => {
+											const winners = pot.winner
+												.split(',')
+												.map(winner => `Player ${winner}`)
+												.join(', ')
+											const verb = pot.winner.length > 1 ? 'split' : 'wins'
+											const potName = i === 0 ? 'main pot' : `side pot ${i}`
+
+											return <p key={i} className='text-lg'>{`${winners} ${verb} the ${potName}: ${pot.value}`}</p>
+										})}
+									</>
+								)}
+
+								{pending && !state.analysis ? (
+									<div className='mx-auto w-full animate-scalePulse'>
+										<Image
+											src={pokerChip}
+											alt='loading'
+											width={150}
+											height={150}
+											className='mx-auto animate-slowSpin'
+										/>
 									</div>
-								)
-							})}
+								) : (
+									<>
+										{Object.keys(errors).length ? (
+											<p className='mt-2 text-lg text-red-500'>Please resolve errors and try again</p>
+										) : null}
+										{state.error && <p className='mt-2 text-lg text-red-500'>{state.error}</p>}
+									</>
+								)}
 
-							{villains.map((villain, i) => (
-								<CardGroupInput
-									key={i}
-									groupSelector={`villains.${i}`}
-									player={villain.player}
-									disabled={!!state.analysis || pending}
-								/>
-							))}
-
-							{villainsCompleted && (
-								<>
-									<TypographyH2>Results</TypographyH2>
-									{pots.map((pot, i) => {
-										const winners = pot.winner
-											.split(',')
-											.map(winner => `Player ${winner}`)
-											.join(', ')
-										const verb = pot.winner.length > 1 ? 'split' : 'wins'
-										const potName = i === 0 ? 'main pot' : `side pot ${i}`
-
-										return <p key={i} className='text-lg'>{`${winners} ${verb} the ${potName}: ${pot.value}`}</p>
-									})}
-								</>
-							)}
-
-							{pending && !state.analysis ? (
-								<div className='mx-auto w-full animate-scalePulse'>
-									<Image src={pokerChip} alt='loading' width={150} height={150} className='mx-auto animate-slowSpin' />
-								</div>
-							) : (
-								<>
-									{Object.keys(errors).length ? (
-										<p className='mt-2 text-lg text-red-500'>Please resolve errors and try again</p>
-									) : null}
-									{state.error && <p className='mt-2 text-lg text-red-500'>{state.error}</p>}
-								</>
-							)}
-
-							{state.analysis ? (
-								<div className='flex animate-fadeIn flex-col gap-8'>
-									<TypographyH2>Analysis</TypographyH2>
-									<Analysis analysis={state.analysis} />
-									<Button asChild variant='success' className='w-full p-8 text-xl'>
-										<Link href={`/hand/${state.handId}`}>Hand added successfully! 🎉 Click here to view</Link>
-									</Button>
-								</div>
-							) : (
-								<div className='fixed bottom-0 left-1/2 z-10 mx-auto w-full max-w-screen-lg -translate-x-1/2 border-t-1 bg-background'>
-									<div className='mx-auto flex w-full max-w-screen-md gap-4 px-8 py-4'>
-										<Button
-											type='button'
-											variant='secondary'
-											className='w-1/2 text-xl'
-											onClick={handleBack}
-											disabled={currentRound === -1 || pending}
-										>
-											Back
+								{state.analysis ? (
+									<div className='flex animate-fadeIn flex-col gap-8'>
+										<TypographyH2>Analysis</TypographyH2>
+										<Analysis analysis={state.analysis} />
+										<Button asChild variant='success' className='w-full p-8 text-xl'>
+											<Link href={`/hand/${state.handId}`}>Hand added successfully! 🎉 Click here to view</Link>
 										</Button>
-										{showSubmit ? (
-											<Submit disabled={!(activePlayers.length === 1 || villainsCompleted)} pending={pending} />
-										) : (
-											<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
-												Next
-											</Button>
-										)}
 									</div>
-								</div>
-							)}
-						</form>
-					</Form>
-				</FormProvider>
-			</Card>
+								) : (
+									<div className='fixed bottom-0 left-1/2 z-10 mx-auto w-full max-w-screen-lg -translate-x-1/2 border-t-1 bg-background'>
+										<div className='mx-auto flex w-full max-w-screen-md gap-4 px-8 py-4'>
+											<Button
+												type='button'
+												variant='secondary'
+												className='w-1/2 text-xl'
+												onClick={handleBack}
+												disabled={currentRound === -1 || pending}
+											>
+												Back
+											</Button>
+											{showSubmit ? (
+												<Submit disabled={!(activePlayers.length === 1 || villainsCompleted)} pending={pending} />
+											) : (
+												<Button type='button' className='w-1/2 text-xl' onClick={handleNext} disabled={disableNext}>
+													Next
+												</Button>
+											)}
+										</div>
+									</div>
+								)}
+							</form>
+						</Form>
+					</FormProvider>
+				</Card>
+			</div>
 		</main>
 	)
 }

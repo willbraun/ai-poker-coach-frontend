@@ -52,7 +52,7 @@ const Login: FC = () => {
 						</Link>{' '}
 						to create one
 					</p>
-					<Link href='/'>
+					<Link href='/feed'>
 						<Home />
 					</Link>
 				</div>

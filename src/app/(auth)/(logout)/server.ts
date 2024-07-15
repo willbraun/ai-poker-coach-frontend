@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 
 const logout = async () => {
 	cookies().delete('auth')
-	redirect('/')
+	redirect('/feed')
 }
 
 export default logout

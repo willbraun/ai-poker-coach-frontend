@@ -94,5 +94,5 @@ export const createAccount = async (prevState: any, formData: FormData) => {
 		},
 	)
 
-	redirect('/')
+	redirect('/feed')
 }

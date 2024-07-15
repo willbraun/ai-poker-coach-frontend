@@ -66,5 +66,5 @@ export const login = async (prevState: any, formData: FormData) => {
 			maxAge: 60 * 60 * 24 * 7,
 		},
 	)
-	redirect('/')
+	redirect('/feed')
 }
