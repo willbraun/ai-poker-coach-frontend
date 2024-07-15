@@ -16,7 +16,7 @@ const Header: FC = () => {
 				<Home />
 			</Link>
 			<Link href='/feed' className='mr-auto'>
-				<p className='text-2xl font-semibold tracking-tight'>AI Poker Coach</p>
+				<p className='text-xl font-semibold tracking-tight sm:text-3xl'>AI Poker Coach</p>
 			</Link>
 			{isAuth ? (
 				<>
@@ -40,13 +40,13 @@ const Header: FC = () => {
 					</DropdownMenu>
 				</>
 			) : (
-				<div className='ml-auto flex items-center'>
-					<Button variant='link'>
+				<div className='ml-auto flex items-center gap-8'>
+					<Button variant='link' className='p-0'>
 						<Link href='/login' className='text-black underline'>
 							Log in
 						</Link>
 					</Button>
-					<Button className='ml-4'>
+					<Button>
 						<Link href='/create-account'>Sign up</Link>
 					</Button>
 				</div>
