@@ -3,6 +3,7 @@ import Image from 'next/image'
 import robot from '@/lib/images/poker-robot.jpeg'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import Footer from '@/components/Footer'
 
 const HomeCard: FC<{ message: string }> = ({ message }) => {
 	return (
@@ -14,12 +15,10 @@ const HomeCard: FC<{ message: string }> = ({ message }) => {
 
 const Home: FC = () => {
 	return (
-		<main className='h-fit min-h-full w-full bg-gradient-to-br from-primary to-gray-900'>
+		<main className='h-fit min-h-full w-full overflow-y-auto bg-gradient-to-br from-primary to-gray-900'>
 			<div className='flex flex-wrap items-center justify-evenly gap-x-8 gap-y-16 px-8 py-16'>
 				<div className='flex flex-col items-center gap-4 text-center'>
-					<h1 className='inline-block text-6xl font-bold tracking-tight text-transparent text-white sm:text-8xl'>
-						AI Poker Coach
-					</h1>
+					<h1 className='inline-block text-6xl font-bold tracking-tight text-white sm:text-8xl'>AI Poker Coach</h1>
 					<p className='text-3xl text-white'>Poker advice in English, not charts</p>
 				</div>
 				<Image src={robot} alt='poker robot' width={400} className='rounded-3xl shadow-lg' />
@@ -50,6 +49,7 @@ const Home: FC = () => {
 					</div>
 				</div>
 			</div>
+			<Footer textColor='text-white' iconFill='fill-white' />
 		</main>
 	)
 }

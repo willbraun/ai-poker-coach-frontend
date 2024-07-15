@@ -8,7 +8,7 @@ const MainLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
 			<Header />
 			<div className='flex min-h-full flex-col justify-between'>
 				{children}
-				<Footer />
+				<Footer textColor='text-gray-500' iconFill='fill-gray-500' />
 			</div>
 		</>
 	)
