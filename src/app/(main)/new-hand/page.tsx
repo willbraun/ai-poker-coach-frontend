@@ -403,11 +403,13 @@ const NewHand: FC = () => {
 
 	const getPotActions = (round: FormRound) => {
 		const actions = round.actions
-		const foldedPlayers = actions.filter(action => action.decision === 'fold').map(action => action.player)
+		const foldedNoBetPlayers = actions
+			.filter(action => action.decision === 'fold' && action.bet === 0)
+			.map(action => action.player)
 
 		const playerBets: { [player: number]: number } = {}
 		actions
-			.filter(action => !foldedPlayers.includes(action.player))
+			.filter(action => !foldedNoBetPlayers.includes(action.player))
 			.forEach(action => {
 				const { player, bet } = action
 				if (playerBets[player] === undefined) {
@@ -416,15 +418,19 @@ const NewHand: FC = () => {
 				playerBets[player] += Number(bet)
 			})
 
-		// if all bets are zero, no potActions
 		const entries = Object.entries(playerBets)
+
+		// if all bets are zero, no potActions
 		if (entries.every(([_, bet]) => bet === 0)) {
 			return []
 		}
 
 		// if all aggregate bets for non-folded players are the same, potActions for one pot
 		let potIndex = Math.max(...pots.map(pot => pot.potIndex))
-		if (entries.every(([_, bet]) => bet === entries[0][1])) {
+		const foldedPlayers = actions.filter(action => action.decision === 'fold').map(action => action.player)
+		const activeEntries = entries.filter(([player, _]) => !foldedPlayers.includes(parseInt(player)))
+
+		if (activeEntries.every(([_, bet]) => bet === activeEntries[0][1])) {
 			return entries.map(
 				([player, bet]) =>
 					({
@@ -594,7 +600,6 @@ const NewHand: FC = () => {
 			}
 
 			if (playerStatusHistory.length === 1) return
-			setPlayerStatusHistory(playerStatusHistory.slice(0, -1))
 		} else if (isCardGroupShowing) {
 			setValue(`rounds.${currentRound}.cards.cards`, [])
 			setValue(`rounds.${currentRound}.cards.evaluation`, '')
@@ -619,6 +624,7 @@ const NewHand: FC = () => {
 		}
 
 		state.error = ''
+		setPlayerStatusHistory(playerStatusHistory.slice(0, -1))
 		scrollToBottom(100)
 	}
 
@@ -632,6 +638,8 @@ const NewHand: FC = () => {
 		setState(data)
 		setPending(false)
 	}
+
+	console.log(getValues())
 
 	return (
 		<main className='mt-12 pb-[4.5rem] md:mt-16 md:pb-24'>

@@ -16,7 +16,7 @@ interface AnalyzeResponse {
 	error: string
 }
 
-const decisions = ['fold', 'check', 'call', 'bet', 'raise', 'callAllIn', 'betAllIn']
+const decisions = ['fold', 'check', 'call', 'bet', 'raise', 'betAllIn', 'callAllIn']
 
 export const analyze = async (formValues: Schema): Promise<AnalyzeResponse> => {
 	const { accessToken } = getAuthDataClient()
