@@ -4,6 +4,7 @@ import robot from '@/lib/images/poker-robot.jpeg'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import Footer from '@/components/Footer'
+import TypingAnimation from '@/components/TypingAnimation'
 
 const HomeCard: FC<{ message: string }> = ({ message }) => {
 	return (
@@ -23,6 +24,9 @@ const Home: FC = () => {
 						<p className='text-3xl text-white'>Poker advice in English, not charts</p>
 					</div>
 					<Image src={robot} alt='poker robot' width={400} className='rounded-3xl shadow-lg' />
+				</div>
+				<div className='mx-auto min-h-[26rem] w-5/6 font-serif text-white sm:min-h-80 md:min-h-48 2xl:w-3/4'>
+					<TypingAnimation />
 				</div>
 				<div className='grid grid-cols-1 gap-8 p-8 md:grid-cols-3'>
 					<HomeCard message={'Review hand analysis in English, rather than deciphering complex charts'} />
