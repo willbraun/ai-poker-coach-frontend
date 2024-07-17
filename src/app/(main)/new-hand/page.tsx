@@ -624,7 +624,9 @@ const NewHand: FC = () => {
 		}
 
 		state.error = ''
-		setPlayerStatusHistory(playerStatusHistory.slice(0, -1))
+		if (playerStatusHistory.length > 1) {
+			setPlayerStatusHistory(playerStatusHistory.slice(0, -1))
+		}
 		scrollToBottom(100)
 	}
 
@@ -638,8 +640,6 @@ const NewHand: FC = () => {
 		setState(data)
 		setPending(false)
 	}
-
-	console.log(getValues())
 
 	return (
 		<main className='mt-12 pb-[4.5rem] md:mt-16 md:pb-24'>

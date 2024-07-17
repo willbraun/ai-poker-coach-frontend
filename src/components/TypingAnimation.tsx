@@ -16,8 +16,8 @@ const TypingAnimation: FC = () => {
 				'"By betting on the river, you could have potentially gotten value from the opponent\'s hand, maximizing your winnings in this situation.',
 				1000,
 			]}
-			speed={65}
-			deletionSpeed={85}
+			speed={50}
+			deletionSpeed={80}
 			style={{ fontSize: '2rem' }}
 			repeat={Infinity}
 		/>

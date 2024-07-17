@@ -62,8 +62,8 @@ const ActionInput: FC<ActionInputProps> = ({ selector, player, disabled }) => {
 										<SelectItem value='call'>Call</SelectItem>
 										<SelectItem value='bet'>Bet</SelectItem>
 										<SelectItem value='raise'>Raise</SelectItem>
-										<SelectItem value='callAllIn'>Call (all-in)</SelectItem>
 										<SelectItem value='betAllIn'>Bet (all-in)</SelectItem>
+										<SelectItem value='callAllIn'>Call (all-in)</SelectItem>
 									</SelectContent>
 								</Select>
 								<FormMessage />

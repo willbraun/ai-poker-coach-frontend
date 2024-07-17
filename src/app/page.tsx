@@ -23,15 +23,15 @@ const Home: FC = () => {
 						<h1 className='inline-block text-6xl font-bold tracking-tight text-white sm:text-8xl'>AI Poker Coach</h1>
 						<p className='text-3xl text-white'>Poker advice in English, not charts</p>
 					</div>
-					<Image src={robot} alt='poker robot' width={400} className='rounded-3xl shadow-lg' />
+					<Image src={robot} alt='poker robot' width={400} className='rounded-3xl shadow-lg' priority={true} />
 				</div>
 				<div className='mx-auto min-h-[26rem] w-5/6 font-serif text-white sm:min-h-80 md:min-h-48 2xl:w-3/4'>
 					<TypingAnimation />
 				</div>
 				<div className='grid grid-cols-1 gap-8 p-8 md:grid-cols-3'>
-					<HomeCard message={'Review hand analysis in English, rather than deciphering complex charts'} />
-					<HomeCard message={'Record hands to your account, and learn from other users'} />
-					<HomeCard message={'Powered by GPT-3.5, enhanced with poker training data'} />
+					<HomeCard message={'Analyze your own hands in natural language, without complex charts'} />
+					<HomeCard message={'Record hands to your account, and learn from other players'} />
+					<HomeCard message={'Powered by AI enhanced with poker training data'} />
 				</div>
 				<div className='mt-16 flex w-full justify-center px-8 pb-16'>
 					<div className='flex w-full max-w-screen-md flex-col gap-4'>
