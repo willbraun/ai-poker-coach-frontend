@@ -24,15 +24,14 @@ const getStraight = (cards: PokerEvaluatorCard[]): [FormCardValue, FormCardValue
 	const uniqueCards = new Set(getValues(cards))
 	const cardStrengths = cardStrengthsDesc(Array.from(uniqueCards))
 
-	let index = 0
-	for (const cardStrength of cardStrengths) {
-		const possibleStraight = cardStrengths.slice(index, index + 5)
-		if (possibleStraight.length === 5 && possibleStraight.every((strength, i) => cardStrength - i === strength)) {
-			const highCard = keys[cardStrength]
-			const lowCard = keys[cardStrengths[index + 4]]
+	let consecutiveCount = 1
+	for (let i = 1; i < cardStrengths.length; i++) {
+		consecutiveCount = cardStrengths[i] + 1 === cardStrengths[i - 1] ? consecutiveCount + 1 : 1
+		if (consecutiveCount === 5) {
+			const highCard = keys[cardStrengths[i - 4]]
+			const lowCard = keys[cardStrengths[i]]
 			return [lowCard, highCard]
 		}
-		index++
 	}
 }
 
@@ -92,17 +91,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 		const value = card.charAt(0) as FormCardValue
 		const suit = card.charAt(1) as FormCardSuit
 
-		if (valueMap.has(value)) {
-			valueMap.set(value, (valueMap.get(value) ?? 0) + 1)
-		} else {
-			valueMap.set(value, 1)
-		}
-
-		if (suitMap.has(suit)) {
-			suitMap.set(suit, (suitMap.get(suit) ?? 0) + 1)
-		} else {
-			suitMap.set(suit, 1)
-		}
+		valueMap.set(value, valueMap.has(value) ? valueMap.get(value)! + 1 : 1)
+		suitMap.set(suit, suitMap.has(suit) ? suitMap.get(suit)! + 1 : 1)
 	})
 
 	try {
