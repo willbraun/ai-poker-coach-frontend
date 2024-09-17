@@ -998,14 +998,12 @@ const NewHand: FC = () => {
 									<>
 										<TypographyH2>Results</TypographyH2>
 										{pots.map((pot, i) => {
-											const winners = pot.winner
-												.split(',')
-												.map(winner => `Player ${winner}`)
-												.join(', ')
-											const verb = pot.winner.length > 1 ? 'split' : 'wins'
+											const array = pot.winner.split(',')
+											const winnerString = array.map(winner => `Player ${winner}`).join(', ')
+											const verb = array.length > 1 ? 'split' : 'wins'
 											const potName = i === 0 ? 'main pot' : `side pot ${i}`
 
-											return <p key={i} className='text-lg'>{`${winners} ${verb} the ${potName}: ${pot.value}`}</p>
+											return <p key={i} className='text-lg'>{`${winnerString} ${verb} the ${potName}: ${pot.value}`}</p>
 										})}
 									</>
 								)}

@@ -5,7 +5,7 @@ export async function POST() {
 		revalidatePath('/', 'layout')
 		return Response.json({ revalidated: true })
 	} catch (error) {
-		console.log(error)
+		console.error(error)
 		return new Response('Error revalidating', {
 			status: 500,
 		})

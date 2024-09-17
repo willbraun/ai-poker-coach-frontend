@@ -232,7 +232,7 @@ const HandPage: FC<{ params: { id: UUID } }> = async ({ params }) => {
 					</section>
 					<section className='[&>*]:border-b-1 [&>*]:border-muted [&>*]:py-4'>
 						{ante || bigBlindAnte ? (
-							<div className='flex items-center'>
+							<div className='flex items-center gap-4'>
 								<p className='text-xl'>Pot after antes</p>
 								<PotView value={ante + bigBlindAnte * playerCount} index={0} />
 							</div>
